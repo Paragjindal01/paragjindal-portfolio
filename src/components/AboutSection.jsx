@@ -1,6 +1,36 @@
 import { motion } from 'framer-motion';
 import SectionWrapper from './SectionWrapper';
 
+const skills = [
+  'Python',
+  'TypeScript',
+  'JavaScript',
+  'FastAPI',
+  'Node.js',
+  'React',
+  'Next.js',
+  'PostgreSQL',
+  'MongoDB',
+  'Docker',
+  'AWS',
+  'Linux',
+  'REST APIs',
+  'GraphQL',
+  'RAG',
+  'Technical Support',
+  'Networking',
+];
+
+const skillVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: 10 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { delay: i * 0.03, duration: 0.35, ease: 'easeOut' },
+  }),
+};
+
 export default function AboutSection() {
   return (
     <SectionWrapper id="about">
@@ -9,7 +39,7 @@ export default function AboutSection() {
           About <span className="text-[var(--color-accent-blue)]">Me</span>
         </h2>
         <p className="section-subtitle">
-          A passionate engineer building the future with code and AI.
+          I build modern digital products and solve everyday technology problems.
         </p>
       </div>
 
@@ -30,6 +60,7 @@ export default function AboutSection() {
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               className="w-32 h-32 rounded-3xl bg-slate-800/80 border border-white/10 flex items-center justify-center text-4xl font-extrabold text-[var(--color-accent-cyan)] shadow-[0_10px_20px_-5px_rgba(34,211,238,0.2)] relative"
+              aria-hidden="true"
             >
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[rgba(34,211,238,0.1)] to-transparent pointer-events-none" />
               PJ
@@ -39,28 +70,44 @@ export default function AboutSection() {
           {/* Bio */}
           <div className="space-y-5">
             <p className="text-[var(--color-text-secondary)] leading-relaxed text-base">
-              <span className="text-[var(--color-text-primary)] font-semibold">Parag Jindal</span> is a Bachelor of Computer Information Systems graduate from <span className="text-[var(--color-accent-cyan)] font-medium">Okanagan College</span> based in Kelowna, BC (Sep 2022 – Apr 2026).
+              I&apos;m <span className="text-[var(--color-text-primary)] font-semibold">Parag Jindal</span>, a
+              Computer Information Systems graduate (Software Development Specialization,{' '}
+              <span className="text-[var(--color-accent-cyan)] font-medium">Okanagan College</span>) based in
+              Kelowna, British Columbia.
             </p>
             <p className="text-[var(--color-text-secondary)] leading-relaxed text-base">
-              He has hands-on experience in <span className="text-[var(--color-text-primary)] font-semibold">AI automation, full-stack development, backend APIs</span>, IT troubleshooting, field technician support, system documentation, and customer-facing technical support.
+              I work as an <span className="text-[var(--color-text-primary)] font-semibold">AI Product Engineer</span>,
+              developing AI products, backend services, workflow automations, and secure internal tools. I also have
+              hands-on experience supporting customers with computers, printers, Wi-Fi networks, smart-home devices,
+              televisions, software, and other technology.
             </p>
             <p className="text-[var(--color-text-secondary)] leading-relaxed text-base">
-              He is focused on building intelligent, reliable, and practical technology solutions.
+              My work combines software development, practical problem-solving, and clear communication. Whether
+              someone needs a professional website, a custom application, or help fixing a technology problem, I
+              focus on delivering <span className="text-[var(--color-text-primary)] font-semibold">reliable and
+              understandable solutions</span>.
             </p>
 
-            {/* Quick stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 mt-4 border-t border-white/10">
-              {[
-                { value: 'B.CIS', label: 'Degree' },
-                { value: 'AI', label: 'Specialization' },
-                { value: 'Full-Stack', label: 'Development' },
-                { value: '5+', label: 'Projects Shipped' },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center p-3">
-                  <div className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">{stat.value}</div>
-                  <div className="text-xs font-medium text-[var(--color-text-muted)] mt-1 tracking-wide uppercase">{stat.label}</div>
-                </div>
-              ))}
+            {/* Compact skills */}
+            <div className="pt-6 mt-4 border-t border-white/10">
+              <h3 className="text-sm font-semibold tracking-widest uppercase text-[var(--color-text-muted)] mb-4">
+                Core Skills
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill, i) => (
+                  <motion.span
+                    key={skill}
+                    custom={i}
+                    variants={skillVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                    className="tech-tag"
+                  >
+                    {skill}
+                  </motion.span>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -4,9 +4,10 @@ import MouseGlow from './components/MouseGlow';
 import AnimatedBackground from './components/AnimatedBackground';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
-import SkillsSection from './components/SkillsSection';
+import ServicesSection from './components/ServicesSection';
 import ProjectsSection from './components/ProjectsSection';
 import ExperienceSection from './components/ExperienceSection';
+import HowItWorksSection from './components/HowItWorksSection';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 
@@ -26,9 +27,10 @@ export default function App() {
         <main>
           <HeroSection />
           <AboutSection />
-          <SkillsSection />
+          <ServicesSection />
           <ProjectsSection />
           <ExperienceSection />
+          <HowItWorksSection />
           <ContactSection />
         </main>
 

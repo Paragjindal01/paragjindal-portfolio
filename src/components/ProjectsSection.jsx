@@ -4,34 +4,31 @@ import ProjectCard from './ProjectCard';
 
 const projects = [
   {
-    title: 'AltaAI Internal AI Assistant / RAG Platform',
+    title: 'SafeKelowna — Community Safety Platform',
+    featured: true,
+    liveUrl: 'https://safekelowna.com',
     description:
-      'Internal AI automation and RAG platform focused on AI-assisted workflows, API integrations, backend troubleshooting, PostgreSQL, OpenAI API, and internal productivity tools.',
-    tags: ['React', 'Node.js', 'Express.js', 'PostgreSQL', 'OpenAI API', 'RAG'],
+      'A production community platform for Kelowna and the Central Okanagan featuring an interactive safety map, community alerts, lost-and-found listings, location-based incident reporting, private messaging, user verification, moderation workflows, reputation features, and privacy-focused reporting.',
+    details: [
+      'Interactive safety map with location-based incident reporting',
+      'Community alerts and lost-and-found listings',
+      'Private messaging and user verification',
+      'Moderation workflows, approval queues, and reputation features',
+      'Privacy-focused reporting for the Central Okanagan community',
+    ],
+    tags: ['Next.js', 'TypeScript', 'PostgreSQL', 'Prisma', 'Leaflet', 'Vercel'],
   },
   {
-    title: 'Kelowna Crime Map – Full-Stack Reporting',
+    title: 'Algorithmic Trading Platform — Backend & ML Serving',
     description:
-      'Built a full-stack reporting application using Next.js, TypeScript, PostgreSQL, Prisma, and Leaflet. Developed report submission, filtering, admin moderation, approval workflows, and public map display features.',
-    tags: ['Next.js', 'TypeScript', 'PostgreSQL', 'Prisma', 'Leaflet'],
+      'A backend and machine-learning serving platform for processing live and historical market data, preparing model inputs, and delivering XGBoost prediction outputs through FastAPI services.',
+    tags: ['Python', 'FastAPI', 'XGBoost', 'PostgreSQL', 'Docker', 'Git', 'Slurm'],
   },
   {
-    title: 'ML Model Backend – Stock Market Prediction',
+    title: 'Diagram Data Warehouse',
     description:
-      'Built a FastAPI backend to serve an XGBoost model, process structured data, and support prediction requests. Developed API workflows for data ingestion, preprocessing, model inference, backend testing, and technical documentation.',
-    tags: ['Python', 'FastAPI', 'XGBoost', 'REST API', 'Backend'],
-  },
-  {
-    title: 'Cybersecurity and IT Home Lab',
-    description:
-      'Built a Kali Linux and Ubuntu Server lab to practice networking, Linux administration, and security troubleshooting. Used Nmap, Wireshark, SSH, firewall rules, and Linux logs to identify open ports, analyze traffic, and review system activity.',
-    tags: ['Kali Linux', 'Ubuntu Server', 'Nmap', 'Wireshark', 'SSH', 'UFW'],
-  },
-  {
-    title: 'Data Diagram Warehouse',
-    description:
-      'Academic full-stack data warehouse project for storing, searching, and analyzing textbook diagram metadata.',
-    tags: ['React', 'Tailwind CSS', 'Node.js', 'Express', 'PostgreSQL', 'MongoDB'],
+      'A full-stack educational diagram platform supporting uploads, advanced search, metadata management, cloud storage, REST and GraphQL APIs, data analysis, and CSV exports.',
+    tags: ['React', 'Node.js', 'Express.js', 'GraphQL', 'PostgreSQL', 'MongoDB Atlas', 'AWS S3', 'CloudFront'],
   },
 ];
 
@@ -43,6 +40,9 @@ const containerVariants = {
 };
 
 export default function ProjectsSection() {
+  const featured = projects.find((p) => p.featured);
+  const rest = projects.filter((p) => !p.featured);
+
   return (
     <SectionWrapper id="projects">
       <div className="text-center mb-16">
@@ -59,11 +59,17 @@ export default function ProjectsSection() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto"
+        className="max-w-7xl mx-auto space-y-6 lg:space-y-8"
       >
-        {projects.map((project, i) => (
-          <ProjectCard key={project.title} project={project} index={i} />
-        ))}
+        {/* Featured project — full width */}
+        {featured && <ProjectCard project={featured} index={0} featured />}
+
+        {/* Remaining projects */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          {rest.map((project, i) => (
+            <ProjectCard key={project.title} project={project} index={i + 1} />
+          ))}
+        </div>
       </motion.div>
     </SectionWrapper>
   );

@@ -1,6 +1,8 @@
-import { useRef } from 'react';
+import { useRef, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import SplineHero from './SplineHero';
+
+/* Lazy-load the heavy Spline runtime so it never blocks initial page load */
+const SplineHero = lazy(() => import('./SplineHero'));
 
 const wordVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -34,7 +36,7 @@ export default function HeroSection() {
   const outroOpacity = useTransform(smoothProgress, [0.75, 0.9, 0.95], [0, 1, 0]);
   const outroY = useTransform(smoothProgress, [0.75, 0.9, 0.95], [40, 0, -40]);
 
-  const subtitleWords = 'I build intelligent web platforms, AI automation tools, backend APIs, and data-driven applications using React, Node.js, FastAPI, PostgreSQL, OpenAI API, and modern development tools.'.split(' ');
+  const subtitleWords = 'I build modern websites, AI-powered applications, and backend systems—and help individuals and small businesses solve everyday computer, device, Wi-Fi, and home technology problems.'.split(' ');
 
   return (
     <section ref={sectionRef} id="home" className="relative" style={{ minHeight: '220vh' }}>
@@ -42,7 +44,9 @@ export default function HeroSection() {
       <div className="sticky top-0 min-h-screen flex items-center justify-center overflow-hidden">
 
         {/* ═══════ Spline 3D scene (right side -> center) ═══════ */}
-        <SplineHero smoothProgress={smoothProgress} />
+        <Suspense fallback={null}>
+          <SplineHero smoothProgress={smoothProgress} />
+        </Suspense>
 
         {/* ═══════ Phase 1: Introduction (scroll 0–25%) ═══════ */}
         <motion.div
@@ -60,7 +64,7 @@ export default function HeroSection() {
               >
                 <span className="glass-badge">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-blue)] animate-pulse" />
-                  AI Engineer & Developer
+                  Kelowna, BC · Remote across Canada
                 </span>
               </motion.div>
 
@@ -80,7 +84,7 @@ export default function HeroSection() {
                 transition={{ delay: 0.4, duration: 0.6 }}
                 className="text-lg sm:text-xl font-medium text-[var(--color-text-secondary)] mb-6"
               >
-                AI Automation Engineer &amp; Full-Stack Developer
+                AI Product Engineer, Full-Stack Developer &amp; Technical Support Specialist
               </motion.h2>
 
               {/* Word-by-word subtitle */}
@@ -110,7 +114,15 @@ export default function HeroSection() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  View Projects
+                  View My Work
+                </motion.a>
+                <motion.a
+                  href="#services"
+                  className="btn-secondary"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Explore Services
                 </motion.a>
                 <motion.a
                   href="#contact"
@@ -146,11 +158,11 @@ export default function HeroSection() {
         >
           <div className="text-center max-w-2xl px-6 bg-slate-900/60 backdrop-blur-xl p-10 rounded-[32px] border border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] pointer-events-auto">
             <h3 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-text-primary)] mb-4 tracking-tight">
-              Crafting the <span className="gradient-text">Future</span>
+              Build. Automate. <span className="gradient-text">Solve.</span>
             </h3>
             <p className="text-[var(--color-text-secondary)] text-lg leading-relaxed">
-              From intelligent AI assistants to full-stack web platforms —
-              every project is built to push boundaries and automate workflows seamlessly.
+              I build modern digital products and solve everyday technology problems —
+              from websites and AI-powered applications to computers, Wi-Fi, and home tech.
             </p>
           </div>
         </motion.div>

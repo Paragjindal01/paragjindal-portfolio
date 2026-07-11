@@ -3,32 +3,25 @@ import SectionWrapper from './SectionWrapper';
 
 const experiences = [
   {
-    role: 'AI Automation Engineer',
-    company: 'AltaAI, Ottawa, ON / Remote',
-    period: 'Apr 2026 – Present',
+    role: 'AI Product Engineer',
+    company: 'AltaAI Inc. — Ottawa, Ontario / Remote',
+    period: 'May 2026 – Present',
     description:
-      'Develop internal AI automation tools using React, Node.js, Express.js, PostgreSQL, OpenAI API, and REST APIs. Support workflow automation, API integrations, authentication flows, testing, documentation, and backend troubleshooting.',
+      'Developing AI products, backend services, internal automations, retrieval-augmented generation systems, secure API integrations, and business workflow tools.',
   },
   {
     role: 'Field Service Agent',
-    company: 'Best Buy / Geek Squad, Kelowna, BC',
-    period: 'Mar 2026 – Present',
+    company: 'Best Buy / Geek Squad — Kelowna, British Columbia',
+    period: 'Apr 2026 – Present',
     description:
-      'Provide customer-facing technical support for device setup, troubleshooting, connectivity, and software issues. Assist with Windows devices, basic networking, Wi-Fi issues, hardware/software setup, and service documentation.',
+      'Providing in-home and in-store technical support for computers, printers, televisions, smart-home devices, mobile devices, peripherals, software, and Wi-Fi networks.',
   },
   {
-    role: 'Front Desk Agent / Night Auditor',
-    company: 'Dilworth Inn, Kelowna, BC',
-    period: 'Jul 2025 – Apr 2026',
-    description:
-      'Managed night audit, reporting, system checks, guest support, and front desk operations independently. Resolved booking, payment, user, device, and system-related issues while maintaining accurate operational records.',
-  },
-  {
-    role: 'Student Employee – Peer Support & Athletics & Recreation',
-    company: 'Okanagan College, Kelowna, BC',
+    role: 'Student Employee — Peer Support and Athletics & Recreation',
+    company: 'Okanagan College — Kelowna, British Columbia',
     period: 'Jan 2025 – Apr 2026',
     description:
-      'Assisted students with campus services, day-to-day support requests, communication, and basic troubleshooting. Collaborated with staff and student teams to support engagement programs and smooth operations.',
+      'Supported students, campus programs, events, recreation operations, and service requests while helping users access appropriate college resources.',
   },
 ];
 

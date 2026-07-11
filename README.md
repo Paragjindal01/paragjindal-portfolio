@@ -1,99 +1,87 @@
-# Parag Jindal — Portfolio Website
+# Parag Jindal — Portfolio & Technology Services
 
-A futuristic, 3D animated portfolio website built with modern web technologies.
+Personal portfolio and independent technology-services website, live at [paragjindal.com](https://paragjindal.com).
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
-![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss)
-![Three.js](https://img.shields.io/badge/Three.js-R3F-black?style=flat-square&logo=threedotjs)
 
 ## ✨ Features
 
-- **3D Hero Section** — Interactive floating torus knot with particle starfield using React Three Fiber & Drei
-- **Glassmorphism Design** — Frosted glass cards with blue/purple glow effects
-- **Smooth Animations** — Scroll-triggered Framer Motion animations throughout
-- **Responsive Layout** — Optimized for desktop, tablet, and mobile
-- **SEO Optimized** — Meta tags, Open Graph, semantic HTML
-- **Deploy Ready** — Configured for one-click Vercel deployment
+- **Interactive Spline robot hero** — lazy-loaded so it never blocks initial page load
+- **Services showcase** — six independent technology-service cards (development + local tech support)
+- **Featured projects** — SafeKelowna (live), trading platform backend, diagram warehouse
+- **Full contact form** — service dropdown, validation, Web3Forms email delivery
+- **SEO** — meta/OG/Twitter tags, canonical URL, JSON-LD (Person + ProfessionalService), sitemap, robots.txt
+- **Accessible** — reduced-motion support, visible keyboard focus states, semantic headings
+- **Glassmorphism dark design** — Framer Motion scroll choreography throughout
 
 ## 🛠 Tech Stack
 
 | Technology | Purpose |
 |-----------|---------|
 | React 19 | UI Framework |
-| Vite 6 | Build Tool |
+| Vite 8 | Build Tool |
 | Tailwind CSS 4 | Styling |
 | Framer Motion | Animations |
-| React Three Fiber | 3D Rendering |
-| Drei | R3F Helpers |
-| Three.js | 3D Engine |
+| @splinetool/react-spline | 3D hero scene |
+| Web3Forms | Contact form email delivery |
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+ 
-- npm 9+
-
-### Setup
-
 ```bash
-# Clone the repository
-git clone https://github.com/paragjindal/parag-portfolio.git
-cd parag-portfolio
-
-# Install dependencies
+git clone https://github.com/Paragjindal01/paragjindal-portfolio.git
+cd paragjindal-portfolio
 npm install
-
-# Start development server
-npm run dev
+cp .env.example .env.local   # then fill in your Web3Forms key
+npm run dev                  # http://localhost:5173
 ```
 
-The app will be available at `http://localhost:5173`
+### Environment variables
 
-### Build for Production
+| Variable | Purpose |
+|----------|---------|
+| `VITE_WEB3FORMS_ACCESS_KEY` | Web3Forms access key for the contact form (get one free at web3forms.com). Public-facing by design — Web3Forms access keys are safe to expose in frontend code. |
+
+### Build & deploy
 
 ```bash
-# Create optimized build
-npm run build
-
-# Preview production build locally
-npm run preview
+npm run lint      # ESLint
+npm run build     # production build to dist/
+npm run preview   # preview the production build locally
 ```
+
+Deployed on Vercel: push to `main` and Vercel auto-deploys (framework preset: **Vite**). Set `VITE_WEB3FORMS_ACCESS_KEY` in Vercel → Project → Settings → Environment Variables.
 
 ## 📁 Project Structure
 
 ```
 src/
 ├── components/
-│   ├── Navbar.jsx            # Sticky glass navigation
-│   ├── HeroSection.jsx       # Hero with 3D canvas
-│   ├── HeroCanvas.jsx        # React Three Fiber scene
-│   ├── AboutSection.jsx      # Bio & education
-│   ├── SkillsSection.jsx     # Skills grid
-│   ├── ProjectsSection.jsx   # Project showcase
-│   ├── ProjectCard.jsx       # Reusable project card
-│   ├── ExperienceSection.jsx # Timeline experience
-│   ├── ContactSection.jsx    # Contact form & socials
-│   ├── SectionWrapper.jsx    # Animation HOC
-│   └── Footer.jsx            # Site footer
-├── App.jsx                   # Main layout
-├── main.jsx                  # Entry point
-└── index.css                 # Design system & globals
-```
-
-## 🌐 Deploy to Vercel
-
-1. Push to GitHub
-2. Import repository in [Vercel](https://vercel.com)
-3. Framework preset will auto-detect as **Vite**
-4. Click **Deploy** — done!
-
-Or use the CLI:
-
-```bash
-npx vercel
+│   ├── Navbar.jsx             # Sticky glass navigation (active-section highlight)
+│   ├── HeroSection.jsx        # Hero with scroll choreography + lazy Spline
+│   ├── SplineHero.jsx         # Spline robot scene (async chunk)
+│   ├── AboutSection.jsx       # Bio + compact skill tags
+│   ├── ServicesSection.jsx    # Six service cards + CTA
+│   ├── ProjectsSection.jsx    # Project data (SafeKelowna featured)
+│   ├── ProjectCard.jsx        # Card with live-site / details buttons
+│   ├── ExperienceSection.jsx  # Timeline experience
+│   ├── HowItWorksSection.jsx  # 3-step client process
+│   ├── ContactSection.jsx     # Validated contact form (Web3Forms)
+│   ├── SectionWrapper.jsx     # Scroll-reveal section HOC
+│   ├── AnimatedBackground.jsx # Gradient orbs + particles
+│   ├── MouseGlow.jsx          # Cursor-following glow
+│   ├── ScrollProgress.jsx     # Top progress bar
+│   └── Footer.jsx             # Footer with services disclaimer
+├── App.jsx
+├── main.jsx
+└── index.css                  # Design system, focus states, reduced motion
+public/
+├── favicon.svg
+├── robots.txt
+└── sitemap.xml
 ```
 
 ## 📄 License
 
-MIT License © 2026 Parag Jindal
+MIT License © Parag Jindal

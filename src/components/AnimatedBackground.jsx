@@ -1,6 +1,46 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
+/* Precomputed particle configs — stable across renders (no impure calls during render) */
+const PARTICLES = Array.from({ length: 8 }, (_, i) => {
+  // Deterministic pseudo-random values seeded by index
+  const seed = (n) => {
+    const x = Math.sin(i * 127.1 + n * 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  return {
+    id: i,
+    speed: 50 + seed(1) * 150,
+    startY: seed(2) * 100,
+    drift: (seed(3) - 0.5) * 100,
+    opacity: 0.3 + seed(4) * 0.3,
+    left: 10 + seed(5) * 80,
+  };
+});
+
+function Particle({ config, smoothProgress }) {
+  const y = useTransform(
+    smoothProgress,
+    [0, 1],
+    [`${config.startY}vh`, `${config.startY - config.speed / 10}vh`]
+  );
+  const x = useTransform(smoothProgress, [0, 1], [0, config.drift]);
+
+  return (
+    <motion.div
+      className="fixed w-[3px] h-[3px] rounded-full pointer-events-none z-0"
+      style={{
+        background: 'var(--color-accent-silver)',
+        opacity: config.opacity,
+        left: `${config.left}%`,
+        y,
+        x,
+        boxShadow: '0 0 10px rgba(148,163,184,0.5)',
+      }}
+    />
+  );
+}
+
 export default function AnimatedBackground({ children }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -18,7 +58,7 @@ export default function AnimatedBackground({ children }) {
 
   return (
     <div ref={ref} className="relative min-h-screen bg-[var(--color-bg-base)] overflow-hidden">
-      
+
       {/* Subtle Dotted Mesh Pattern */}
       <div className="absolute inset-0 bg-mesh-dark opacity-50 pointer-events-none z-0 mask-image-gradient" />
 
@@ -41,29 +81,9 @@ export default function AnimatedBackground({ children }) {
       />
 
       {/* Extremely subtle, slow-floating particles for depth */}
-      {[...Array(8)].map((_, i) => {
-        const speed = 50 + Math.random() * 150;
-        const startY = Math.random() * 100;
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const particleY = useTransform(smoothProgress, [0, 1], [`${startY}vh`, `${startY - speed / 10}vh`]);
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const particleX = useTransform(smoothProgress, [0, 1], [0, (Math.random() - 0.5) * 100]);
-
-        return (
-          <motion.div
-            key={i}
-            className="fixed w-[3px] h-[3px] rounded-full pointer-events-none z-0"
-            style={{
-              background: 'var(--color-accent-silver)',
-              opacity: 0.3 + Math.random() * 0.3,
-              left: `${10 + Math.random() * 80}%`,
-              y: particleY,
-              x: particleX,
-              boxShadow: '0 0 10px rgba(148,163,184,0.5)',
-            }}
-          />
-        );
-      })}
+      {PARTICLES.map((config) => (
+        <Particle key={config.id} config={config} smoothProgress={smoothProgress} />
+      ))}
 
       {/* Content */}
       <div className="relative z-10">{children}</div>
