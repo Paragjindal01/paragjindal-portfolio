@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import Spline from '@splinetool/react-spline';
+import RobotVoiceGreeting from './robot/RobotVoiceGreeting';
 
 export default function SplineHero({ smoothProgress }) {
   const [loaded, setLoaded] = useState(false);
+  const splineAppRef = useRef(null);
 
   /* ═══════ Cursor-following spotlight behind the robot ═══════ */
   const mouseX = useMotionValue(0);
@@ -95,9 +97,17 @@ export default function SplineHero({ smoothProgress }) {
             {/* Interactive Spline Scene */}
             <Spline
               scene="https://prod.spline.design/wmlbgIVajKF3kFwY/scene.splinecode"
-              onLoad={() => setLoaded(true)}
+              onLoad={(app) => {
+                splineAppRef.current = app;
+                if (import.meta.env.DEV) window.__splineProbe = app;
+                setLoaded(true);
+              }}
               style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
             />
+
+            {/* Voice greeting: speech bubble, captions, audio controls,
+                and speaking glow — audio state lives outside Spline logic */}
+            <RobotVoiceGreeting splineRef={splineAppRef} robotLoaded={loaded} />
 
             {/* Subtle instruction if needed */}
             {loaded && (
