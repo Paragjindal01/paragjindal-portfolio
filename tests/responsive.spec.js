@@ -95,9 +95,13 @@ async function assertElementsInsideViewport(page) {
 test.describe('horizontal overflow matrix', () => {
   for (const { w, h, label } of VIEWPORTS) {
     test(`no overflow at ${label} (${w}x${h})`, async ({ page }) => {
+      // Layout assertions don't need the external Spline scene (the robot
+      // panel has fixed dimensions either way). Blocking it keeps this
+      // 27-viewport matrix fast and independent of CDN congestion.
+      await page.route('**://prod.spline.design/**', (route) => route.abort());
       await page.setViewportSize({ width: w, height: h });
       await page.goto('/');
-      await page.waitForLoadState('networkidle').catch(() => {});
+      await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
       // Top of page
       await assertNoHorizontalOverflow(page);
       await assertElementsInsideViewport(page);
@@ -188,6 +192,9 @@ test.describe('hero', () => {
 });
 
 test.describe('robot greeting controls', () => {
+  // The robot depends on an external Spline CDN fetch — allow extra headroom.
+  test.slow();
+
   test('invite → play → pause → resume → mute → close → reopen', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/');

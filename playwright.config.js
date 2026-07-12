@@ -10,7 +10,13 @@ export default defineConfig({
   testDir: './tests',
   timeout: 60_000,
   fullyParallel: true,
-  retries: 0,
+  // Capped: tests that load the real Spline scene fetch a multi-MB asset
+  // from an external CDN; too many parallel workers starve each other.
+  workers: 4,
+  // One retry: the robot tests depend on an external Spline CDN fetch that
+  // can transiently exceed timeouts under parallel load. A genuine
+  // regression still fails both attempts.
+  retries: 1,
   reporter: [['list']],
   use: {
     baseURL: 'http://localhost:4317',

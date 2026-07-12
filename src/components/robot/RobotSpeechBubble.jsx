@@ -54,29 +54,17 @@ export default function RobotSpeechBubble({
                 </span>
                 <RobotSpeakingIndicator active={status === 'speaking'} reducedMotion={reducedMotion} />
               </div>
-              {inConversation || status === 'completed' || status === 'error' ? (
-                <RobotAudioControls
-                  status={status}
-                  muted={muted}
-                  onPause={onPause}
-                  onResume={onResume}
-                  onToggleMute={onToggleMute}
-                  onReplay={onReplay}
-                  onClose={onClose}
-                />
-              ) : (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close greeting"
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
+              {/* Sound toggle + transport controls — always visible so the
+                  audio option is discoverable before the greeting starts */}
+              <RobotAudioControls
+                status={status}
+                muted={muted}
+                onPause={onPause}
+                onResume={onResume}
+                onToggleMute={onToggleMute}
+                onReplay={onReplay}
+                onClose={onClose}
+              />
             </div>
 
             {/* Caption / message. aria-live announces caption changes. */}
@@ -89,19 +77,31 @@ export default function RobotSpeechBubble({
 
             {/* Invite / replay button */}
             {(status === 'ready' || status === 'completed' || status === 'error') && (
-              <button type="button" onClick={onStart} className="btn-primary !px-5 !py-2 text-xs mt-3 w-full justify-center">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  {status === 'ready' ? (
-                    <polygon points="6 4 20 12 6 20 6 4" />
-                  ) : (
-                    <>
-                      <polyline points="1 4 1 10 7 10" />
-                      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-                    </>
-                  )}
-                </svg>
-                {buttonLabel}
-              </button>
+              <>
+                <button type="button" onClick={onStart} className="btn-primary !px-5 !py-2.5 text-xs mt-3 w-full justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    {status === 'ready' ? (
+                      <>
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                      </>
+                    ) : (
+                      <>
+                        <polyline points="1 4 1 10 7 10" />
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                      </>
+                    )}
+                  </svg>
+                  {buttonLabel}
+                </button>
+                <p className="text-[11px] text-[var(--color-text-muted)] text-center mt-2 flex items-center justify-center gap-1.5">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                  Plays a short voice intro — use the speaker button to mute
+                </p>
+              </>
             )}
           </div>
         </motion.div>
