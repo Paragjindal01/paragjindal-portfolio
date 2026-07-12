@@ -4,7 +4,7 @@ import { useReducedMotion } from 'framer-motion';
 import RobotSpeechBubble from './RobotSpeechBubble';
 import useSplineRobotActions from './useSplineRobotActions';
 import {
-  GREETING_AUDIO_SRC,
+  GREETING_AUDIO_SOURCES,
   GREETING_STORAGE_KEY,
   GREETING_SEGMENTS,
   GREETING_FULL_TEXT,
@@ -122,11 +122,15 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
     });
   }, [muted, runTextCaptions, finish]);
 
-  /* Primary path: prerecorded MP3 via a single HTMLAudioElement. */
+  /* Primary path: prerecorded audio via a single HTMLAudioElement.
+     Sources are tried in order (final MP3 first, committed M4A placeholder
+     second) before degrading to speech synthesis, then captions. */
+  const sourceIdxRef = useRef(0);
+
   const runAudio = useCallback(() => {
     let audio = audioRef.current;
     if (!audio) {
-      audio = new Audio(GREETING_AUDIO_SRC);
+      audio = new Audio(GREETING_AUDIO_SOURCES[sourceIdxRef.current]);
       audio.preload = 'metadata';
       audioRef.current = audio;
 
@@ -151,19 +155,31 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
     setStatus('speaking');
     setSegmentIdx(0);
 
-    const p = audio.play();
-    if (p && typeof p.then === 'function') {
+    const attempt = () => {
+      const p = audio.play();
+      if (!p || typeof p.then !== 'function') return;
       p.catch((err) => {
-        // Missing file or blocked playback — degrade gracefully.
+        const failedSrc = GREETING_AUDIO_SOURCES[sourceIdxRef.current];
+        if (sourceIdxRef.current < GREETING_AUDIO_SOURCES.length - 1) {
+          // Try the next source (e.g. MP3 missing → M4A placeholder).
+          sourceIdxRef.current += 1;
+          audio.src = GREETING_AUDIO_SOURCES[sourceIdxRef.current];
+          audio.currentTime = 0;
+          attempt();
+          return;
+        }
+        // All sources failed or playback blocked — degrade gracefully.
         if (import.meta.env.DEV) {
           console.warn(
-            '[RobotVoiceGreeting] Audio unavailable (%s). Place the greeting MP3 at public/audio/robot-welcome.mp3. Falling back to speech synthesis / captions.',
-            err?.name || err
+            '[RobotVoiceGreeting] Audio unavailable (%s on %s). Place the final greeting MP3 at public/audio/robot-welcome.mp3. Falling back to speech synthesis / captions.',
+            err?.name || err,
+            failedSrc
           );
         }
         runSpeechSynthesis();
       });
-    }
+    };
+    attempt();
   }, [muted, finish, runSpeechSynthesis]);
 
   /* ── Public actions ── */

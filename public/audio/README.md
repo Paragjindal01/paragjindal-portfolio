@@ -6,6 +6,13 @@ Place the final AI-generated voice file here as:
 
 Served at `/audio/robot-welcome.mp3` (the path the greeting player uses).
 
+## Current placeholder
+
+`robot-welcome.m4a` is a PLACEHOLDER voice generated with macOS TTS
+("Daniel", en-GB). The player tries `robot-welcome.mp3` first, so simply
+adding the final MP3 replaces the placeholder — no code change needed.
+Delete the .m4a once the MP3 exists.
+
 ## Script (exact)
 
 > "Hi, I'm Parag's digital assistant. Parag builds websites, AI solutions,

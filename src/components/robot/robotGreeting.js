@@ -8,7 +8,10 @@
  * timed captions only. No key or API call happens in the browser.
  */
 
-export const GREETING_AUDIO_SRC = '/audio/robot-welcome.mp3';
+/** Tried in order. The MP3 (final AI voice) wins when present; the M4A is a
+ *  committed placeholder generated with macOS TTS ("Daniel") so the greeting
+ *  is audible until the premium voice is produced. */
+export const GREETING_AUDIO_SOURCES = ['/audio/robot-welcome.mp3', '/audio/robot-welcome.m4a'];
 
 export const GREETING_STORAGE_KEY = 'parag-robot-greeting-played';
 
