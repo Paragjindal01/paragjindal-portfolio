@@ -14,6 +14,8 @@ export default function SplineHero({ smoothProgress }) {
   const springMouseY = useSpring(mouseY, { stiffness: 25, damping: 20 });
 
   useEffect(() => {
+    // Only track the cursor on devices that actually have one.
+    if (!window.matchMedia('(pointer: fine)').matches) return undefined;
     const handleMouse = (e) => {
       const cx = (e.clientX / window.innerWidth - 0.5) * 40;
       const cy = (e.clientY / window.innerHeight - 0.5) * 40;
@@ -36,7 +38,7 @@ export default function SplineHero({ smoothProgress }) {
   const borderGlowOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.3, 0.7, 0.2]);
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center lg:justify-end lg:pr-[5vw] xl:pr-[10vw] z-20 pointer-events-none overflow-hidden max-w-[100vw]">
+    <div className="absolute inset-0 flex items-center justify-center lg:justify-end lg:pr-[5vw] xl:pr-[10vw] z-10 lg:z-20 pointer-events-none overflow-hidden">
       {/* Spline scene container with scroll layout shift - NO pointer-events-none here to allow canvas interaction */}
       <motion.div
         style={{ 
@@ -44,7 +46,7 @@ export default function SplineHero({ smoothProgress }) {
           y: yScroll,
           scale,
         }}
-        className="relative w-[95vw] sm:w-[90vw] max-w-[500px] md:max-w-[650px] lg:max-w-[750px] h-[480px] sm:h-[560px] md:h-[720px] mt-12 lg:mt-0"
+        className="relative w-[80vw] sm:w-[85vw] max-w-[420px] sm:max-w-[500px] md:max-w-[650px] lg:max-w-[750px] h-[380px] sm:h-[480px] md:h-[600px] lg:h-[720px] mt-20 sm:mt-16 lg:mt-0"
       >
         {/* Soft floating motion wrapper */}
         <motion.div 
@@ -105,17 +107,13 @@ export default function SplineHero({ smoothProgress }) {
               style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
             />
 
-            {/* Voice greeting: speech bubble, captions, audio controls,
-                and speaking glow — audio state lives outside Spline logic */}
-            <RobotVoiceGreeting splineRef={splineAppRef} robotLoaded={loaded} />
-
             {/* Subtle instruction if needed */}
             {loaded && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
                 transition={{ delay: 2, duration: 2 }}
-                className="absolute bottom-6 left-0 right-0 text-center pointer-events-none z-20"
+                className="absolute bottom-6 left-0 right-0 text-center pointer-events-none z-20 hidden pointer-fine:block"
               >
                 <p className="text-[10px] sm:text-xs font-semibold tracking-widest text-[var(--color-text-muted)] uppercase drop-shadow-md">
                   Move your cursor to interact
@@ -126,7 +124,7 @@ export default function SplineHero({ smoothProgress }) {
 
           {/* Floating Tech Badges (Pointer Events None to avoid blocking Spline) */}
           <motion.div
-            className="absolute top-[15%] -left-4 sm:-left-12 lg:-left-16 z-30 pointer-events-none"
+            className="absolute top-[15%] -left-2 sm:-left-8 lg:-left-16 z-30 pointer-events-none"
             animate={{ y: [0, -10, 0], rotate: [0, 2, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
           >
@@ -136,7 +134,7 @@ export default function SplineHero({ smoothProgress }) {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-[25%] -left-2 sm:-left-8 lg:-left-12 z-30 pointer-events-none"
+            className="absolute bottom-[25%] -left-1 sm:-left-6 lg:-left-12 z-30 pointer-events-none"
             animate={{ y: [0, 10, 0], rotate: [0, -2, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
           >
@@ -146,7 +144,7 @@ export default function SplineHero({ smoothProgress }) {
           </motion.div>
 
           <motion.div
-            className="absolute top-[20%] -right-4 sm:-right-10 lg:-right-14 z-30 pointer-events-none hidden sm:block"
+            className="absolute top-[20%] -right-2 sm:-right-6 lg:-right-14 z-30 pointer-events-none hidden sm:block"
             animate={{ y: [0, -12, 0], rotate: [0, -3, 0] }}
             transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
           >
@@ -156,7 +154,7 @@ export default function SplineHero({ smoothProgress }) {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-[20%] -right-2 sm:-right-8 lg:-right-12 z-30 pointer-events-none hidden sm:block"
+            className="absolute bottom-[20%] -right-1 sm:-right-4 lg:-right-12 z-30 pointer-events-none hidden sm:block"
             animate={{ y: [0, 8, 0], rotate: [0, 2, 0] }}
             transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
           >
@@ -166,6 +164,12 @@ export default function SplineHero({ smoothProgress }) {
           </motion.div>
 
         </motion.div>
+
+        {/* Voice greeting: speech bubble, captions, audio controls, and
+            speaking glow. Mounted OUTSIDE the floating wrapper so the
+            controls stay still (stable click targets) while the robot
+            bobs. Audio state lives outside the Spline logic. */}
+        <RobotVoiceGreeting splineRef={splineAppRef} robotLoaded={loaded} />
       </motion.div>
     </div>
   );

@@ -16,7 +16,7 @@ export default function SectionWrapper({ children, id, className = '' }) {
   return (
     <motion.section
       id={id}
-      className={`relative px-6 py-20 md:py-28 max-w-7xl mx-auto ${className}`}
+      className={`relative px-4 sm:px-6 py-16 sm:py-20 md:py-28 max-w-7xl mx-auto ${className}`}
       variants={sectionVariants}
       initial="hidden"
       whileInView="visible"

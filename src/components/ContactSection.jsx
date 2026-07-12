@@ -150,7 +150,7 @@ export default function ContactSection() {
   return (
     <SectionWrapper id="contact">
       <div className="text-center mb-16">
-        <h2 className="section-title">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-[var(--color-text-primary)]">
           Let&apos;s Build Something or <span className="text-[var(--color-accent-blue)]">Solve Your Tech Problem</span>
         </h2>
         <p className="section-subtitle">
@@ -168,7 +168,7 @@ export default function ContactSection() {
       >
         {/* Social Links + Info */}
         <motion.div variants={itemVariants} className="space-y-6">
-          <div className="bg-slate-900/60 backdrop-blur-xl rounded-[24px] p-8 md:p-10 border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] h-full">
+          <div className="bg-slate-900/60 backdrop-blur-xl rounded-[24px] p-5 sm:p-8 md:p-10 border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] h-full">
             <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-3 tracking-tight">
               Reach Out Directly
             </h3>
@@ -188,9 +188,9 @@ export default function ContactSection() {
                   className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/10 hover:border-cyan-400/40 hover:bg-slate-800/80 transition-all duration-300 text-[var(--color-text-secondary)] hover:text-[var(--color-accent-cyan)] shadow-sm"
                 >
                   {link.icon}
-                  <span className="flex flex-col">
+                  <span className="flex flex-col min-w-0">
                     <span className="font-medium">{link.label}</span>
-                    <span className="text-xs text-[var(--color-text-muted)]">{link.detail}</span>
+                    <span className="text-xs text-[var(--color-text-muted)] [overflow-wrap:anywhere]">{link.detail}</span>
                   </span>
                   <svg
                     width="16"
@@ -215,7 +215,7 @@ export default function ContactSection() {
 
         {/* Contact Form */}
         <motion.div variants={itemVariants}>
-          <form onSubmit={handleSubmit} className="glass-card p-8 md:p-10 space-y-5" noValidate>
+          <form onSubmit={handleSubmit} className="glass-card p-5 sm:p-8 md:p-10 space-y-5" noValidate>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label htmlFor="contact-name" className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2">

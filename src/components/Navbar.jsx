@@ -37,7 +37,9 @@ export default function Navbar() {
   const handleNavClick = (href) => {
     setMobileOpen(false);
     const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (!el) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
   };
 
   return (
@@ -51,7 +53,7 @@ export default function Navbar() {
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <a
           href="#home"

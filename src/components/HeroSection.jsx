@@ -40,8 +40,9 @@ export default function HeroSection() {
 
   return (
     <section ref={sectionRef} id="home" className="relative" style={{ minHeight: '220vh' }}>
+      {/* Prevent any horizontal overflow from the Spline scene or floating badges */}
       {/* ═══════ Sticky viewport ═══════ */}
-      <div className="sticky top-0 min-h-screen flex items-center justify-center overflow-hidden">
+      <div className="sticky top-0 min-h-screen supports-[height:100svh]:min-h-[100svh] flex items-center justify-center overflow-hidden">
 
         {/* ═══════ Spline 3D scene (right side -> center) ═══════ */}
         <Suspense fallback={null}>
@@ -51,11 +52,13 @@ export default function HeroSection() {
         {/* ═══════ Phase 1: Introduction (scroll 0–25%) ═══════ */}
         <motion.div
           style={{ y: introY, x: introX, opacity: introOpacity }}
-          className="absolute inset-0 flex items-center z-30 pointer-events-none"
+          className="absolute inset-0 flex items-center z-30 pointer-events-none pt-20 lg:pt-0"
         >
           {/* Grid layout matching the max-w-7xl container to align text left */}
-          <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-2">
-            <div className="max-w-lg pt-12 lg:pt-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid grid-cols-1 lg:grid-cols-2">
+            <div className="max-w-lg pt-4 sm:pt-8 lg:pt-0 relative">
+              {/* Dark scrim behind text on mobile so it's readable over the robot */}
+              <div className="absolute -inset-4 sm:-inset-6 rounded-3xl bg-[#050505]/70 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none -z-10 lg:hidden" />
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -72,7 +75,7 @@ export default function HeroSection() {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-5xl sm:text-6xl lg:text-[4.5rem] font-extrabold leading-[1.05] tracking-tight mb-5"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold leading-[1.05] tracking-tight mb-5"
               >
                 <span className="text-[var(--color-text-primary)]">Parag</span>{' '}
                 <span className="gradient-text">Jindal</span>
@@ -156,7 +159,7 @@ export default function HeroSection() {
           style={{ y: outroY, opacity: outroOpacity }}
           className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
         >
-          <div className="text-center max-w-2xl px-6 bg-slate-900/60 backdrop-blur-xl p-10 rounded-[32px] border border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] pointer-events-auto">
+          <div className="text-center max-w-2xl px-4 sm:px-6 bg-slate-900/60 backdrop-blur-xl p-6 sm:p-10 rounded-[24px] sm:rounded-[32px] border border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] pointer-events-auto mx-4 sm:mx-auto">
             <h3 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-text-primary)] mb-4 tracking-tight">
               Build. Automate. <span className="gradient-text">Solve.</span>
             </h3>

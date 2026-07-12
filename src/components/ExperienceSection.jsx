@@ -58,10 +58,10 @@ export default function ExperienceSection() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
-        className="relative max-w-3xl mx-auto pl-10 md:pl-16"
+        className="relative max-w-3xl mx-auto pl-8 sm:pl-10 md:pl-14"
       >
         {/* Elegant subtle timeline line */}
-        <div className="absolute left-0 top-2 bottom-0 w-[1px] bg-gradient-to-b from-[var(--color-accent-cyan)] via-[var(--color-accent-silver)] to-transparent opacity-50" />
+        <div className="absolute left-[7px] sm:left-[11px] md:left-[15px] top-2 bottom-0 w-[1px] bg-gradient-to-b from-[var(--color-accent-cyan)] via-[var(--color-accent-silver)] to-transparent opacity-50" />
 
         {experiences.map((exp, i) => (
           <motion.div
@@ -71,7 +71,7 @@ export default function ExperienceSection() {
           >
             {/* Minimalist timeline dot */}
             <motion.div
-              className="absolute -left-[43px] md:-left-[67px] w-[6px] h-[6px] rounded-full bg-[var(--color-accent-cyan)] top-6 ring-4 ring-[#0f172a] shadow-[0_0_0_5px_rgba(5,5,5,1)]"
+              className="absolute -left-[28px] sm:-left-[31px] md:-left-[44px] w-[6px] h-[6px] rounded-full bg-[var(--color-accent-cyan)] top-6 ring-4 ring-[#0f172a] shadow-[0_0_0_5px_rgba(5,5,5,1)]"
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
               viewport={{ once: true }}
