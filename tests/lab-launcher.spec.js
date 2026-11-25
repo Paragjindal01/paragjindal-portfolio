@@ -36,6 +36,35 @@ test('final lab search filters categories and restores the complete index', asyn
   await expect(page.getByRole('status')).toHaveText('10 of 10 systems');
 });
 
+test('each lab hover preview loads the current app capture on both indexes', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+
+  for (const path of ['/', '/lab']) {
+    await page.goto(path);
+    const rows = page.locator('.index__row');
+    await expect(rows).toHaveCount(LAB_TOOLS.length);
+    const preview = page.locator('.index__preview');
+    const image = preview.locator('img');
+    for (const tool of LAB_TOOLS) {
+      const row = rows.filter({ has: page.locator('.index__name', { hasText: tool.name }) });
+      await row.hover();
+      await expect(preview).toHaveAttribute('data-on', 'true');
+      await expect(image).toHaveAttribute('src', `/lab-previews/${tool.id}.webp`);
+      await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth)).toBeGreaterThan(0);
+    }
+
+    const firstRow = rows.first();
+    const firstHref = await firstRow.getAttribute('href');
+    const firstTool = LAB_TOOLS.find(({ links }) => links.demo === firstHref);
+    await firstRow.focus();
+    await expect(preview).toHaveAttribute('data-on', 'true');
+    await expect(image).toHaveAttribute('src', `/lab-previews/${firstTool.id}.webp`);
+    await firstRow.blur();
+    await expect(preview).toHaveAttribute('data-on', 'false');
+  }
+});
+
 test('scenario links preserve the scenario and advance the deterministic clock', async ({ page }) => {
   await page.goto('/lab/rackops');
   await page.getByRole('combobox', { name: 'Scenario', exact: true }).selectOption('critical');

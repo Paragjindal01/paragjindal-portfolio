@@ -47,7 +47,7 @@ export default function LabOverview({ scenario }) {
         <span aria-hidden="true" className="index__arrow">↗</span>
       </a>)}
       {shown.length === 0 && <div className="labtools__empty"><p>No system matches “{query || category}”.</p><button className="cta-text" type="button" onClick={() => { setQuery(''); setCategory(null); }}>Clear filters</button></div>}
-      <div aria-hidden="true" className="index__preview" data-on={preview ? 'true' : 'false'} style={{ top: preview?.top ?? 0 }}>{preview && <img alt="" decoding="async" loading="lazy" src={preview.tool.art} />}</div>
+      <div aria-hidden="true" className="index__preview" data-on={preview ? 'true' : 'false'} style={{ top: preview?.top ?? 0 }}>{preview && <img key={preview.tool.id} alt="" decoding="async" loading="lazy" src={preview.tool.preview} />}</div>
     </div>
 
     <div className="index__foot">

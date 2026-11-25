@@ -18,6 +18,7 @@ export const LAB_TOOLS = design.map(([id, code, category, art, caption], index) 
   code,
   category,
   art: `/assets/${art}`,
+  preview: `/lab-previews/${id}.webp`,
   caption,
   number: String(index + 1).padStart(2, '0'),
 }));

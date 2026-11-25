@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import ContactSection from "../../components/ContactSection.jsx";
-import { ALL_PROJECTS } from "../../data/projects.mjs";
 import { CONTACT, CURRENT_ROLE, EDUCATION, EMPLOYMENT, employmentMonth, employmentPeriod, workplaceDetails } from "../../data/professional.mjs";
-import relayPreview from "../../../relayops-ai/docs/screenshots/studio.webp";
-import computePreview from "../../../compute-flow/docs/workbench.webp";
+import { LAB_TOOLS } from "../../lab/lab-design.mjs";
 
 import "./shared-chrome.css";
 import "./site.css";
@@ -30,24 +28,14 @@ import type { LabApp } from "./chrome";
 import { EpisodeModal } from "./episode-modal";
 import type { EpisodeDossier } from "./episode-modal";
 
-const PROJECT_CATEGORIES = {
-  "relayops-ai": "Orchestration",
-  "infrapilot-ai": "Automation",
-  rackops: "Digital twin",
-  gpuwatch: "Observability",
-  powerops: "Power",
-  fabriclab: "Network",
-  virtscan: "Discovery",
-  storagecalc: "Storage",
-  "compute-flow": "Scheduling",
-  localmind: "Retrieval",
-};
+const HOMEPAGE_LAB_ORDER = [
+  "relayops-ai", "infrapilot-ai", "rackops", "gpuwatch", "powerops",
+  "fabriclab", "virtscan", "storagecalc", "compute-flow", "localmind",
+];
 
-const LAB_APPS: LabApp[] = Object.entries(PROJECT_CATEGORIES).map(([id, category]) => {
-  const project = ALL_PROJECTS.find((entry) => entry.id === id);
-  const image = id === "relayops-ai" ? relayPreview
-    : id === "compute-flow" ? computePreview : project.screenshot.path;
-  return { href: project.links.demo, name: project.name, desc: project.description, category, image };
+const LAB_APPS: LabApp[] = HOMEPAGE_LAB_ORDER.map((id) => {
+  const { links, name, description, category, preview } = LAB_TOOLS.find((tool) => tool.id === id);
+  return { href: links.demo, name, desc: description, category, image: preview };
 });
 
 const [altaai, bestBuy, okanagan] = EMPLOYMENT;

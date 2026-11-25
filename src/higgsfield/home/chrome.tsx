@@ -332,7 +332,7 @@ export function LabIndex({ apps }: { apps: LabApp[] }) {
         style={{ top }}
       >
         {active === null || !apps[active]?.image ? null : (
-          <img alt="" loading="lazy" src={apps[active].image} />
+          <img key={apps[active].image} alt="" decoding="async" loading="lazy" src={apps[active].image} />
         )}
       </div>
     </div>
