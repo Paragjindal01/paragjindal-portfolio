@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { ApiError, boundedJson, object } from './errors.mjs';
 import { issueSession, json, openStore, parse, sha256 } from './store.mjs';
+import { createWebhookService } from './webhooks.mjs';
 
 const TERMINAL = new Set(['completed', 'failed', 'cancelled']);
 const RESOLVED = new Set(['completed', 'skipped']);
@@ -94,6 +95,7 @@ export function createEngine({
   let lastSweep = 0;
   const now = () => new Date(clock()).toISOString();
   const timeAfter = (ms) => new Date(clock() + ms).toISOString();
+  const webhooks = createWebhookService({ store, clock, queueRun });
 
   function audit(id, type, stepId = null, data = {}) {
     db.prepare('INSERT INTO events (run_id,at,type,step_id,data) VALUES (?,?,?,?,?)').run(id, now(), type, stepId, json(data));
@@ -182,7 +184,7 @@ export function createEngine({
       .all(owner, limit).map(readRun);
   }
 
-  function queueRun(owner, { definition, version, input, mode, providerName, replayOf }, idempotencyKey, requestHash) {
+  function queueRun(owner, { definition, version, input, mode, providerName, replayOf, webhookId }, idempotencyKey, requestHash) {
     const id = randomUUID();
     const createdAt = now();
     const resultingId = store.transaction(() => {
@@ -206,11 +208,14 @@ export function createEngine({
       `).run(id, owner, definition.id, definition.name, version, json(definition), json(input), mode, providerName, replayOf, createdAt, idempotencyKey, requestHash);
       const insert = db.prepare("INSERT INTO steps (run_id,id,type,label,row_order,status) VALUES (?,?,?,?,?,'queued')");
       for (const [index, node] of definition.nodes.entries()) insert.run(id, node.id, node.type, node.label, index);
-      audit(id, 'run.queued', null, { mode, version, replayOf, workflowId: definition.id });
+      audit(id, 'run.queued', null, {
+        mode, version, replayOf, workflowId: definition.id,
+        ...(webhookId ? { trigger: 'webhook', webhookId } : {}),
+      });
       return id;
     });
     schedule();
-    return detail(owner, resultingId);
+    return resultingId;
   }
 
   function startRun(owner, command, idempotencyKey = null) {
@@ -242,17 +247,19 @@ export function createEngine({
     if (mode === 'offline' && providerName !== 'offline') throw new ApiError(403, 'policy_denied', 'Offline runs use the offline provider.');
     if (idempotencyKey != null && (typeof idempotencyKey !== 'string' || !KEY.test(idempotencyKey))) throw new ApiError(400, 'invalid_input', 'Idempotency key is invalid.');
 
-    return queueRun(owner, { definition, version, input, mode, providerName, replayOf: null }, idempotencyKey, sha256(json(command)));
+    const id = queueRun(owner, { definition, version, input, mode, providerName, replayOf: null }, idempotencyKey, sha256(json(command)));
+    return detail(owner, id);
   }
 
   function replayRun(owner, id) {
     const row = ownedRun(owner, id);
     if (!TERMINAL.has(row.status)) throw new ApiError(409, 'run_active', 'Finish the original run before starting a replay.');
     if (row.mode === 'connected' && !allowConnected) throw new ApiError(403, 'policy_denied', 'Connected execution is disabled on this server.');
-    return queueRun(owner, {
+    const replayId = queueRun(owner, {
       definition: parse(row.definition), input: parse(row.input), version: row.version,
       mode: row.mode, providerName: row.provider, replayOf: id,
     }, null, null);
+    return detail(owner, replayId);
   }
 
   function endRun(id, status, issue = null) {
@@ -509,7 +516,7 @@ export function createEngine({
   schedule();
 
   return {
-    createSession, ownerFor, listWorkflows, versions, saveWorkflow,
+    createSession, ownerFor, listWorkflows, versions, saveWorkflow, ...webhooks,
     startRun, replayRun, detail, listRuns, cancelRun, review, events,
     status: (owner, id) => ownedRun(owner, id).status,
     evaluate(owner, id) {

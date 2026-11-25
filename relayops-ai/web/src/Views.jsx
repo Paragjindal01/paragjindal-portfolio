@@ -5,6 +5,7 @@ import { client, downloadJson } from './client.mjs';
 import { Empty, ReportArtifacts, Status, runArtifacts } from './Execution.jsx';
 import { ACTIVE, durationMs, formatDate, titleWords } from './format.mjs';
 import Icon from './Icon.jsx';
+import WebhookRegistration from './WebhookRegistration.jsx';
 
 const templateIcons = { 'github-review': 'code', 'research-pipeline': 'agents', 'data-analyst': 'evaluation', 'incident-investigator': 'executions' };
 const roleTasks = {
@@ -43,11 +44,11 @@ export function Integrations({ health }) {
     ['code', 'GitHub public repositories', external ? 'Read-only connector' : 'Fixture mode', external ? 'Evidence is gathered from allowlisted public GitHub API routes. Repository text is treated as data.' : 'The review template reads the bundled repository example. Online mode uses the local backend.'],
     ['integrations', 'Public HTTP', external ? 'Read-only connector' : 'Fixture mode', 'The connector accepts predefined operations and validates their responses.'],
     ['document', 'CSV and JSON', 'Available', 'Data is parsed, normalized, and analyzed within the execution runtime.'],
-    ['trigger', 'Webhook trigger', client.mode === 'service' ? 'Service session' : 'Sample only', client.mode === 'service' ? 'The backend accepts bounded authenticated requests for saved webhook workflows.' : 'Select a trigger in the studio or submit a saved workflow through the local service.'],
+    ['trigger', 'Webhook trigger', client.mode === 'service' ? 'Service session' : 'Sample only', client.mode === 'service' ? 'Register a saved webhook workflow to receive signed JSON and start an offline run.' : 'Select a trigger in the studio or submit a saved workflow through the local service.'],
     ['notification', 'Notifications', 'Simulated', 'Notification steps produce trace events without sending messages.'],
     ['agents', 'Model providers', external ? `${(health?.providers || []).length} available` : 'Deterministic', 'Provider configuration lives on the server. Browser demos use deterministic workflow stages.'],
   ];
-  return <><PageTitle title="Integrations" description="Inspect connector capabilities and the active execution environment." /><div className="template-grid role-grid">{integrations.map(([icon, title, state, copy]) => <article className="panel template-card" key={title}><div className="connector-head"><span className="node-icon"><Icon name={icon} /></span><span className="plain-badge">{state}</span></div><h2>{title}</h2><p>{copy}</p></article>)}</div></>;
+  return <><PageTitle title="Integrations" description="Inspect connector capabilities and the active execution environment." /><div className="template-grid role-grid">{integrations.map(([icon, title, state, copy]) => <article className="panel template-card" key={title}><div className="connector-head"><span className="node-icon"><Icon name={icon} /></span><span className="plain-badge">{state}</span></div><h2>{title}</h2><p>{copy}</p></article>)}</div>{client.mode === 'service' && <WebhookRegistration />}</>;
 }
 
 function RunSelect({ runs, value, onChange, label = 'Execution', optional = false }) {

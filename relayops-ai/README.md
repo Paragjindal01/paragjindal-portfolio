@@ -41,9 +41,13 @@ Open `http://127.0.0.1:4174/relayops/`. The local service serves the UI and API 
 
 An equivalent offline-service setup is available with `docker compose up --build`. Compose publishes only a loopback port and keeps SQLite in a named volume. For Vite hot reload alongside the service, run `VITE_RELAYOPS_API=1 npm run dev` in a second terminal.
 
+### Signed webhook triggers
+
+In the SQLite service, set a workflow trigger to Webhook and save a version. Register that version from Integrations to get a delivery URL and a signing secret. The secret is shown once. Signed JSON deliveries queue the pinned version in offline mode. Registration, delivery and revocation are described in the [API reference](docs/api.md).
+
 ### Optional connected inference
 
-Copy `.env.example` to `.env`, set `RELAYOPS_CONNECTED=1` and configure model names and credentials for the providers you intend to use. Start with `node --env-file=.env server/index.mjs`. The default service bind is loopback. Optional adapters support OpenAI, Anthropic, Gemini, Ollama and a loopback OpenAI-compatible endpoint. A model node can summarize scoped evidence. It has no tool or control access. Configure provider order, fallback and optional per-million-token pricing in the server environment. Pricing inputs determine estimates; confirm actual billing from the provider.
+Copy `.env.example` to `.env`, set `RELAYOPS_CONNECTED=1` and configure model names and credentials for the providers you intend to use. Start with `node --env-file=.env server/index.mjs`. The default service bind is loopback. The GitHub review can read real public evidence in connected mode without a model key. Optional adapters support OpenAI, Anthropic, Gemini, Ollama and a loopback OpenAI-compatible endpoint. A model node can summarize scoped evidence. It has no tool or control access. Configure provider order, fallback and optional per-million-token pricing in the server environment. Pricing inputs determine estimates; confirm actual billing from the provider.
 
 ## Architecture
 
@@ -84,10 +88,11 @@ npm test
 npm run build
 npx playwright install chromium
 npm run test:browser
+npm run test:browser:service
 ```
 
 See [benchmark runs](docs/benchmark.md) for measured examples and [workflow API](docs/api.md) for automation. Tests cover isolated session tokens, approval gates, cancellation, restart recovery, retry behavior, bounded provider responses, reference validation, and safe network and file handling.
 
 ## Boundaries and roadmap
 
-The hosted app is an offline demonstration. The durable service is a single-instance, SQLite-backed deployment intended for a local operator. Sessions are capabilities; multi-tenant identity, enterprise RBAC, redundant workers and backup automation are future work. Webhook triggers are graph input definitions with manual or API submission. The current release leaves inbound signed webhook delivery, real notifications, and external writes to later implementations. Research uses labeled sample sources. Public GitHub and the named public HTTP integration use fixed, read-only requests in connected mode. Provider adapter checks use mocked responses unless otherwise noted. No paid model account or infrastructure is required for the public or local offline workflows.
+The hosted app is an offline demonstration. The durable service is a single-instance, SQLite-backed deployment intended for a local operator. Sessions are capabilities; multi-tenant identity, enterprise RBAC, redundant workers and backup automation are future work. Signed webhook delivery is available in the local service. Notifications and mitigation outputs remain simulated. The service has no external write connector. Research uses labeled sample sources. Public GitHub and the named public HTTP integration use fixed, read-only requests in connected mode. Provider adapter checks use mocked responses unless otherwise noted. No paid model account or infrastructure is required for the public or local offline workflows.

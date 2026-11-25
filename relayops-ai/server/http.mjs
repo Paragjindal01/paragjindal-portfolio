@@ -3,6 +3,8 @@ import { readFile, realpath, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { ApiError } from './errors.mjs';
+import { parseJsonBody } from './json-input.mjs';
+import { WEBHOOK_MAX_BYTES } from './webhooks.mjs';
 
 const MAX_BODY = 256 * 1024;
 const ID = /^[a-zA-Z0-9_-]{1,80}$/;
@@ -29,23 +31,7 @@ function respond(response, status, value) {
   response.end(text);
 }
 
-function validateJson(data) {
-  const pending = [{ value: data, depth: 0 }];
-  let visited = 0;
-  while (pending.length) {
-    const { value, depth } = pending.pop();
-    visited += 1;
-    if (depth > 32 || visited > 30_000) failure(400, 'invalid_json', 'JSON nesting or item count exceeded its limit.');
-    if (typeof value === 'number' && !Number.isFinite(value)) failure(400, 'invalid_json', 'JSON numbers must be finite.');
-    if (value == null || typeof value !== 'object') continue;
-    for (const [key, child] of Object.entries(value)) {
-      if (['__proto__', 'constructor', 'prototype'].includes(key)) failure(400, 'invalid_json', 'The JSON document contains a reserved object key.');
-      pending.push({ value: child, depth: depth + 1 });
-    }
-  }
-}
-
-function readBytes(request) {
+function readBytes(request, limit) {
   return new Promise((resolveBody, reject) => {
     const chunks = [];
     let bytes = 0;
@@ -56,7 +42,7 @@ function readBytes(request) {
     };
     function consume(chunk) {
       bytes += chunk.length;
-      if (bytes > MAX_BODY) {
+      if (bytes > limit) {
         detach();
         request.resume();
         reject(new ApiError(413, 'content_limit', 'This request exceeds the JSON size limit.'));
@@ -76,21 +62,20 @@ function readBytes(request) {
   });
 }
 
-async function readBody(request) {
+function readJsonBytes(request, limit = MAX_BODY) {
   const contentType = request.headers['content-type']?.split(';', 1)[0].trim().toLowerCase();
   if (contentType !== 'application/json') failure(415, 'unsupported_media_type', 'Send an application/json request.');
-  if (Number(request.headers['content-length']) > MAX_BODY) {
+  const encoding = request.headers['content-encoding'];
+  if (encoding && encoding.toLowerCase() !== 'identity') failure(415, 'unsupported_media_type', 'Send uncompressed JSON.');
+  if (Number(request.headers['content-length']) > limit) {
     request.resume();
     failure(413, 'content_limit', 'This request exceeds the JSON size limit.');
   }
-  const bytes = await readBytes(request);
-  let data;
-  try { data = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); } catch {
-    failure(400, 'invalid_json', 'The request body is not valid UTF-8 JSON.');
-  }
-  if (!data || typeof data !== 'object' || Array.isArray(data)) failure(400, 'invalid_json', 'Send a JSON object.');
-  validateJson(data);
-  return data;
+  return readBytes(request, limit);
+}
+
+async function readBody(request) {
+  return parseJsonBody(await readJsonBytes(request));
 }
 
 function integer(value, defaultValue, min, max) {
@@ -250,7 +235,35 @@ export function createHttpServer({
       respond(response, 201, engine.createSession());
       return;
     }
+    if (method === 'POST' && resource === 'webhooks' && route.length === 3 && action === 'deliver') {
+      checkRate('webhook-peer:' + address, 60);
+      const rawBody = await readJsonBytes(request, WEBHOOK_MAX_BYTES);
+      const runId = engine.deliverWebhook(id, {
+        timestamp: request.headers['x-relayops-timestamp'],
+        signature: request.headers['x-relayops-signature'],
+        idempotencyKey: request.headers['idempotency-key'],
+        rawBody,
+      }, () => checkRate('webhook-registration:' + id, 30));
+      respond(response, 202, { runId });
+      return;
+    }
     const owner = authenticate(request);
+    if (resource === 'webhooks') {
+      if (route.length === 1 && method === 'GET') {
+        respond(response, 200, { webhooks: engine.listWebhooks(owner) });
+        return;
+      }
+      if (route.length === 1 && method === 'POST') {
+        respond(response, 201, engine.registerWebhook(owner, await readBody(request)));
+        return;
+      }
+      if (route.length === 2 && method === 'DELETE') {
+        engine.revokeWebhook(owner, id);
+        response.writeHead(204, { 'Cache-Control': 'no-store' });
+        response.end();
+        return;
+      }
+    }
     if (resource === 'workflows') {
       if (route.length === 1) {
         if (method === 'GET') {

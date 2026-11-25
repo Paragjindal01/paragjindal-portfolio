@@ -24,6 +24,8 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: npm run test:browser:service
+
       - name: Test the SQLite Compose image
         run: |
           docker compose up -d --build --wait

@@ -21,6 +21,17 @@ const schema = `
     created_at TEXT NOT NULL,
     PRIMARY KEY (owner, id, version)
   );
+  CREATE TABLE IF NOT EXISTS webhooks (
+    id TEXT PRIMARY KEY,
+    owner TEXT NOT NULL,
+    workflow_id TEXT NOT NULL,
+    workflow_version INTEGER NOT NULL,
+    secret BLOB NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (owner, workflow_id, workflow_version)
+      REFERENCES workflow_versions (owner, id, version) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS webhooks_owner ON webhooks(owner, created_at);
   CREATE TABLE IF NOT EXISTS runs (
     id TEXT PRIMARY KEY,
     owner TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,

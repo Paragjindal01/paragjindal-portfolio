@@ -13,7 +13,8 @@
     "start": "node server/index.mjs",
     "test": "node --test",
     "test:browser": "playwright test --config web/playwright.config.mjs",
-    "benchmark": "node scripts/benchmark.mjs"
+    "benchmark": "node scripts/benchmark.mjs",
+    "test:browser:service": "playwright test --config web/playwright.service.config.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

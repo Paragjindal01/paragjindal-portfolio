@@ -318,3 +318,19 @@ label > select { overflow: hidden; text-overflow: ellipsis; }
   .inspector-body label:has(> select), .evaluation-controls label:has(> select) { overflow: clip; overflow-clip-margin: 4px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+.webhook-panel { margin-top: .9rem; padding: .9rem; }
+.webhook-panel > h3 { margin: .85rem 0 .35rem; font-size: .96rem; }
+.webhook-form { display: flex; flex-wrap: wrap; gap: .65rem; align-items: flex-end; margin-bottom: .4rem; }
+.webhook-form label { flex: 1 1 175px; min-width: 0; }
+.webhook-secret { padding: .65rem; margin: .75rem 0; border: 1px solid #c7d8ca; border-radius: 6px; background: #edf5ed; }
+.webhook-secret > div, .webhook-list > li { display: flex; gap: .55rem; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.webhook-list { display: grid; gap: .45rem; padding: 0; list-style: none; }
+.webhook-list > li { padding: .52rem; border: 1px solid var(--line); border-radius: 6px; }
+.webhook-list > li > div:first-child { min-width: 0; flex: 1 1 280px; display: grid; gap: .15rem; }
+.webhook-list strong { font-size: .85rem; }
+.webhook-panel code { overflow-wrap: anywhere; font: .77rem var(--mono); }
+.webhook-secret code { display: block; padding: .32rem .4rem; margin-top: .3rem; background: #fcfefc; border-radius: 3px; user-select: all; }
+.webhook-signing { margin: .7rem 0 0; }
+.webhook-signing > div { padding: .55rem .65rem; color: var(--muted); font-size: .83rem; }
+.webhook-signing p + p { margin-top: .42rem; }

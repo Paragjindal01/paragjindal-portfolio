@@ -19,18 +19,23 @@ function createServiceClient() {
     return opening;
   }
 
-  async function request(path, { body, credentials = true, retry = true } = {}) {
+  async function request(path, { body, credentials = true, retry = true, method = body === undefined ? 'GET' : 'POST' } = {}) {
     const headers = { Accept: 'application/json' };
     if (credentials) headers.Authorization = `Bearer ${await session()}`;
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (path === '/runs' && body) headers['Idempotency-Key'] = crypto.randomUUID();
-    const response = await fetch(`/api${path}`, { headers, method: body === undefined ? 'GET' : 'POST', signal: AbortSignal.timeout(12_000), body: body === undefined ? undefined : JSON.stringify(body) });
+    const response = await fetch(`/api${path}`, { headers, method, signal: AbortSignal.timeout(12_000), body: body === undefined ? undefined : JSON.stringify(body) });
     if (response.status === 401 && credentials && retry) {
       token = null;
-      return request(path, { body, credentials, retry: false });
+      return request(path, { body, credentials, method, retry: false });
     }
+    if (response.status === 204) return null;
     const data = await response.json().catch(() => null);
-    if (!response.ok || !data) throw new Error(typeof data?.error === 'string' ? data.error : data?.error?.message || `RelayOps service returned HTTP ${response.status}.`);
+    if (!response.ok || !data) {
+      const error = new Error(typeof data?.error === 'string' ? data.error : data?.error?.message || `RelayOps service returned HTTP ${response.status}.`);
+      error.status = response.status;
+      throw error;
+    }
     return data;
   }
 
@@ -40,7 +45,10 @@ function createServiceClient() {
     warning: () => '',
     health: () => request('/health', { credentials: false }),
     workflows: async () => (await request('/workflows')).workflows,
-    versions: async (id) => (await request(`/workflows/${encodeURIComponent(id)}`)).versions,
+    async versions(id) {
+      try { return (await request(`/workflows/${encodeURIComponent(id)}`)).versions; }
+      catch (error) { if (error.status === 404) return []; throw error; }
+    },
     save: (workflow) => request('/workflows', { body: { workflow } }),
     runs: async () => (await request('/runs')).runs,
     run: async (id) => (await request(pathFor(id))).run,
@@ -50,6 +58,9 @@ function createServiceClient() {
     replay: async (id) => (await request(`${pathFor(id)}/replay`, { body: {} })).run,
     trace: (id) => request(`${pathFor(id)}/replay`),
     evaluate: async (id) => (await request(`${pathFor(id)}/evaluation`)).evaluation,
+    webhooks: async () => (await request('/webhooks')).webhooks,
+    registerWebhook: (body) => request('/webhooks', { body }),
+    revokeWebhook: (id) => request(`/webhooks/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   };
 }
 
