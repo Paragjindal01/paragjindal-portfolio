@@ -21,7 +21,7 @@ const applications = {
 function LabHero({ overview, project, slug, snapshot }) {
   const title = project?.name ?? (slug ? 'Application unavailable' : 'Engineering Lab');
   return <header className="labhero">
-    <div aria-hidden="true" className="labhero__art"><img alt="" decoding="async" fetchPriority="high" src={project?.art ?? '/assets/world/hall-01-poster.jpg'} /></div>
+    <div aria-hidden="true" className="labhero__art"><img alt="" decoding="async" fetchPriority="high" src={project?.art ?? '/assets/world/hall-01-poster.webp'} /></div>
     <div className="labhero__inner">
       <div className="labhero__crumb">
         <a href="/">Portfolio</a><i aria-hidden="true">/</i><a href="/lab">Engineering lab</a><i aria-hidden="true">/</i>

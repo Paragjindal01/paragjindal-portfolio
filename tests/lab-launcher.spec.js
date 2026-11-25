@@ -44,10 +44,13 @@ test('each lab hover preview loads the current app capture on both indexes', asy
     await page.goto(path);
     const rows = page.locator('.index__row');
     await expect(rows).toHaveCount(LAB_TOOLS.length);
+    await page.evaluate(() => document.fonts.ready);
     const preview = page.locator('.index__preview');
     const image = preview.locator('img');
     for (const tool of LAB_TOOLS) {
       const row = rows.filter({ has: page.locator('.index__name', { hasText: tool.name }) });
+      await page.mouse.move(0, 0);
+      await row.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
       await row.hover();
       await expect(preview).toHaveAttribute('data-on', 'true');
       await expect(image).toHaveAttribute('src', `/lab-previews/${tool.id}.webp`);

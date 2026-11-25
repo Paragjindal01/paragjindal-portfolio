@@ -441,8 +441,8 @@ export function ScrollScrub({
         segment.layer.style.zIndex = index === currentIndex ? "2" : "1";
 
         if (
-          y > segment.start - 1.5 * viewportHeight &&
-          y < segment.end + 1.5 * viewportHeight
+          y > segment.start - 0.6 * viewportHeight &&
+          y < segment.end + 0.6 * viewportHeight
         ) {
           void loadClip(segment);
         }

@@ -381,7 +381,7 @@ export default function HiggsfieldHome() {
               <div className="bento__cell bento__photo">
                 <img
                   alt="Concept art of a fictional server monolith lit in magenta and cyan"
-                  src="/assets/img/tower.jpg"
+                  src="/assets/img/tower.webp"
                   loading="lazy"
                   decoding="async"
                 />
@@ -442,7 +442,7 @@ export default function HiggsfieldHome() {
               <figure className="about__media">
                 <img
                   alt="Stylised character portrait of Parag in a neon server hall"
-                  src="/assets/img/engineer.jpg"
+                  src="/assets/img/engineer.webp"
                   loading="lazy"
                   decoding="async"
                 />
