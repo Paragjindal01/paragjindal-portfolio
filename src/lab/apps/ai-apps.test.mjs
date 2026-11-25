@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createSnapshot } from '../simulator.mjs';
 import {
-  chooseTool, decideHandoff, EXAMPLE_QUERIES, listOutlets, normalizeInventory, prepareHandoff, runTool, validateToolResult,
+  captureAnalysisContext, chooseTool, decideHandoff, EXAMPLE_QUERIES, filterActivity, listOutlets, normalizeInventory, prepareHandoff, runTool, validateToolResult,
 } from './infrapilot.mjs';
 import {
-  answerFromSources, buildIndex, chunkDocument, cosine, embed, evaluateRetrieval, SAMPLE_DOCUMENTS, SAMPLE_QUESTIONS, searchIndex,
+  answerFromSources, buildIndex, chunkDocument, compareRetrievalSettings, cosine, embed, evaluateRetrieval, SAMPLE_DOCUMENTS, SAMPLE_QUESTIONS, searchIndex,
 } from './localmind.mjs';
 
 test('the example infrastructure queries call schema-validated tools without state mutation', () => {
@@ -108,4 +108,40 @@ test('extractive answers preserve decimal measurements in complete sentences', (
   const query = 'What does a 1.5 kW load consume?';
   const result = answerFromSources(query, searchIndex(buildIndex(SAMPLE_DOCUMENTS), query));
   assert.ok(result.some(({ text }) => text.includes('A 1.5 kW load over four hours uses 6 kWh.')));
+});
+
+test('activity evidence captures the original synthetic frame and filters report-bearing events', () => {
+  const snapshot = createSnapshot({ scenario: 'critical', step: 3 });
+  const thresholds = { gpuC: 90, inletC: 30, outletPercent: 80 };
+  const context = captureAnalysisContext(snapshot, thresholds);
+  thresholds.gpuC = 100;
+  assert.deepEqual(context, {
+    simulatorSchemaVersion: snapshot.schemaVersion, scenario: 'critical', step: 3,
+    capturedTelemetryAt: snapshot.timestamp, thresholds: { gpuC: 90, inletC: 30, outletPercent: 80 },
+  });
+  const history = [
+    { id: 'query', context, result: runTool('gpu', snapshot) },
+    { id: 'approval', context, result: null },
+    { id: 'report', context: captureAnalysisContext(createSnapshot()), result: runTool('report', createSnapshot()) },
+  ];
+  assert.deepEqual(filterActivity(history, { scenario: 'critical', resultsOnly: true }).map(({ id }) => id), ['query']);
+  assert.deepEqual(filterActivity(history, { resultsOnly: true }).map(({ id }) => id), ['query', 'report']);
+  assert.throws(() => captureAnalysisContext({ ...snapshot, mode: 'live' }), /simulation frame/);
+});
+
+test('candidate index comparison evaluates the same queries and reports rank direction without modifying the active index', () => {
+  const active = { size: 70, overlap: 12 };
+  const candidate = { size: 120, overlap: 20 };
+  const index = buildIndex(SAMPLE_DOCUMENTS, active.size, active.overlap);
+  const report = compareRetrievalSettings(SAMPLE_DOCUMENTS, SAMPLE_QUESTIONS, index, active, candidate);
+  assert.equal(report.baseline.chunkCount, 9);
+  assert.equal(report.candidate.chunkCount, 5);
+  assert.equal(report.baseline.recall, 1);
+  assert.equal(report.candidate.meanReciprocalRank, 0.875);
+  assert.equal(index.chunks.length, 9);
+  assert.ok(report.cases.every(({ outcome }) => outcome === 'unchanged'));
+  assert.throws(() => compareRetrievalSettings(SAMPLE_DOCUMENTS, [null], index, active, candidate), /expected document/);
+  assert.throws(() => compareRetrievalSettings(SAMPLE_DOCUMENTS, SAMPLE_QUESTIONS, index, active, { size: 30, overlap: 30 }), /overlap/);
+  const distinct = compareRetrievalSettings(SAMPLE_DOCUMENTS, SAMPLE_QUESTIONS, index, active, { size: 30, overlap: 20 });
+  assert.deepEqual(distinct.cases.map(({ outcome }) => outcome), ['unchanged', 'unchanged', 'unchanged', 'improved']);
 });

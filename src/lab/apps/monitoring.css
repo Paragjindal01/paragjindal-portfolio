@@ -210,3 +210,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.ops-disclosure { margin-block: .65rem; }
+.ops-disclosure summary { color: #31583f; font-weight: 650; cursor: pointer; }
+.ops-disclosure[open] summary { margin-bottom: .45rem; }
+.ops-subline { display: block; color: #56645a; margin: .2rem 0 .45rem; }

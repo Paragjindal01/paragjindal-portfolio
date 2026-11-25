@@ -29,10 +29,12 @@ export function createPowerAdapter({ now = Date.now, rebootMs = 3000, approvalMs
     if (snapshot.mode !== 'simulation') throw new Error('A simulated snapshot is required.');
     if (role !== 'operator') throw new Error('Operator role is required.');
     if (!ACTIONS.has(action)) throw new Error('Unknown outlet action.');
-    const outlet = inspect(snapshot).flatMap((pdu) => pdu.outlets).find((item) => item.id === outletId);
+    const pdu = inspect(snapshot).find((item) => item.outlets.some((outlet) => outlet.id === outletId));
+    const outlet = pdu?.outlets.find((item) => item.id === outletId);
     if (!outlet) throw new Error('Outlet was not found.');
     if (outlet.state === 'rebooting') throw new Error('Wait for the current reboot to finish.');
     if (action === 'reboot' && outlet.state !== 'on') throw new Error('Turn the outlet on before rebooting.');
+    return { pdu, outlet };
   }
 
   return {
@@ -55,10 +57,16 @@ export function createPowerAdapter({ now = Date.now, rebootMs = 3000, approvalMs
       approvals.delete(id);
       if (now() >= request.expiresAt) throw new Error('Approval expired. Prepare the action again.');
       const { outletId, action } = request;
-      verify(snapshot, role, outletId, action);
+      const { pdu, outlet: before } = verify(snapshot, role, outletId, action);
       const timestamp = now();
-      overrides.set(outletId, { state: action === 'reboot' ? 'rebooting' : action, readyAt: timestamp + rebootMs });
-      const entry = { id, timestamp: new Date(timestamp).toISOString(), role, outletId, action, mode: 'simulation' };
+      const afterState = action === 'reboot' ? 'rebooting' : action;
+      overrides.set(outletId, { state: afterState, readyAt: timestamp + rebootMs });
+      const after = inspect(snapshot).find((item) => item.id === pdu.id).outlets.find((item) => item.id === outletId);
+      const entry = {
+        id, timestamp: new Date(timestamp).toISOString(), role, outletId, action, mode: 'simulation',
+        pduId: pdu.id, scenario: snapshot.scenario, step: snapshot.step,
+        beforeState: before.state, afterState: after.state, beforePowerW: before.powerW, afterPowerW: after.powerW,
+      };
       audit.push(entry);
       return { ...entry };
     },

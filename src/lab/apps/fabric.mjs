@@ -174,3 +174,33 @@ export function inspectTopology({ devices, links, vlans }) {
 
   return { issues, redundancy, bandwidthGbps: links.reduce((total, cable) => total + cable.speedGbps, 0) }
 }
+
+export function analyzeCableOutage(topology, cableId, baseline = inspectTopology(topology)) {
+  const cable = topology.links.find(({ id }) => id === cableId)
+  if (!cable) throw new RangeError('Choose a cable in this topology.')
+  const after = inspectTopology({ ...topology, links: topology.links.filter(({ id }) => id !== cableId) })
+  const reachableBefore = new Set(baseline.redundancy.filter(({ connected }) => connected).map(({ id }) => id))
+  return {
+    cableId,
+    fabric: cable.fabric,
+    removedBandwidthGbps: cable.speedGbps,
+    remainingBandwidthGbps: after.bandwidthGbps,
+    lostReachability: after.redundancy.filter(({ id, connected }) => !connected && reachableBefore.has(id))
+      .map(({ id, label }) => ({ id, label })),
+    alreadyIsolated: baseline.redundancy.filter(({ connected }) => !connected).map(({ id, label }) => ({ id, label })),
+  }
+}
+
+export function fabricDesignReport(topology, baseline, outage = null) {
+  return {
+    schemaVersion: 1,
+    topology,
+    validation: baseline,
+    outage,
+    assumptions: [
+      'Installed link rates are additive and do not measure end-to-end throughput.',
+      'Reachability requires a continuous fabric to a firewall or a switch when no firewall exists.',
+      'Cable removal is a topology exercise and does not simulate forwarding policies or protocols.',
+    ],
+  }
+}

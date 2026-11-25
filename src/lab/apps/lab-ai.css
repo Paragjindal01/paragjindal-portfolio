@@ -82,3 +82,16 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.lab-ai-evidence {
+  color: var(--muted);
+  font-size: .8rem;
+  overflow-wrap: anywhere;
+}
+
+.lab-ai-check {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: 36px;
+}

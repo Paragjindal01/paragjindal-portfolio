@@ -152,6 +152,13 @@ export default function PowerOps({ snapshot, scenario }) {
     downloadReport('powerops-' + scenario + '.csv', toCsv([header, ...entries]), 'text/csv;charset=utf-8');
   }
 
+  function exportAudit() {
+    const header = ['Confirmation ID', 'Time (UTC)', 'Scenario', 'Step', 'PDU', 'Outlet', 'Action', 'Role', 'State before', 'State after', 'Draw before W', 'Draw after W', 'Change W'];
+    const rows = [...audit].reverse().map((entry) => [entry.id, entry.timestamp, entry.scenario, entry.step, entry.pduId, entry.outletId,
+      actionNames[entry.action], entry.role, entry.beforeState, entry.afterState, entry.beforePowerW, entry.afterPowerW, entry.afterPowerW - entry.beforePowerW]);
+    downloadReport('powerops-session-audit.csv', toCsv([header, ...rows]), 'text/csv;charset=utf-8');
+  }
+
   const replayParams = new URLSearchParams({ incident: handoff.incident, scenario });
   if (snapshot.step) replayParams.set('step', String(snapshot.step));
   return <div className="ops-stack">
@@ -244,12 +251,15 @@ export default function PowerOps({ snapshot, scenario }) {
     </div>
     <section className="lab-panel">
       <h2>Audit history</h2>
-      <p>Confirmed actions are recorded for this simulated session.</p>
+      <p>Confirmed actions are recorded for this simulated session. The outcome reflects the outlet immediately after confirmation.</p>
+      {audit.length > 0 && <div className="lab-controls"><button type="button" onClick={exportAudit}>Export session audit CSV</button></div>}
       {audit.length > 0 && <div className="ops-overflow" tabIndex="0" role="region" aria-label="Audit history table">
         <table className="lab-table ops-table">
-          <thead><tr>{['Time (UTC)', 'Outlet', 'Action', 'Role'].map((label) => <th scope="col" key={label}>{label}</th>)}</tr></thead>
+          <thead><tr>{['Time (UTC)', 'Outlet', 'Action', 'Role', 'Scenario', 'State change', 'Draw change'].map((label) => <th scope="col" key={label}>{label}</th>)}</tr></thead>
           <tbody>{audit.map((entry) => <tr key={entry.id}>
             <td>{entry.timestamp}</td><td>{entry.outletId}</td><td>{actionNames[entry.action]}</td><td>{entry.role}</td>
+            <td>{entry.scenario} · step {entry.step}</td><td>{entry.beforeState} → {entry.afterState}</td>
+            <td>{entry.beforePowerW} → {entry.afterPowerW} W</td>
           </tr>)}</tbody>
         </table>
       </div>}

@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { filterEquipment, floorPositions, rackEquipment, rackUnitPosition } from './rack.mjs'
+import { filterEquipment, floorPositions, pduDependencies, rackAlerts, rackEquipment, rackSpace, rackUnitPosition } from './rack.mjs'
 import './visual-tools.css'
+import './monitoring.css'
 
 const kindLabels = { gpu: 'GPU server', compute: 'Compute server', management: 'Management server', storage: 'Storage node', switch: 'Network switch', pdu: 'Power distribution' }
 const statusLabels = { normal: 'Normal', online: 'Online', warning: 'Warning', critical: 'Critical', offline: 'Offline', recovery: 'Recovery' }
-const environmentMetrics = { ambientC: ['Ambient temperature', '°C'], humidityPercent: ['Relative humidity', '% RH'] }
+const environmentMetrics = { ambientC: ['Ambient temperature', '°C'], humidityPercent: ['Relative humidity', '% RH'], gpuTemperatureC: ['GPU temperature', '°C'] }
 const enumLabel = value => value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown'
 
 function EquipmentBadge({ status }) {
@@ -59,6 +60,23 @@ function RackModel({ rack, items, selected, select }) {
   </div>
 }
 
+function PowerDependencies({ item, snapshot }) {
+  const connected = pduDependencies(snapshot, item)
+  const guests = connected.reduce((total, record) => total + record.workloads.length, 0)
+  return <details className="ops-disclosure">
+    <summary>Power dependencies</summary>
+    <p>{connected.length} mapped devices · {guests} guest workloads. Review the equipment and guests that depend on this simulated PDU.</p>
+    <ul>
+      {connected.map(({ outlet, device, workloads }) => {
+        const params = new URLSearchParams({ scenario: snapshot.scenario, step: String(snapshot.step), outlet: outlet.id })
+        return <li key={outlet.id}><strong>{device.name}</strong> · {outlet.powerW} W · <a href={'/lab/powerops?' + params}>Open outlet {outlet.number} in PowerOps</a>
+          {workloads.length > 0 && <small className="ops-subline">Guests: {workloads.map((guest) => `${guest.name} (${guest.status})`).join(', ')}</small>}
+        </li>
+      })}
+    </ul>
+  </details>
+}
+
 function EquipmentDetails({ item, snapshot, select }) {
   if (!item) return <p>Select equipment in the rack model or inventory.</p>
   const pdu = snapshot.pdus.find(entry => entry.id === item.pduId)
@@ -90,6 +108,7 @@ function EquipmentDetails({ item, snapshot, select }) {
         })}</tbody>
       </table>
     </div>}
+    {item.outlets && <PowerDependencies item={item} snapshot={snapshot} />}
   </>
 }
 
@@ -110,8 +129,8 @@ export default function RackOps({ snapshot }) {
   const busyFilters = query.trim() || kind || status
   const inventory = filterEquipment(equipment, { query, kind, status, rackId: busyFilters ? '' : rack?.id })
   const layout = floorPositions(roomsRacks)
-  const labels = new Map([...snapshot.racks, ...equipment].map(item => [item.id, item.name]))
-  const alerts = snapshot.alerts.filter(item => item.assetId === rack?.id || rackItems.some(asset => asset.id === item.assetId))
+  const space = rack ? rackSpace(rack, rackItems) : null
+  const alerts = rack ? rackAlerts(snapshot, rack.id, rackItems) : []
   const environmental = alerts.filter(item => /temperature|humidity|ambient|thermal/i.test(item.metric))
 
   function selectEquipment(item) {
@@ -149,6 +168,9 @@ export default function RackOps({ snapshot }) {
         <h3>{rack.name} rack model</h3>
         <p>{rack.ambientC} °C · {rack.humidityPercent}% RH · {rack.capacityW} W capacity</p>
         <RackModel key={rack.id} rack={rack} items={rackItems} selected={assetId} select={selectEquipment} />
+        <details className="ops-disclosure"><summary>Rack space assessment</summary><p>{space.occupied}U occupied · {space.free}U free · {space.largestGap}U largest contiguous space.</p>
+          {space.gaps.length > 0 && <p>Free ranges: {space.gaps.map(({ start, end }) => start === end ? `U${start}` : `U${start}–U${end}`).join(', ')}.</p>}
+        </details>
       </section>
       <section className="lab-panel">
         <h3>Equipment information</h3>
@@ -158,7 +180,7 @@ export default function RackOps({ snapshot }) {
           {environmental.map((alert, index) => {
             const [metric, unit] = environmentMetrics[alert.metric] ?? [alert.metric, '']
             return <li key={`${alert.assetId}-${alert.metric}-${index}`}>
-              <EquipmentBadge status={alert.severity} /> {labels.get(alert.assetId) ?? alert.assetId} · {metric} recorded {alert.value} {unit} (threshold {alert.threshold} {unit}). {alert.recommendation}
+              <EquipmentBadge status={alert.severity} /> {alert.label} · {metric} recorded {alert.value} {unit} (threshold {alert.threshold} {unit}). {alert.recommendation}
             </li>
           })}
         </ul> : <p>No simulated environmental alerts for this rack.</p>}

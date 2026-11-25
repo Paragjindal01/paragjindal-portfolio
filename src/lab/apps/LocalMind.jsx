@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import {
   answerFromSources,
   buildIndex,
+  compareRetrievalSettings,
   DOCUMENT_CHAR_LIMIT,
   DOCUMENT_LIMIT,
   evaluateRetrieval,
@@ -12,6 +13,7 @@ import {
 } from './localmind.mjs';
 import { AiProvider } from './LabAiProvider.jsx';
 import { requestAi } from './lab-ai-client.mjs';
+import { downloadReport } from './monitoring.mjs';
 import './lab-ai.css';
 
 const INITIAL_QUESTION = SAMPLE_QUESTIONS[0].query;
@@ -129,7 +131,59 @@ function DocumentForm({ documents, setDocuments, resetExamples }) {
   );
 }
 
-function RetrievalEvaluation({ index, documents }) {
+function ChunkComparison({ documents, cases, index, settings }) {
+  const [size, setSize] = useState('120');
+  const [overlap, setOverlap] = useState('20');
+  const [comparison, setComparison] = useState(null);
+  const [error, setError] = useState('');
+  const report = comparison?.index === index && comparison?.cases === cases ? comparison.report : null;
+
+  function compare(event) {
+    event.preventDefault();
+    setError('');
+    try {
+      const result = compareRetrievalSettings(documents, cases, index, settings, { size: Number(size), overlap: Number(overlap) });
+      setComparison({ index, cases, report: result });
+    } catch (failure) {
+      setComparison(null);
+      setError(failure.message);
+    }
+  }
+
+  return <details className="lab-ai-output">
+    <summary>Compare chunk settings</summary>
+    <p>Run the same {cases.length} labeled {cases.length === 1 ? 'query' : 'queries'} against the active index and a candidate index. The active index stays in use.</p>
+    <form className="lab-ai-form" onSubmit={compare}>
+      <label>Candidate words per chunk <input type="number" min={30} max={300} value={size} onChange={(event) => setSize(event.target.value)} required /></label>
+      <label>Candidate overlap words <input type="number" min={0} max={75} value={overlap} onChange={(event) => setOverlap(event.target.value)} required /></label>
+      <button type="submit" disabled={!index}>Run index comparison</button>
+    </form>
+    {error && <p role="alert">{error}</p>}
+    {report && <div aria-live="polite">
+      <div className="lab-table-wrap">
+        <table className="lab-table">
+          <thead><tr><th>Index</th><th>Size / overlap</th><th>Chunks</th><th>Recall@3</th><th>Mean reciprocal rank</th></tr></thead>
+          <tbody>{[['Active', report.baseline], ['Candidate', report.candidate]].map(([label, summary]) => (
+            <tr key={label}><th scope="row">{label}</th><td>{summary.settings.size} / {summary.settings.overlap}</td>
+              <td>{summary.chunkCount}</td><td>{(summary.recall * 100).toFixed(1)}%</td><td>{summary.meanReciprocalRank.toFixed(3)}</td></tr>
+          ))}</tbody>
+        </table>
+      </div>
+      <div className="lab-table-wrap">
+        <table className="lab-table">
+          <thead><tr><th>Evaluation query</th><th>Active rank</th><th>Candidate rank</th><th>Outcome</th></tr></thead>
+          <tbody>{report.cases.map((item, position) => (
+            <tr key={position}><td>{item.query}</td><td>{item.baselineRank || 'Outside first three'}</td>
+              <td>{item.candidateRank || 'Outside first three'}</td><td>{item.outcome}</td></tr>
+          ))}</tbody>
+        </table>
+      </div>
+      <button type="button" onClick={() => downloadReport('localmind-retrieval-comparison.json', JSON.stringify(report, null, 2), 'application/json')}>Export comparison</button>
+    </div>}
+  </details>;
+}
+
+function RetrievalEvaluation({ index, documents, settings }) {
   const [query, setQuery] = useState('');
   const [expected, setExpected] = useState('');
   const [cases, setCases] = useState(null);
@@ -164,6 +218,7 @@ function RetrievalEvaluation({ index, documents }) {
           </table>
         </div>
       </>}
+      <ChunkComparison documents={documents} cases={cases ?? SAMPLE_QUESTIONS} index={index} settings={settings} />
     </section>
   );
 }
@@ -304,7 +359,7 @@ export default function LocalMind() {
             {settingsError && <p role="alert">{settingsError}</p>}
             <p aria-live="polite">Active settings: {settings.size} words per chunk, {settings.overlap} words of overlap.</p>
           </section>
-          <RetrievalEvaluation index={index} documents={documents} />
+          <RetrievalEvaluation index={index} documents={documents} settings={settings} />
         </div>
       </div>
     </div>

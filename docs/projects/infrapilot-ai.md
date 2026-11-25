@@ -1,10 +1,12 @@
 # InfraPilot AI
 
+[Conceptual cover artwork](../artwork/infrapilot-ai.webp)
+
 InfraPilot turns natural-language infrastructure questions into validated, read-only analytics over a fictional facility. Select the critical scenario to see related host, accelerator, thermal and power alerts in one report.
 
 [Open the engineering lab demo](https://paragjindal.com/lab/infrapilot-ai)
 
-![InfraPilot console showing a live simulation run](../../public/lab-screenshots/infrapilot-ai.webp)
+![InfraPilot activity history filtered to a recorded synthetic scenario](../../public/lab-screenshots/infrapilot-ai.webp)
 
 ## Run locally
 
@@ -33,6 +35,10 @@ flowchart LR
 
 The React UI executes plain JavaScript tool functions against the shared normal, warning, critical and recovery fixtures. The tool registry covers normalized inventory, server health, GPU temperature, rack environment, rack power, PDU and outlet utilization, incident classification, utilization comparison and compute headroom. A report combines tool outputs, deduplicates recommendations and can be reopened or exported as JSON. The report workflow reuses the same validation and analytics as interactive queries.
 
+### Traceable report evidence
+
+A saved result retains the simulator schema, scenario, step, telemetry timestamp, and configured thresholds. Reopening it shows the original evidence even after the scenario or thresholds change. The session history supports a scenario filter and a results-only view. The JSON activity export includes the active filters and recorded tool results. The incident recorder remains available for an ordered replay with the telemetry and review events captured during the incident.
+
 The handoff validates the target outlet and operation, records a five-minute request and requires explicit approval under the simulated operator role. The link selects the outlet in PowerOps. PowerOps has its own role, action confirmation and audit history.
 
 ## Optional local model
@@ -51,3 +57,7 @@ To enable an external OpenAI-compatible provider, configure all three server-sid
 ## Incident replay
 
 [Record and replay a simulated incident](incident-replay.md), including scenario transitions, full telemetry checkpoints, recommendations and approval decisions.
+
+## Verification
+
+The browser check runs reports in two scenarios, reopens the critical result, and verifies that both JSON exports retain the original step and thresholds. These browser checks passed in Chromium, Firefox, and WebKit.

@@ -78,3 +78,42 @@ export function calculateStorage(plan) {
     }
   })
 }
+
+export const MAX_PLANNING_TARGET_TB = 250_000_000
+const MAX_INSTALLED_NODES = PLAN_FIELDS.find(([field]) => field === 'nodes')[3]
+
+export function planResilientCapacity(plan, results, targetTB = null) {
+  if (targetTB !== null && (!Number.isFinite(targetTB) || targetTB < 0 || targetTB > MAX_PLANNING_TARGET_TB)) {
+    throw new RangeError('Capacity target must be 0–250,000,000 TB.')
+  }
+  return results.map((result, index) => {
+    const target = targetTB ?? result.current.planningTB ?? 0
+    const columns = result.current.requiredDomains
+    const payload = index === 0 ? 1 : plan.data
+    const canPlaceTarget = (nodes) => {
+      const planningTB = capacity(nodes, plan, columns, payload).planningTB
+      return planningTB !== null && planningTB >= target
+    }
+    let left = columns
+    let right = MAX_INSTALLED_NODES - plan.failed
+    let minimumNodes = null
+    if (right >= left && canPlaceTarget(right)) {
+      while (left < right) {
+        const mid = Math.floor((left + right) / 2)
+        if (canPlaceTarget(mid)) right = mid
+        else left = mid + 1
+      }
+      minimumNodes = left + plan.failed
+    }
+    return {
+      label: result.label,
+      targetTB: target,
+      targetTiB: tbToTib(target),
+      modeledFailedNodes: plan.failed,
+      minimumInstalledNodes: minimumNodes,
+      additionalNodes: minimumNodes === null ? null : Math.max(0, minimumNodes - plan.nodes),
+      meetsTargetAfterLoss: result.failed.planningTB !== null && result.failed.planningTB >= target,
+      targetWithinModel: minimumNodes !== null,
+    }
+  })
+}

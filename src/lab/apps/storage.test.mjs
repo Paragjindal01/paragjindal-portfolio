@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { calculateStorage, DEFAULT_PLAN, tbToTib } from './storage.mjs'
+import { calculateStorage, DEFAULT_PLAN, planResilientCapacity, tbToTib } from './storage.mjs'
 
 test('replication and erasure coding use their distinct overhead ratios', () => {
   const [replicated, encoded] = calculateStorage(DEFAULT_PLAN)
@@ -35,4 +35,20 @@ test('invalid inputs and impossible failures are rejected', () => {
   for (const changes of [{ nodes: 1.5 }, { failed: 9 }, { reserve: 100 }, { drives: 0 }, { driveTB: Infinity }, { data: NaN }]) {
     assert.throws(() => calculateStorage({ ...DEFAULT_PLAN, ...changes }), RangeError)
   }
+})
+
+test('resilience sizing identifies the minimum placement and capacity needed after loss', () => {
+  const plan = { ...DEFAULT_PLAN }
+  const results = calculateStorage(plan)
+  assert.deepEqual(planResilientCapacity(plan, results).map(({ minimumInstalledNodes }) => minimumInstalledNodes), [9, 9])
+  const [replicated, encoded] = planResilientCapacity(plan, results, 500)
+  assert.equal(replicated.minimumInstalledNodes, 11)
+  assert.equal(replicated.additionalNodes, 3)
+  assert.equal(replicated.meetsTargetAfterLoss, false)
+  assert.equal(encoded.minimumInstalledNodes, 7)
+  assert.equal(encoded.additionalNodes, 0)
+  assert.equal(encoded.meetsTargetAfterLoss, true)
+  assert.equal(planResilientCapacity(plan, results, 0)[1].minimumInstalledNodes, 7)
+  assert.equal(planResilientCapacity(plan, results, 250_000_000)[0].minimumInstalledNodes, null)
+  assert.throws(() => planResilientCapacity(plan, results, -1), /target/)
 })

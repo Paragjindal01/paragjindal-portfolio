@@ -42,3 +42,25 @@ export function historicalSeries(samples, metric, filters = {}) {
     return { timestamp: snapshot.timestamp, value };
   });
 }
+
+export function warningExposure(samples, filters = {}) {
+  const rows = new Map();
+  samples.forEach((snapshot, index) => {
+    for (const { server, gpu, warnings } of gpuRows(snapshot, filters)) {
+      const record = rows.get(gpu.id) ?? { serverId: server.id, serverName: server.name, gpuId: gpu.id, observations: 0, warningSamples: 0, longestStreak: 0, currentStreak: 0, latestWarningIndex: -2, lastWarningAt: null, peakTemperatureC: gpu.temperatureC, counts: {} };
+      record.observations += 1;
+      record.peakTemperatureC = Math.max(record.peakTemperatureC, gpu.temperatureC);
+      if (warnings.length) {
+        record.warningSamples += 1;
+        record.currentStreak = record.latestWarningIndex === index - 1 ? record.currentStreak + 1 : 1;
+        record.longestStreak = Math.max(record.longestStreak, record.currentStreak);
+        record.latestWarningIndex = index;
+        record.lastWarningAt = snapshot.timestamp;
+        for (const warning of warnings) record.counts[warning] = (record.counts[warning] ?? 0) + 1;
+      }
+      rows.set(gpu.id, record);
+    }
+  });
+  return [...rows.values()].sort((left, right) => right.warningSamples - left.warningSamples || right.peakTemperatureC - left.peakTemperatureC || left.gpuId.localeCompare(right.gpuId))
+    .map(({ currentStreak: _currentStreak, latestWarningIndex: _latestWarningIndex, ...row }) => row);
+}

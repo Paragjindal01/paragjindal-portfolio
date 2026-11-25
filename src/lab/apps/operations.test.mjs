@@ -3,10 +3,10 @@ import test from 'node:test';
 import { createSnapshot, history } from '../simulator.mjs';
 import { parseGpuMetrics } from '../../../tools/gpuwatch-nvml.mjs';
 import { collectProxmoxInventory } from '../../../tools/proxmox-inventory.mjs';
-import { gpuRows, historicalSeries } from './gpuwatch.mjs';
+import { gpuRows, historicalSeries, warningExposure } from './gpuwatch.mjs';
 import { scenarioWindow, toCsv } from './monitoring.mjs';
 import { createPowerAdapter, historicalEnergy, loadStatus, phaseBalance } from './powerops.mjs';
-import { compareInventory, filterInventory, inventoryFromSnapshot } from './virtscan.mjs';
+import { baselineReference, compareInventory, filterInventory, inventoryFromSnapshot, restoreBaseline } from './virtscan.mjs';
 
 test('GPU warnings, filters and the modeled overheating scenario', () => {
   const normal = gpuRows(createSnapshot({ scenario: 'normal' }));
@@ -143,4 +143,47 @@ test('Proxmox adapter uses one allowlisted read-only route and sanitizes output'
   assert.doesNotMatch(JSON.stringify(report), /unused|nested/);
   await assert.rejects(collectProxmoxInventory({ ...env, PROXMOX_URL: 'http://pve.example.invalid' }), /HTTPS origin/);
   await assert.rejects(collectProxmoxInventory({ ...env, PROXMOX_URL: 'https://user@pve.example.invalid' }), /HTTPS origin/);
+});
+
+
+test('GPU warning exposure counts coincident reasons and resets streak across a clean sample', () => {
+  const samples = [84, 88, 72, 84].map((temperatureC, step) => {
+    const snapshot = createSnapshot({ step });
+    const server = snapshot.servers[0];
+    server.cpuPercent = step === 1 ? 95 : 50;
+    server.gpus[0].temperatureC = temperatureC;
+    return snapshot;
+  });
+  const [row] = warningExposure(samples, { serverId: 'SIM-S01', gpuId: 'SIM-S01-GPU1' });
+  assert.equal(row.warningSamples, 3);
+  assert.equal(row.observations, 4);
+  assert.equal(row.longestStreak, 2);
+  assert.equal(row.lastWarningAt, samples[3].timestamp);
+  assert.equal(row.peakTemperatureC, 88);
+  assert.deepEqual(row.counts, { 'GPU temperature': 3, 'CPU utilization': 1 });
+});
+
+test('PowerOps records immediate confirmed outcome and the synthetic clock', () => {
+  const adapter = createPowerAdapter({ now: () => 0 });
+  const snapshot = createSnapshot({ scenario: 'critical', step: 12 });
+  const pdu = snapshot.pdus[1];
+  const outlet = pdu.outlets[0];
+  const approval = adapter.prepare(snapshot, { outletId: outlet.id, action: 'off', role: 'operator' });
+  const entry = adapter.confirm(snapshot, { id: approval.id, role: 'operator' });
+  assert.deepEqual(entry, {
+    id: approval.id, timestamp: '1970-01-01T00:00:00.000Z', role: 'operator', outletId: outlet.id, action: 'off', mode: 'simulation',
+    pduId: pdu.id, scenario: 'critical', step: 12, beforeState: 'on', afterState: 'off', beforePowerW: outlet.powerW, afterPowerW: 0,
+  });
+  assert.deepEqual(adapter.history(), [entry]);
+});
+
+test('VirtScan restores a versioned synthetic baseline without storing inventory records', () => {
+  const baseline = inventoryFromSnapshot(createSnapshot({ scenario: 'normal', step: 12 }));
+  const reference = baselineReference(baseline);
+  assert.deepEqual(reference, { version: 1, schemaVersion: 2, scenario: 'normal', step: 12 });
+  assert.deepEqual(restoreBaseline(JSON.stringify(reference)), baseline);
+  for (const invalid of [{ ...reference, version: 7 }, { ...reference, schemaVersion: 7 }, { ...reference, scenario: 'live' }, { ...reference, step: -5 }]) {
+    assert.equal(restoreBaseline(JSON.stringify(invalid)), null);
+  }
+  assert.equal(restoreBaseline('{incomplete'), null);
 });

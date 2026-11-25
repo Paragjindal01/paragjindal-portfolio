@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { DEVICE_TYPES, FABRICS, GRAPH_HEIGHT, GRAPH_WIDTH, exampleTopology, inspectTopology, parseTopology } from './fabric.mjs'
+import { useMemo, useRef, useState } from 'react'
+import { analyzeCableOutage, DEVICE_TYPES, FABRICS, GRAPH_HEIGHT, GRAPH_WIDTH, exampleTopology, fabricDesignReport, inspectTopology, parseTopology } from './fabric.mjs'
 import './visual-tools.css'
 
 const typeLabels = { firewall: 'Firewall', switch: 'Switch', server: 'Server', storage: 'Storage' }
@@ -19,7 +19,7 @@ const nextId = (items, prefix) => {
   return `${prefix}-${suffix}`
 }
 
-function TopologyCanvas({ topology, selected, setSelected, onMove, onAdd }) {
+function TopologyCanvas({ topology, selected, setSelected, onMove, onAdd, failedCable }) {
   const canvas = useRef(null)
   const drag = useRef(null)
   const points = new Map(topology.devices.map(item => [item.id, item]))
@@ -42,7 +42,7 @@ function TopologyCanvas({ topology, selected, setSelected, onMove, onAdd }) {
       {topology.links.map(cable => {
         const from = points.get(cable.from)
         const to = points.get(cable.to)
-        return <line key={cable.id} x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+        return <line key={cable.id} x1={from.x} y1={from.y} x2={to.x} y2={to.y} opacity={failedCable === cable.id ? 0.23 : undefined}
           className={cable.fabric === 'InfiniBand' ? 'fabric-link-ib' : 'fabric-link-eth'} />
       })}
     </svg>
@@ -107,7 +107,11 @@ export default function FabricLab() {
   const [cableDraft, setCableDraft] = useState(null)
   const [vlanDraft, setVlanDraft] = useState(null)
   const [error, setError] = useState('')
-  const report = inspectTopology(topology)
+  const [failedCable, setFailedCable] = useState('')
+  const report = useMemo(() => inspectTopology(topology), [topology])
+  const activeFailure = topology.links.find(({ id }) => id === failedCable)?.id || ''
+  const outage = useMemo(() => activeFailure ? analyzeCableOutage(topology, activeFailure, report) : null,
+    [topology, activeFailure, report])
   const selectedNode = topology.devices.find(item => item.id === selected)
   const labels = new Map(topology.devices.map(item => [item.id, item.label]))
 
@@ -117,6 +121,7 @@ export default function FabricLab() {
     setCableDraft(null)
     setVlanDraft(null)
     setError('')
+    setFailedCable('')
   }
 
   function update(candidate) {
@@ -157,11 +162,11 @@ export default function FabricLab() {
     }
   }
 
-  function exportTopology() {
-    const url = URL.createObjectURL(new Blob([JSON.stringify(topology, null, 2)], { type: 'application/json' }))
+  function exportJson(filename, payload) {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }))
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = 'fabriclab-topology.json'
+    anchor.download = filename
     anchor.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
@@ -200,7 +205,7 @@ export default function FabricLab() {
       <div className="visual-actions">
         {FABRICS.map(fabric => <button type="button" key={fabric} onClick={() => reset(exampleTopology(fabric))}>Load {fabric} example</button>)}
         <button type="button" onClick={() => reset({ version: 1, devices: [], links: [], vlans: [] })}>Blank topology</button>
-        <button type="button" onClick={exportTopology}>Export topology JSON</button>
+        <button type="button" onClick={() => exportJson('fabriclab-topology.json', topology)}>Export topology JSON</button>
         <label className="fabric-file">Import topology JSON<input type="file" accept=".json,application/json" onChange={importFile} /></label>
       </div>
       {error && <p className="visual-error" role="alert">{error}</p>}
@@ -297,5 +302,21 @@ export default function FabricLab() {
         </ul> : <p>Add a server or storage device to check cable redundancy.</p>}
       </section>
     </div>
+    <section className="lab-panel" aria-labelledby="fabric-outage">
+      <h3 id="fabric-outage">Cable outage drill</h3>
+      <p>Preview the loss of a single cable while keeping the saved topology intact. Already isolated endpoints are reported separately.</p>
+      <div className="visual-actions">
+        <label>Simulated failed cable <select value={activeFailure} onChange={event => setFailedCable(event.target.value)}>
+          <option value="">No failure selected</option>
+          {topology.links.map(cable => <option value={cable.id} key={cable.id}>{cable.id} · {labels.get(cable.from)} to {labels.get(cable.to)}</option>)}
+        </select></label>
+        <button type="button" onClick={() => exportJson('fabriclab-design-report.json', fabricDesignReport(topology, report, outage))}>Export design report</button>
+      </div>
+      {outage && <div aria-live="polite">
+        <p><strong>{outage.cableId}</strong> disabled in the drill · {outage.removedBandwidthGbps} Gbps removed · {Number(outage.remainingBandwidthGbps.toFixed(2))} Gbps remaining installed link capacity.</p>
+        <p>{outage.lostReachability.length ? 'Newly isolated: ' + outage.lostReachability.map(({ label }) => label).join(', ') : 'No additional endpoints lose their path to core.'}</p>
+        {outage.alreadyIsolated.length > 0 && <p>Already isolated: {outage.alreadyIsolated.map(({ label }) => label).join(', ')}.</p>}
+      </div>}
+    </section>
   </div>
 }

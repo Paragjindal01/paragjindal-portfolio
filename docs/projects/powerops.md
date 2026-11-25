@@ -1,12 +1,14 @@
 # PowerOps
 
+[Conceptual cover artwork](../artwork/powerops.webp)
+
 PowerOps is a portfolio MVP for inspecting rack power and controlling simulated outlets. An outlet map connects equipment to labeled branch phases and ratings. Reports show instantaneous watts, kilowatts and modeled energy.
 
 ![PowerOps displaying the PDU inventory and outlet map in the browser](../../public/lab-screenshots/powerops.webp)
 
 ## Run and try
 
-From the repository root, run `npm ci` and `npm run dev`, then open `http://localhost:5173/lab/powerops`. Select **Critical** to investigate the loaded PDU. Pick an outlet, choose the **Operator** demo role, and request an off or reboot action. Confirm in the dialog and check the audit history. A simulated reboot lasts three seconds.
+From the repository root, run `npm ci` and `npm run dev`, then open `http://localhost:5173/lab/powerops`. Select **Critical** to investigate the loaded PDU. Pick an outlet, choose the **Operator** demo role, and request an off or reboot action. Confirm in the dialog and check the audit history. A simulated reboot lasts three seconds. **Export session audit CSV** records confirmed actions in chronological order with the scenario, simulator step, and outlet state and draw before and immediately after confirmation. Reboot recovery remains separate from that immediate measurement.
 
 Open **Simulate phase balancing** to compare current loads with a proposed assignment. The comparison greedily assigns the largest active loads to the least-loaded phase and preserves the total load. The plan is advisory. **Export power CSV** produces outlet and PDU readings with their warning threshold.
 

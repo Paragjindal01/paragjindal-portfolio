@@ -1,3 +1,5 @@
+import { createSnapshot } from '../simulator.mjs';
+
 export const inventoryTypes = ['host', 'vm', 'container'];
 
 export function inventoryFromSnapshot(snapshot) {
@@ -25,7 +27,7 @@ export function inventoryFromSnapshot(snapshot) {
     storageGiB: workload.storageGiB,
     interfaces: [{ name: 'virt-net0', ip: workload.ip, mac: workload.mac }],
   }));
-  return { mode: 'simulation', timestamp: snapshot.timestamp, scenario: snapshot.scenario, assets: [...hosts, ...workloads] };
+  return { mode: 'simulation', schemaVersion: snapshot.schemaVersion, step: snapshot.step, timestamp: snapshot.timestamp, scenario: snapshot.scenario, assets: [...hosts, ...workloads] };
 }
 
 export function compareInventory(previous, current) {
@@ -58,4 +60,20 @@ export function filterInventory(assets, { query = '', type = '', status = '' } =
     const searchable = [asset.id, asset.name, asset.location, asset.os, ...asset.interfaces.flatMap((item) => [item.name, item.ip, item.mac])];
     return searchable.some((value) => String(value ?? '').toLowerCase().includes(term));
   });
+}
+
+
+export function baselineReference(inventory) {
+  return { version: 1, schemaVersion: inventory.schemaVersion, scenario: inventory.scenario, step: inventory.step };
+}
+
+export function restoreBaseline(serialized) {
+  try {
+    const reference = JSON.parse(serialized);
+    if (reference?.version !== 1 || typeof reference.scenario !== 'string' || !Number.isSafeInteger(reference.step)) return null;
+    const snapshot = createSnapshot(reference);
+    return snapshot.schemaVersion === reference.schemaVersion ? inventoryFromSnapshot(snapshot) : null;
+  } catch {
+    return null;
+  }
 }

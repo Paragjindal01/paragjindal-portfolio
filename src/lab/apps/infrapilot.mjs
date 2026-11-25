@@ -33,6 +33,26 @@ export function validateThresholds(thresholds) {
   return thresholds;
 }
 
+export function captureAnalysisContext(snapshot, thresholds = THRESHOLDS) {
+  if (snapshot?.mode !== 'simulation' || !Number.isSafeInteger(snapshot.schemaVersion) ||
+      !Number.isSafeInteger(snapshot.step) || snapshot.step < 0 || typeof snapshot.scenario !== 'string' ||
+      !Number.isFinite(Date.parse(snapshot.timestamp))) {
+    throw new Error('A compatible simulation frame is required.');
+  }
+  const { gpuC, inletC, outletPercent } = validateThresholds(thresholds);
+  return {
+    simulatorSchemaVersion: snapshot.schemaVersion,
+    scenario: snapshot.scenario,
+    step: snapshot.step,
+    capturedTelemetryAt: snapshot.timestamp,
+    thresholds: { gpuC, inletC, outletPercent },
+  };
+}
+
+export function filterActivity(history, { scenario = '', resultsOnly = false } = {}) {
+  return history.filter((item) => (!scenario || item.context.scenario === scenario) && (!resultsOnly || item.result));
+}
+
 export function normalizeInventory(snapshot) {
   return snapshot.servers.map((server) => ({
     assetId: server.id,

@@ -1,10 +1,12 @@
 # LocalMind
 
+[Conceptual cover artwork](../artwork/localmind.webp)
+
 LocalMind is a private, in-browser document assistant with semantic passage search, question answering, source citations and retrieval evaluation. The sample library contains original fictional infrastructure runbooks.
 
 [Open the engineering lab demo](https://paragjindal.com/lab/localmind)
 
-![LocalMind showing a grounded answer and ranked document sources](../../public/lab-screenshots/localmind.webp)
+![LocalMind comparing active and candidate retrieval settings](../../public/lab-screenshots/localmind.webp)
 
 ## Run locally
 
@@ -33,6 +35,12 @@ flowchart LR
 
 The React application extracts text from an inert HTML template or reads plain TXT and Markdown, splits words into configurable overlapping chunks and builds normalized sparse vectors in browser memory. Term weighting, adjacent word pairs and an infrastructure vocabulary map make related operational language searchable. Cosine ranking filters weak candidates. Extractive answering ranks relevant sentences from the returned passages and cites their chunk IDs. The evaluation pane compares expected documents to the top three results and reports recall and mean reciprocal rank. With the default corpus and chunk settings, the bundled four-question evaluation reaches 100% recall@3 and 0.875 mean reciprocal rank.
 
+### Candidate index comparison
+
+Expand **Compare chunk settings** to benchmark a candidate index on the same corpus and labeled queries. The comparison shows chunk counts, recall@3, mean reciprocal rank, and per-query rank changes. The ephemeral candidate never replaces the active index. A JSON export includes settings and rank results, without document contents.
+
+On the bundled four-query suite, changing from 70 words with 12 words of overlap to 120 words with 20 words of overlap reduces the chunk count from 9 to 5, with 100% recall@3 and 0.875 mean reciprocal rank on both. The screenshot uses a 30-word candidate with 20 words of overlap. It indexes 38 chunks and improves mean reciprocal rank to 1.000. These measurements apply to the sample corpus and queries.
+
 ## Optional local model
 
 Start Ollama on the same machine and install a model, such as `ollama pull qwen2.5:3b`. Copy `tools/lab-ai.env.example` to `tools/lab-ai.env.local`. Start the adapter with `node --env-file=tools/lab-ai.env.local tools/lab-ai.mjs`. In a separate terminal run `VITE_LAB_AI_ENDPOINT=http://127.0.0.1:8765 npm run dev` and select Local Ollama on the configured localhost origin.
@@ -45,3 +53,7 @@ For an external OpenAI-compatible service, supply all three external variables i
 - The lightweight vocabulary works best for English infrastructure text. The four-query evaluation is a smoke test. PDF extraction, dense neural embeddings and durable multi-user libraries are outside this MVP.
 - The default public mode makes no model requests. The optional loopback adapter constrains the frontend origin and applies body limits. Browser document content and generated model answers render as text. Citation validation checks reference IDs; readers can open each passage to verify the claim.
 - Automated tests use mocked provider responses. Live model inference remains unverified because this environment has no Ollama installation or configured external provider. Use fictional or otherwise authorized material in the public demo.
+
+## Verification
+
+The domain test verifies metrics, per-query rank changes, and malformed settings. The browser check runs the candidate and verifies the comparison export while the active index keeps its settings. These browser checks passed in Chromium, Firefox, and WebKit.

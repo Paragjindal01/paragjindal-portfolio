@@ -21,7 +21,7 @@ flowchart LR
   F --> G[Local JSON output]
 ```
 
-React and Vite run the public demo. The shared JavaScript simulation provides fixture records. Snapshot comparison reports additions, removals and changed fields by stable asset ID. It compares inventory and lifecycle state and excludes utilization samples.
+React and Vite run the public demo. The shared JavaScript simulation provides fixture records. Snapshot comparison reports additions, removals and changed fields by stable asset ID. **Pin current inventory** keeps a versioned synthetic scenario and step reference in this browser. Reopening the app reconstructs the baseline, and **Export baseline diff CSV** reports drift from the pinned inventory to the synchronized view. It compares inventory and lifecycle state and excludes utilization samples.
 
 ## Optional Proxmox inventory
 

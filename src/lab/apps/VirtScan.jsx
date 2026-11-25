@@ -1,13 +1,30 @@
 import { useState } from 'react';
-import { compareInventory, filterInventory, inventoryFromSnapshot, inventoryTypes } from './virtscan.mjs';
+import { baselineReference, compareInventory, filterInventory, inventoryFromSnapshot, inventoryTypes, restoreBaseline } from './virtscan.mjs';
 import { downloadReport, toCsv } from './monitoring.mjs';
 import './monitoring.css';
 
 const typeLabels = { host: 'Host', vm: 'VM', container: 'Container' };
+const baselineStorageKey = 'virtscan-baseline-v1';
+
+function loadBaseline() {
+  try { return restoreBaseline(window.localStorage.getItem(baselineStorageKey)); }
+  catch { return null; }
+}
+
+function ChangeTable({ changes, label }) {
+  return <div className="ops-overflow" tabIndex="0" role="region" aria-label={label}>
+    <table className="lab-table ops-table">
+      <thead><tr>{['Asset', 'Change', 'Details'].map((heading) => <th scope="col" key={heading}>{heading}</th>)}</tr></thead>
+      <tbody>{changes.map((change) => <tr key={change.id}><th scope="row">{change.name}</th><td>{change.type}</td><td>{change.detail}</td></tr>)}</tbody>
+    </table>
+  </div>;
+}
 
 export default function VirtScan({ snapshot }) {
   const [inventory, setInventory] = useState(() => inventoryFromSnapshot(snapshot));
   const [changes, setChanges] = useState(null);
+  const [baseline, setBaseline] = useState(loadBaseline);
+  const [baselineMessage, setBaselineMessage] = useState('');
   const [query, setQuery] = useState('');
   const [type, setType] = useState('');
   const [status, setStatus] = useState('');
@@ -15,6 +32,7 @@ export default function VirtScan({ snapshot }) {
   const visible = filterInventory(inventory.assets, { query, type, status });
   const selected = visible.find((asset) => asset.id === assetId) ?? visible[0];
   const statuses = [...new Set(inventory.assets.map((asset) => asset.status))];
+  const baselineChanges = baseline ? compareInventory(baseline, inventory) : [];
   const counts = Object.fromEntries(inventoryTypes.map((item) => [item, inventory.assets.filter((asset) => asset.type === item).length]));
 
   function sync() {
@@ -22,6 +40,32 @@ export default function VirtScan({ snapshot }) {
     setChanges(compareInventory(inventory, updated));
     setInventory(updated);
     if (!updated.assets.some((asset) => asset.status === status)) setStatus('');
+  }
+
+  function pinBaseline() {
+    try {
+      window.localStorage.setItem(baselineStorageKey, JSON.stringify(baselineReference(inventory)));
+      setBaselineMessage('Baseline pinned on this browser.');
+    } catch {
+      setBaselineMessage('Browser storage is unavailable. Baseline pinned for this visit.');
+    }
+    setBaseline(inventory);
+  }
+
+  function clearBaseline() {
+    try {
+      window.localStorage.removeItem(baselineStorageKey);
+      setBaseline(null);
+      setBaselineMessage('Baseline cleared.');
+    } catch {
+      setBaselineMessage('Browser storage is unavailable. The saved baseline could not be cleared.');
+    }
+  }
+
+  function exportBaseline() {
+    const header = ['Baseline scenario', 'Baseline step', 'Current scenario', 'Current step', 'Asset ID', 'Name', 'Change', 'Details'];
+    const rows = baselineChanges.map(({ id, name, type: change, detail }) => [baseline.scenario, baseline.step, inventory.scenario, inventory.step, id, name, change, detail]);
+    downloadReport('virtscan-baseline-diff.csv', toCsv([header, ...rows]), 'text/csv;charset=utf-8');
   }
 
   function exportJson() {
@@ -98,14 +142,19 @@ export default function VirtScan({ snapshot }) {
     </div>
     {changes?.length > 0 && <section className="lab-panel">
       <h2>Snapshot changes</h2>
-      <div className="ops-overflow" tabIndex="0" role="region" aria-label="Snapshot changes table">
-        <table className="lab-table ops-table">
-          <thead><tr>{['Asset', 'Change', 'Details'].map((label) => <th scope="col" key={label}>{label}</th>)}</tr></thead>
-          <tbody>{changes.map((change) => <tr key={change.id}>
-            <th scope="row">{change.name}</th><td>{change.type}</td><td>{change.detail}</td>
-          </tr>)}</tbody>
-        </table>
-      </div>
+      <ChangeTable changes={changes} label="Snapshot changes table" />
     </section>}
+    <section className="lab-panel" aria-labelledby="virtscan-baseline">
+      <h2 id="virtscan-baseline">Inventory baseline</h2>
+      <p>Pin a synchronized synthetic snapshot to compare it with later inventories. The baseline reference stays in this browser.</p>
+      <div className="lab-controls"><button type="button" onClick={pinBaseline}>{baseline ? 'Replace baseline' : 'Pin current inventory'}</button>
+        {baseline && <><button type="button" onClick={clearBaseline}>Clear baseline</button>
+          <button type="button" disabled={!baselineChanges.length} onClick={exportBaseline}>Export baseline diff CSV</button></>}
+      </div>
+      {baselineMessage && <p role="status">{baselineMessage}</p>}
+      {baseline && <p>Baseline {baseline.scenario} · step {baseline.step} → synchronized {inventory.scenario} · step {inventory.step}.</p>}
+      {baselineChanges.length > 0 && <ChangeTable changes={baselineChanges} label="Baseline difference table" />}
+      {baseline && baselineChanges.length === 0 && <p>No changes from the pinned baseline.</p>}
+    </section>
   </div>;
 }

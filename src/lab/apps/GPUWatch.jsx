@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { chartMetrics, gpuRows, gpuThresholds, historicalSeries } from './gpuwatch.mjs';
+import { chartMetrics, gpuRows, gpuThresholds, historicalSeries, warningExposure } from './gpuwatch.mjs';
 import { decimal, downloadReport, scenarioWindow, toCsv } from './monitoring.mjs';
 import './monitoring.css';
 
@@ -69,6 +69,29 @@ function TelemetryChart({ series, metric, currentTimestamp }) {
   </section>;
 }
 
+function ThresholdExposure({ samples, filters }) {
+  const exposure = warningExposure(samples, filters);
+  const affected = exposure.filter(({ warningSamples }) => warningSamples > 0);
+  const displayTime = (timestamp) => timestamp ? readingTime(timestamp) + ' UTC' : '—';
+  return <section className="lab-panel">
+    <h2>Threshold exposure</h2>
+    <p>{affected.length} of {exposure.length} GPUs recorded a warning in this {samples.length}-sample scenario window. Consecutive warnings count observations at 15-minute intervals.</p>
+    <details className="ops-disclosure">
+      <summary>View per-GPU warning history</summary>
+      <div className="ops-overflow" tabIndex="0" role="region" aria-label="GPU warning exposure table">
+        <table className="lab-table ops-table">
+          <thead><tr>{['GPU', 'Warning samples', 'Longest streak', 'Peak temperature', 'Last warning', 'Warnings by type'].map((label) => <th scope="col" key={label}>{label}</th>)}</tr></thead>
+          <tbody>{exposure.map((item) => <tr key={item.gpuId}>
+            <th scope="row">{item.gpuId}<small>{item.serverName}</small></th>
+            <td>{item.warningSamples} / {item.observations}</td><td>{item.longestStreak}</td><td>{decimal(item.peakTemperatureC, 1)} °C</td><td>{displayTime(item.lastWarningAt)}</td>
+            <td>{Object.entries(item.counts).map(([name, count]) => `${name} (${count})`).join(', ') || 'None'}</td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+    </details>
+  </section>;
+}
+
 export default function GPUWatch({ snapshot, scenario }) {
   const [serverId, setServerId] = useState('');
   const [gpuId, setGpuId] = useState('');
@@ -80,7 +103,8 @@ export default function GPUWatch({ snapshot, scenario }) {
   const warnings = rows.filter((row) => row.warnings.length > 0).length;
   const unhealthyServers = new Set(rows.filter(({ server }) => server.status !== 'online').map(({ server }) => server.id)).size;
   const latestTemperature = rows.length ? Math.max(...rows.map(({ gpu }) => gpu.temperatureC)) : 0;
-  const series = historicalSeries(scenarioWindow(snapshot), metric, { serverId, gpuId });
+  const samples = scenarioWindow(snapshot);
+  const series = historicalSeries(samples, metric, { serverId, gpuId });
 
   function exportReport() {
     const header = ['Timestamp (UTC)', 'Scenario', 'Server', 'Status', 'GPU', 'GPU %', 'VRAM used GiB', 'VRAM total GiB', 'GPU °C', 'GPU W', 'CPU %', 'System RAM used GiB', 'System RAM total GiB', 'Server W', 'Warnings'];
@@ -118,6 +142,7 @@ export default function GPUWatch({ snapshot, scenario }) {
       </div>
     </section>
     <TelemetryChart series={series} metric={metric} currentTimestamp={snapshot.timestamp} />
+    <ThresholdExposure samples={samples} filters={{ serverId, gpuId, thresholds }} />
     <section className="lab-panel">
       <h2>Equipment telemetry</h2>
       <div className="ops-overflow" tabIndex="0" role="region" aria-label="Equipment telemetry table">

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { calculateStorage, DEFAULT_PLAN, PLAN_FIELDS } from './storage.mjs'
+import { calculateStorage, DEFAULT_PLAN, MAX_PLANNING_TARGET_TB, PLAN_FIELDS, planResilientCapacity } from './storage.mjs'
 import './visual-tools.css'
 
 const quantity = new Intl.NumberFormat('en-CA', { maximumFractionDigits: 2 })
@@ -31,7 +31,7 @@ function CapacityChart({ results }) {
   </figure>
 }
 
-function download(plan, results) {
+function download(plan, results, resilience) {
   const report = {
     model: 'Uniform storage nodes with one distinct host per shard',
     assumptions: [
@@ -41,6 +41,7 @@ function download(plan, results) {
     ],
     plan,
     results,
+    resilience,
   }
   const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' }))
   const anchor = document.createElement('a')
@@ -52,11 +53,14 @@ function download(plan, results) {
 
 export default function StorageCalc() {
   const [plan, setPlan] = useState(DEFAULT_PLAN)
+  const [target, setTarget] = useState('')
   const values = Object.fromEntries(Object.entries(plan).map(([key, value]) => [key, planNumber(value)]))
   let results
   let error
+  let resilience
   try {
     results = calculateStorage(values)
+    resilience = planResilientCapacity(values, results, target === '' ? null : Number(target))
   } catch (exception) {
     error = exception.message
   }
@@ -74,13 +78,34 @@ export default function StorageCalc() {
         ))}
       </div>
       <div className="visual-actions">
-        <button type="button" onClick={() => results && download(values, results)} disabled={!results}>Export calculation report</button>
-        <button type="button" onClick={() => setPlan(DEFAULT_PLAN)}>Reset sample plan</button>
+        <button type="button" onClick={() => resilience && download(values, results, resilience)} disabled={!resilience}>Export calculation report</button>
+        <button type="button" onClick={() => { setPlan(DEFAULT_PLAN); setTarget('') }}>Reset sample plan</button>
       </div>
       {error && <p className="visual-error" role="alert">{error}</p>}
     </section>
     {results && <>
       <CapacityChart results={results} />
+      <section className="lab-panel" aria-labelledby="storage-resilience">
+        <h3 id="storage-resilience">Capacity target after node loss</h3>
+        <p>Estimate the number of installed hosts needed to preserve a planning target after the configured node losses, while retaining enough failure domains for full placement.</p>
+        <div className="visual-actions">
+          <label>Target planning capacity (TB)
+            <input type="number" min="0" max={MAX_PLANNING_TARGET_TB} step="any" inputMode="decimal" value={target}
+              onChange={event => setTarget(event.target.value)} placeholder="Current capacity by layout" />
+          </label>
+        </div>
+        {resilience && <div className="visual-table-wrap">
+          <table className="lab-table">
+            <thead><tr><th scope="col">Protection</th><th scope="col">Target TB / TiB</th><th scope="col">Minimum installed hosts</th><th scope="col">Additional hosts</th><th scope="col">Current plan after loss</th></tr></thead>
+            <tbody>{resilience.map(row => <tr key={row.label}>
+              <th scope="row">{row.label}</th><td>{format(row.targetTB)} / {format(row.targetTiB)}</td>
+              <td>{row.minimumInstalledNodes ?? 'Beyond 500 hosts'}</td><td>{row.additionalNodes ?? 'Unavailable'}</td>
+              <td>{row.meetsTargetAfterLoss ? 'Meets target' : 'Below target or insufficient domains'}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>}
+        <p>Blank target retains the current planning capacity of each layout. This sizing calculation assumes uniform nodes and full replacement placement, and does not forecast service availability.</p>
+      </section>
       <section className="lab-panel">
         <h3>Failure domains and expansion</h3>
         <p>Each host is a distinct failure domain. Drive count and capacity are uniform. The planning target subtracts capacity reservation, then applies operating headroom.</p>

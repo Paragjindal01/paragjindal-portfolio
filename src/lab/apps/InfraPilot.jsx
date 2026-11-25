@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  chooseTool, decideHandoff, EXAMPLE_QUERIES, listOutlets, prepareHandoff, runTool, THRESHOLDS, validateThresholds,
+  captureAnalysisContext, chooseTool, decideHandoff, EXAMPLE_QUERIES, filterActivity, listOutlets, prepareHandoff, runTool, THRESHOLDS, validateThresholds,
 } from './infrapilot.mjs';
 import { AiProvider } from './LabAiProvider.jsx';
 import { requestAi } from './lab-ai-client.mjs';
 import IncidentReplay from '../replay/IncidentReplay.jsx';
 import { useIncidentRecording } from '../replay/useIncidentRecording.js';
+import { downloadReport } from './monitoring.mjs';
 import './lab-ai.css';
 
 const INITIAL_QUERY = EXAMPLE_QUERIES[0];
@@ -109,13 +110,19 @@ export default function InfraPilot({ snapshot }) {
   const [schedule, setSchedule] = useState(0);
   const [lastScheduled, setLastScheduled] = useState(null);
   const [history, setHistory] = useState([]);
+  const [historyScenario, setHistoryScenario] = useState('');
+  const [resultsOnly, setResultsOnly] = useState(false);
   const recording = useIncidentRecording(snapshot);
   const { capture } = recording;
 
-  const record = useCallback((actor, text, result = null) => {
-    const item = { id: crypto.randomUUID(), time: nowMs(), actor, text, result };
+  const context = useMemo(() => captureAnalysisContext(snapshot, thresholds), [snapshot, thresholds]);
+  const visibleHistory = filterActivity(history, { scenario: historyScenario, resultsOnly });
+  const scenarios = [...new Set(history.map((item) => item.context.scenario))].sort();
+
+  const record = useCallback((actor, text, result = null, evidence = context) => {
+    const item = { id: crypto.randomUUID(), time: nowMs(), actor, text, result, context: evidence };
     setHistory((prior) => [item, ...prior].slice(0, 40));
-  }, []);
+  }, [context]);
 
   useEffect(() => {
     if (!schedule) return undefined;
@@ -133,7 +140,7 @@ export default function InfraPilot({ snapshot }) {
     return () => window.clearInterval(timer);
   }, [schedule, snapshot, thresholds, record, capture]);
 
-  const display = execution || { question: INITIAL_QUERY, result: runTool('health', snapshot, thresholds), scenario: snapshot.scenario };
+  const display = execution || { question: INITIAL_QUERY, result: runTool('health', snapshot, thresholds), context };
 
   async function submit(event) {
     event.preventDefault();
@@ -144,7 +151,7 @@ export default function InfraPilot({ snapshot }) {
     try {
       const tool = chooseTool(query);
       const result = runTool(tool, snapshot, thresholds);
-      const nextExecution = { question: query.trim(), result, scenario: snapshot.scenario };
+      const nextExecution = { question: query.trim(), result, context };
       setExecution(nextExecution);
       record('Query', query.trim(), result);
       void capture('analysis.completed', { trigger: 'operator query', thresholds, result });
@@ -176,26 +183,31 @@ export default function InfraPilot({ snapshot }) {
       setThresholds(next);
       setThresholdError('');
       void capture('thresholds.changed', { previous: thresholds, next });
-      record('Thresholds updated', next.gpuC + ' °C GPU · ' + next.inletC + ' °C inlet · ' + next.outletPercent + '% outlet');
+      record('Thresholds updated', next.gpuC + ' °C GPU · ' + next.inletC + ' °C inlet · ' + next.outletPercent + '% outlet',
+        null, captureAnalysisContext(snapshot, next));
     } catch (failure) {
       setThresholdError(failure.message);
     }
   }
 
   function openReport(item) {
-    setExecution({ question: item.actor, result: item.result, scenario: item.scenario || 'Recorded snapshot' });
+    setExecution({ question: item.text, result: item.result, context: item.context });
     setGenerated(null);
     setError('');
     setModelError('');
   }
 
-  function exportReport(result) {
-    const url = URL.createObjectURL(new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'infrapilot-' + result.tool + '.json';
-    link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  function exportReport({ result, context }) {
+    downloadReport('infrapilot-' + result.tool + '.json', JSON.stringify({ ...result, evidence: context }, null, 2), 'application/json');
+  }
+
+  function exportHistory() {
+    downloadReport('infrapilot-activity.json', JSON.stringify({
+      schemaVersion: 1,
+      mode: 'simulation',
+      filters: { scenario: historyScenario || null, resultsOnly },
+      activities: visibleHistory,
+    }, null, 2), 'application/json');
   }
 
   return (
@@ -223,8 +235,9 @@ export default function InfraPilot({ snapshot }) {
           <div className="lab-controls">
             <span className="lab-badge">Rule-based analytics</span>
             <span className={'lab-badge ' + display.result.severity}>{display.result.severity}</span>
-            <span className="lab-badge">{display.scenario}</span>
+            <span className="lab-badge">{display.context.scenario} · step {display.context.step}</span>
           </div>
+          <p className="lab-ai-evidence">Telemetry {display.context.capturedTelemetryAt} · GPU {display.context.thresholds.gpuC} °C · Inlet {display.context.thresholds.inletC} °C · Outlet {display.context.thresholds.outletPercent}%</p>
           <h3>{display.result.title}</h3>
           <p>{display.result.summary}</p>
           {display.result.rows.length ? <div className="lab-table-wrap">
@@ -243,7 +256,7 @@ export default function InfraPilot({ snapshot }) {
             <h3>{generated.answer.provider === 'ollama' ? 'Ollama summary' : 'External model summary'}</h3>
             <p>{generated.answer.text}</p>
           </>}
-          <button type="button" onClick={() => exportReport(display.result)}>Export results as JSON</button>
+          <button type="button" onClick={() => exportReport(display)}>Export results as JSON</button>
         </div>
       </section>
 
@@ -262,7 +275,7 @@ export default function InfraPilot({ snapshot }) {
             </select></label>
             <button type="button" onClick={() => {
               const result = runTool('report', snapshot, thresholds);
-              setExecution({ question: 'Manual report workflow', result, scenario: snapshot.scenario });
+              setExecution({ question: 'Manual report workflow', result, context });
               setGenerated(null);
               record('Manual report', result.summary, result);
               void capture('analysis.completed', { trigger: 'manual report', thresholds, result });
@@ -291,15 +304,26 @@ export default function InfraPilot({ snapshot }) {
 
       <section className="lab-panel" aria-labelledby="infrapilot-history">
         <h2 id="infrapilot-history">Activity and execution history</h2>
-        {history.length ? <div className="lab-table-wrap">
-          <table className="lab-table">
-            <thead><tr><th>Time</th><th>Event</th><th>Detail</th><th>Result</th></tr></thead>
-            <tbody>{history.map((item) => (
-              <tr key={item.id}><td>{formatTime(item.time)}</td><td>{item.actor}</td><td>{item.text}</td>
-                <td>{item.result && <button type="button" onClick={() => openReport(item)}>View result</button>}</td></tr>
-            ))}</tbody>
-          </table>
-        </div> : <p>Run a query or workflow to start the session history.</p>}
+        {history.length ? <>
+          <div className="lab-controls">
+            <label>Activity scenario <select value={historyScenario} onChange={(event) => setHistoryScenario(event.target.value)}>
+              <option value="">All scenarios</option>
+              {scenarios.map((scenario) => <option key={scenario}>{scenario}</option>)}
+            </select></label>
+            <label className="lab-ai-check"><input type="checkbox" checked={resultsOnly} onChange={(event) => setResultsOnly(event.target.checked)} /> Results only</label>
+            <button type="button" disabled={!visibleHistory.length} onClick={exportHistory}>Export filtered activity</button>
+          </div>
+          {visibleHistory.length ? <div className="lab-table-wrap">
+            <table className="lab-table">
+              <thead><tr><th>Time</th><th>Event</th><th>Scenario and step</th><th>Detail</th><th>Result</th></tr></thead>
+              <tbody>{visibleHistory.map((item) => (
+                <tr key={item.id}><td>{formatTime(item.time)}</td><td>{item.actor}</td>
+                  <td>{item.context.scenario} · step {item.context.step}</td><td>{item.text}</td>
+                  <td>{item.result && <button type="button" onClick={() => openReport(item)}>View result</button>}</td></tr>
+              ))}</tbody>
+            </table>
+          </div> : <p>No activity matches these filters.</p>}
+        </> : <p>Run a query or workflow to start the session history.</p>}
       </section>
     </div>
   );

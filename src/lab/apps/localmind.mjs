@@ -225,3 +225,36 @@ export function evaluateRetrieval(index, cases, limit = 3) {
     meanReciprocalRank: results.length ? results.reduce((sum, { rank }) => sum + (rank ? 1 / rank : 0), 0) / results.length : 0,
   };
 }
+
+export function compareRetrievalSettings(documents, cases, baselineIndex, baselineSettings, candidateSettings) {
+  if (!Array.isArray(cases) || cases.length < 1 || cases.length > 100 || cases.some((entry) =>
+    typeof entry?.query !== 'string' || !entry.query.trim() || entry.query.length > 500 || typeof entry.documentId !== 'string' || !entry.documentId)) {
+    throw new Error('Provide 1–100 queries with expected document IDs.');
+  }
+  const candidateIndex = buildIndex(documents, candidateSettings.size, candidateSettings.overlap);
+  const baseline = evaluateRetrieval(baselineIndex, cases);
+  const candidate = evaluateRetrieval(candidateIndex, cases);
+  const summary = ({ recall, meanReciprocalRank }, index, settings) => ({
+    settings: { ...settings },
+    chunkCount: index.chunks.length,
+    recall,
+    meanReciprocalRank,
+  });
+  return {
+    schemaVersion: 1,
+    mode: 'offline',
+    documentCount: documents.length,
+    cutoff: 3,
+    baseline: summary(baseline, baselineIndex, baselineSettings),
+    candidate: summary(candidate, candidateIndex, candidateSettings),
+    cases: baseline.results.map(({ query, documentId, rank }, index) => {
+      const candidateRank = candidate.results[index].rank;
+      const baselinePosition = rank || Infinity;
+      const candidatePosition = candidateRank || Infinity;
+      return {
+        query, documentId, baselineRank: rank, candidateRank,
+        outcome: candidatePosition === baselinePosition ? 'unchanged' : candidatePosition < baselinePosition ? 'improved' : 'regressed',
+      };
+    }),
+  };
+}

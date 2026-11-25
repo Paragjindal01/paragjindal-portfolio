@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { exampleTopology, inspectTopology, parseTopology } from './fabric.mjs'
+import { analyzeCableOutage, fabricDesignReport, exampleTopology, inspectTopology, parseTopology } from './fabric.mjs'
 
 test('both presets round-trip with redundant endpoints and calculated cable capacity', () => {
   for (const [fabric, capacity] of [['Ethernet', 300], ['InfiniBand', 800]]) {
@@ -47,4 +47,20 @@ test('reachability excludes intermediate endpoints and incompatible fabrics', ()
   topology.links = topology.links.filter(cable => ['cable-1', 'cable-5'].includes(cable.id))
   topology.links[0].fabric = 'InfiniBand'
   assert.ok(inspectTopology(topology).redundancy.every(item => !item.connected))
+})
+
+test('outage drills preserve the topology and report new losses separately from baseline gaps', () => {
+  const topology = exampleTopology()
+  assert.deepEqual(analyzeCableOutage(topology, 'cable-5').lostReachability, [])
+  const design = { ...topology, links: topology.links.filter(({ id }) => id !== 'cable-5') }
+  design.devices = [...design.devices, { id: 'isolated', kind: 'storage', label: 'Isolated node', x: 300, y: 200 }]
+  const before = structuredClone(design)
+  const baseline = inspectTopology(design)
+  const outage = analyzeCableOutage(design, 'cable-2', baseline)
+  assert.equal(outage.remainingBandwidthGbps, 175)
+  assert.deepEqual(outage.lostReachability.map(({ id }) => id), ['server-1'])
+  assert.deepEqual(outage.alreadyIsolated.map(({ id }) => id), ['isolated'])
+  assert.deepEqual(design, before)
+  assert.equal(fabricDesignReport(design, baseline, outage).validation.bandwidthGbps, 200)
+  assert.throws(() => analyzeCableOutage(design, 'unknown'), /Choose a cable/)
 })
