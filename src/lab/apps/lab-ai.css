@@ -1,0 +1,84 @@
+.lab-ai-stack {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.lab-ai-columns {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.lab-ai-form {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.lab-ai-form > label,
+.lab-ai-form > label > input,
+.lab-ai-form > label > textarea {
+  width: 100%;
+}
+
+.lab-ai-form > label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.lab-ai-form textarea {
+  color: inherit;
+  font: inherit;
+  padding: 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 0.35rem;
+  background: transparent;
+  resize: vertical;
+}
+
+.lab-ai-output {
+  margin-top: 1rem;
+  border-top: 1px solid #a1aca2;
+  padding-top: 0.75rem;
+}
+
+.lab-ai-output li,
+.lab-ai-sources li {
+  margin: 0.65rem 0;
+}
+
+.lab-ai-sources details {
+  padding: 0.45rem 0;
+}
+
+.lab-ai-sources summary {
+  cursor: pointer;
+}
+
+.lab-ai-sources blockquote {
+  margin: 0.4rem 0 0;
+  border-left: 2px solid #6f8878;
+  padding-left: 0.8rem;
+}
+
+.lab-ai-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin: 0.75rem 0;
+}
+
+.lab-ai-query {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.lab-ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 760px) {
+  .lab-ai-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
