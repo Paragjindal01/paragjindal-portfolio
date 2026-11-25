@@ -1,0 +1,17 @@
+{
+  "name": "@paragjindal01/infra-simulation",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic synthetic infrastructure snapshots for the Alder Research Facility engineering lab",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "files": ["src", "test", "CHANGELOG.md", "README.md"]
+}

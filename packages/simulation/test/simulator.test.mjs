@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { analyze, createSnapshot, history, SCENARIOS } from './simulator.mjs';
+import { analyze, createSnapshot, history, SCENARIOS } from '../src/index.mjs';
 
 test('snapshots are deterministic, with 15-minute intervals and no shared mutable records', () => {
   const first = createSnapshot({ scenario: 'warning', step: 6 });

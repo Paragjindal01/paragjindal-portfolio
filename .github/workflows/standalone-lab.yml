@@ -1,0 +1,104 @@
+name: Verify and release standalone engineering apps
+on:
+  push:
+    paths:
+      - '.github/workflows/standalone-lab.yml'
+      - 'src/lab/**'
+      - 'src/data/**'
+      - 'src/engineering.css'
+      - 'packages/**'
+      - 'tools/**'
+      - 'docs/projects/**'
+      - 'docs/artwork/**'
+      - 'public/lab-screenshots/**'
+      - 'package*.json'
+  pull_request:
+    paths:
+      - '.github/workflows/standalone-lab.yml'
+      - 'src/lab/**'
+      - 'src/data/**'
+      - 'src/engineering.css'
+      - 'packages/**'
+      - 'tools/**'
+      - 'docs/projects/**'
+      - 'docs/artwork/**'
+      - 'public/lab-screenshots/**'
+      - 'package*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standalone-lab-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify:standalone
+      - uses: actions/upload-artifact@v6
+        with:
+          name: standalone-lab-release
+          path: test-output/standalone/release/
+          if-no-files-found: error
+
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'Paragjindal01/paragjindal-portfolio'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v6
+        with:
+          name: standalone-lab-release
+          path: ${{ runner.temp }}/standalone-lab-release
+      - name: Publish verified version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ASSET_DIR: ${{ runner.temp }}/standalone-lab-release
+        run: |
+          set -euo pipefail
+          test "$(gh repo view --json nameWithOwner --jq '.nameWithOwner')" = 'Paragjindal01/paragjindal-portfolio'
+          tag="$(node -p 'require(process.argv[1]).tag' "$ASSET_DIR/manifest.json")"
+          [[ "$tag" =~ ^standalone-lab-v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$(node -p 'require(process.argv[1]).sourceCommit' "$ASSET_DIR/verification.json")" = "$GITHUB_SHA"
+          (cd "$ASSET_DIR" && sha256sum --check SHA256SUMS)
+
+          if gh release view "$tag" --json isDraft,assets > "$RUNNER_TEMP/existing-release.json" 2>/dev/null; then
+            node --input-type=module - "$RUNNER_TEMP/existing-release.json" "$ASSET_DIR/manifest.json" <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const [current, manifest] = process.argv.slice(2).map((file) => JSON.parse(readFileSync(file, 'utf8')));
+          assert.equal(current.isDraft, false, 'An existing draft needs inspection before reusing this release tag.');
+          const assets = new Set(current.assets.map(({ name }) => name));
+          for (const name of [manifest.shared.archive, ...manifest.projects.map(({ archive }) => archive), 'SHA256SUMS', 'manifest.json', 'verification.json']) {
+            assert.ok(assets.has(name), 'Existing release is missing ' + name);
+          }
+          NODE
+            echo "$tag is already published. No release assets changed."
+            exit 0
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "Refusing to reuse tag $tag without a verified release."
+            exit 1
+          else
+            code=$?
+            test "$code" -eq 2
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" \
+            --title "Standalone Engineering Lab ${tag#standalone-lab-}" \
+            --notes-file "$ASSET_DIR/RELEASE-NOTES.md" --latest=false \
+            "$ASSET_DIR"/*.tgz "$ASSET_DIR/SHA256SUMS" "$ASSET_DIR/manifest.json" "$ASSET_DIR/verification.json"
