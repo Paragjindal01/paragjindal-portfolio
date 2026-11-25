@@ -36,7 +36,7 @@ export default function HeroSection() {
   const outroOpacity = useTransform(smoothProgress, [0.75, 0.9, 0.95], [0, 1, 0]);
   const outroY = useTransform(smoothProgress, [0.75, 0.9, 0.95], [40, 0, -40]);
 
-  const subtitleWords = 'I build modern websites, AI-powered applications, and backend systems—and help individuals and small businesses solve everyday computer, device, Wi-Fi, and home technology problems.'.split(' ');
+  const subtitleWords = 'I build AI-powered software, infrastructure automation, backend systems and independent engineering demonstrations for GPU computing, data centre operations and observability.'.split(' ');
 
   return (
     <section ref={sectionRef} id="home" className="relative" style={{ minHeight: '220vh' }}>
@@ -67,7 +67,7 @@ export default function HeroSection() {
               >
                 <span className="glass-badge">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-blue)] animate-pulse" />
-                  Kelowna, BC · Remote across Canada
+                  Ottawa, Ontario · Canada
                 </span>
               </motion.div>
 
@@ -87,7 +87,7 @@ export default function HeroSection() {
                 transition={{ delay: 0.4, duration: 0.6 }}
                 className="text-lg sm:text-xl font-medium text-[var(--color-text-secondary)] mb-6"
               >
-                AI Product Engineer, Full-Stack Developer &amp; Technical Support Specialist
+                AI &amp; Information Systems Specialist · Software Developer
               </motion.h2>
 
               {/* Word-by-word subtitle */}

@@ -55,7 +55,7 @@ const services = [
     title: 'Computer & Software Support',
     description:
       'Help with slow computers, software installation, operating-system issues, account setup, updates, backups, malware concerns, device configuration, and general troubleshooting.',
-    availability: 'Kelowna and surrounding areas',
+    availability: 'Contact for availability',
     icon: (
       <svg {...iconProps}>
         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -66,7 +66,7 @@ const services = [
     title: 'Wi-Fi & Home Network Support',
     description:
       'Wi-Fi troubleshooting, router setup, connectivity problems, printer connections, device configuration, network optimization, and help connecting home technology.',
-    availability: 'Kelowna and surrounding areas',
+    availability: 'Contact for availability',
     icon: (
       <svg {...iconProps}>
         <path d="M5 12.55a11 11 0 0 1 14.08 0" />
@@ -80,7 +80,7 @@ const services = [
     title: 'Smart Devices & Home Technology',
     description:
       'Setup and troubleshooting for televisions, printers, streaming devices, smart-home equipment, mobile devices, peripherals, and connected technology.',
-    availability: 'Kelowna and surrounding areas',
+    availability: 'Contact for availability',
     icon: (
       <svg {...iconProps}>
         <path d="M3 9.5 12 3l9 6.5" />

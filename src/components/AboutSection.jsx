@@ -19,6 +19,11 @@ const skills = [
   'RAG',
   'Technical Support',
   'Networking',
+  'Proxmox',
+  'GPU infrastructure',
+  'DCIM',
+  'PDU telemetry',
+  'AI automation',
 ];
 
 const skillVariants = {
@@ -73,10 +78,10 @@ export default function AboutSection() {
               I&apos;m <span className="text-[var(--color-text-primary)] font-semibold">Parag Jindal</span>, a
               Computer Information Systems graduate (Software Development Specialization,{' '}
               <span className="text-[var(--color-accent-cyan)] font-medium">Okanagan College</span>) based in
-              Kelowna, British Columbia.
+              Ottawa, Ontario.
             </p>
             <p className="text-[var(--color-text-secondary)] leading-relaxed text-base">
-              I work as an <span className="text-[var(--color-text-primary)] font-semibold">AI Product Engineer</span>,
+              I work as an <span className="text-[var(--color-text-primary)] font-semibold">AI &amp; Information Systems Specialist</span>,
               developing AI products, backend services, workflow automations, and secure internal tools. I also have
               hands-on experience supporting customers with computers, printers, Wi-Fi networks, smart-home devices,
               televisions, software, and other technology.

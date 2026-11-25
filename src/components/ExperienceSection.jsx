@@ -3,16 +3,16 @@ import SectionWrapper from './SectionWrapper';
 
 const experiences = [
   {
-    role: 'AI Product Engineer',
+    role: 'AI & Information Systems Specialist',
     company: 'AltaAI Inc. — Ottawa, Ontario / Remote',
-    period: 'May 2026 – Present',
+    period: 'Sep 2026 – Present',
     description:
-      'Developing AI products, backend services, internal automations, retrieval-augmented generation systems, secure API integrations, and business workflow tools.',
+      'Developing AI-powered applications, infrastructure inventory and visualization tools, secure API integrations and workflow automation; contributing to GPU infrastructure deployment planning, networking and storage design.',
   },
   {
     role: 'Field Service Agent',
     company: 'Best Buy / Geek Squad — Kelowna, British Columbia',
-    period: 'Apr 2026 – Present',
+    period: 'Apr 2026 – Sep 2026',
     description:
       'Providing in-home and in-store technical support for computers, printers, televisions, smart-home devices, mobile devices, peripherals, software, and Wi-Fi networks.',
   },

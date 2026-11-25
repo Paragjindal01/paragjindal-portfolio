@@ -173,7 +173,7 @@ export default function ContactSection() {
               Reach Out Directly
             </h3>
             <p className="text-[var(--color-text-secondary)] leading-relaxed mb-8">
-              Based in Kelowna, BC — available for local technical support and remote development
+              Based in Ottawa, Ontario — available for local technical support and remote development
               work across Canada.
             </p>
 
@@ -310,7 +310,7 @@ export default function ContactSection() {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  placeholder="Kelowna, BC"
+                  placeholder="Ottawa, ON"
                   className="form-input"
                   aria-invalid={!!errors.location}
                   required

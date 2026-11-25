@@ -39,6 +39,7 @@ export default function ProjectCard({ project, index, featured = false }) {
             `Project ${String(index + 1).padStart(2, '0')}`
           )}
         </span>
+        {project.status && <span className="glass-badge normal-case tracking-normal text-[10px]">{project.status}</span>}
         {project.liveUrl && (
           <span className="glass-badge normal-case tracking-normal text-[10px]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

@@ -32,6 +32,112 @@ const projects = [
   },
 ];
 
+const infrastructureProjects = [
+  {
+    "title": "RackOps — Data centre digital twin",
+    "description": "Interactive rack inventory, equipment visualization and environmental monitoring.",
+    "tags": [
+      "React",
+      "Three.js",
+      "FastAPI",
+      "PostgreSQL"
+    ],
+    "status": "Planned"
+  },
+  {
+    "title": "GPUWatch — GPU observability",
+    "description": "GPU utilization, temperature, VRAM and power telemetry. Synthetic GPU metrics already exist in the shared lab.",
+    "tags": [
+      "Python",
+      "NVML",
+      "Prometheus",
+      "Grafana"
+    ],
+    "status": "Lab foundation"
+  },
+  {
+    "title": "PowerOps — Intelligent power management",
+    "description": "PDU outlet telemetry, rack power budgets and simulated switching. Synthetic outlet readings already exist in the shared lab.",
+    "tags": [
+      "Python",
+      "SNMP",
+      "FastAPI",
+      "React"
+    ],
+    "status": "Lab foundation"
+  },
+  {
+    "title": "InfraPilot AI — Infrastructure automation",
+    "description": "Planned AI-assisted inventory analysis, incident summaries and operational recommendations. The shared lab currently provides deterministic rule-based reports, not an LLM agent.",
+    "tags": [
+      "Python",
+      "Tool calling",
+      "FastAPI",
+      "Ollama"
+    ],
+    "status": "Lab foundation"
+  },
+  {
+    "title": "FabricLab — Network architecture",
+    "description": "Network topology, port mapping, VLAN planning and redundancy validation.",
+    "tags": [
+      "Next.js",
+      "TypeScript",
+      "React Flow"
+    ],
+    "status": "Planned"
+  },
+  {
+    "title": "VirtScan — Infrastructure discovery",
+    "description": "Read-only discovery of virtual machines, containers and server resources.",
+    "tags": [
+      "Python",
+      "Proxmox API",
+      "Docker"
+    ],
+    "status": "Planned"
+  },
+  {
+    "title": "StorageCalc — Distributed storage planning",
+    "description": "Replication, usable storage capacity and failure scenario planning.",
+    "tags": [
+      "Python",
+      "TypeScript",
+      "Ceph concepts"
+    ],
+    "status": "Planned"
+  },
+  {
+    "title": "LocalMind — Private AI knowledge platform",
+    "description": "Local document processing, semantic retrieval, citations and retrieval evaluation.",
+    "tags": [
+      "Ollama",
+      "ChromaDB",
+      "FastAPI",
+      "React"
+    ],
+    "status": "Planned"
+  }
+];
+const labPrototype = {
+  "title": "Infrastructure Lab — Server & PDU Simulator",
+  "status": "Working prototype",
+  "description": "An independent deterministic simulator with synthetic server inventory, GPU and CPU telemetry, PDU outlet measurements, power totals and read-only rule-based health reports.",
+  "tags": [
+    "JavaScript",
+    "Node.js",
+    "Telemetry",
+    "Unit tests"
+  ],
+  "repoUrl": "https://github.com/Paragjindal01/Paragjindal01/tree/main/labs/infra-sim",
+  "details": [
+    "Three fictional racks, six servers and three PDUs",
+    "Deterministic synthetic telemetry and thermal warning scenarios",
+    "Power reconciliation and automated invariant tests",
+    "No production connections or real hardware control"
+  ]
+};
+
 const containerVariants = {
   hidden: {},
   visible: {
@@ -54,6 +160,17 @@ export default function ProjectsSection() {
         </p>
       </div>
 
+      <div className="max-w-7xl mx-auto mb-16 space-y-6">
+        <h3 className="text-2xl font-bold">Independent infrastructure engineering lab</h3>
+        <p className="text-[var(--color-text-secondary)] max-w-3xl">Original personal projects using fictional environments and public documentation. Planned capabilities are not represented as completed products. No proprietary employer code, real customer data or production infrastructure configurations are included.</p>
+        <motion.div initial="visible" animate="visible"><ProjectCard project={labPrototype} index={0} featured /></motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {infrastructureProjects.map((project, i) => (
+            <motion.div key={project.title} initial="visible" animate="visible"><ProjectCard project={project} index={i + 1} /></motion.div>
+          ))}
+        </div>
+        <h3 className="text-2xl font-bold pt-8">Selected software projects</h3>
+      </div>
       <motion.div
         variants={containerVariants}
         initial="hidden"
