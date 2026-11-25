@@ -220,3 +220,10 @@
   .lab-ai-form > label:has(> select) { overflow: clip; overflow-clip-margin: 4px; }
   .lab-ai-form select { max-width: 100%; text-overflow: ellipsis; }
 }
+
+.relay-feature { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: clamp(1.4rem, 5vw, 4rem); }
+.relay-feature-detail { margin-top: .8rem; color: var(--muted); font-size: .9rem; }
+.relay-feature .site-hero-actions { margin-bottom: 0; }
+.relay-feature-preview { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
+.relay-feature-preview img { width: 100%; height: auto; }
+@media (max-width: 720px) { .relay-feature { grid-template-columns: minmax(0, 1fr); } }

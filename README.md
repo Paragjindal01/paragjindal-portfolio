@@ -15,6 +15,10 @@ Eight browser-based engineering demonstrations and a personal portfolio for AI i
 | StorageCalc | [Capacity and resilience](https://paragjindal.com/lab/storagecalc) | [StorageCalc](docs/projects/storagecalc.md) |
 | LocalMind | [Document retrieval](https://paragjindal.com/lab/localmind) | [LocalMind](docs/projects/localmind.md) |
 
+## RelayOps AI
+
+[Open the offline workflow studio](https://paragjindal.com/relayops/) or see the [RelayOps source and local SQLite setup](relayops-ai/README.md). The Vercel release build bundles the browser-local version alongside the portfolio.
+
 ## Run locally
 
 Use Node.js 22.12+ or 24 LTS.

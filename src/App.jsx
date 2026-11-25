@@ -3,6 +3,7 @@ import { useMotionValue } from 'framer-motion';
 import ContactSection from './components/ContactSection.jsx';
 import { GITHUB, LAB_PROJECTS, REPOSITORY } from './lab/catalog.mjs';
 import LabIcon from './lab/LabIcon.jsx';
+import relayStudioScreenshot from '../relayops-ai/docs/screenshots/studio.webp';
 import './engineering.css';
 
 const LabShell = lazy(() => import('./lab/LabShell.jsx'));
@@ -75,6 +76,16 @@ function Portfolio() {
       <section className="site-frame site-hero" aria-labelledby="hero-title">
         <div><p className="eyebrow"><span className="status-dot" /> Ottawa, Ontario · Canada</p><h1 id="hero-title">Parag Jindal</h1><p className="site-hero-title">AI &amp; Information Systems Specialist</p><p className="site-intro">I build AI software and the infrastructure that runs it. My work spans GPU systems, data centre operations, and full-stack engineering.</p><div className="site-hero-actions"><a className="site-button site-button-primary" href="/lab">Open the lab <LabIcon name="arrow" size={17} /></a><a className="site-button site-button-outline" href="#projects">View My Work</a></div><a className="site-quiet-link" href="/greeting">Open 3D greeting <LabIcon name="external" size={14} /></a></div>
         <RackIllustration />
+      </section>
+      <section className="site-section site-section-tint" id="relayops">
+        <div className="site-frame relay-feature">
+          <div>
+            <SectionTitle label="Flagship AI engineering project" description="Build an executable graph, run it against sample data, inspect every step, and decide whether a simulated action should proceed.">RelayOps AI</SectionTitle>
+            <p className="relay-feature-detail">The visual studio shares a validated workflow contract with a local SQLite execution service that retains approvals, retries, and trace events across restarts.</p>
+            <div className="site-hero-actions"><a className="site-button site-button-primary" href="/relayops/">Open offline demo <LabIcon name="arrow" size={17} /></a><a className="site-button site-button-outline" href={`${REPOSITORY}/tree/main/relayops-ai`}>View source and case study <LabIcon name="external" size={15} /></a></div>
+          </div>
+          <a className="relay-feature-preview" href="/relayops/" aria-label="Open RelayOps AI"><img src={relayStudioScreenshot} width="1099" height="690" loading="lazy" alt="RelayOps AI studio with the Infrastructure Incident Investigator graph" /></a>
+        </div>
       </section>
       <section className="site-section site-section-tint" id="projects"><div className="site-frame">
         <div className="site-section-row"><SectionTitle label="Featured work" description="Eight working applications for a fictional data centre, plus standalone tools for storage planning, network design, and local AI.">Infrastructure engineering lab</SectionTitle><a className="site-button site-button-outline" href="/lab">All applications <LabIcon name="arrow" size={15} /></a></div>

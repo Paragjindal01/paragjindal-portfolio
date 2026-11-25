@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "playwright test",
     "test:chromium": "playwright test --project=chromium",
-    "test:unit": "node --test src/lab/*.test.mjs src/lab/apps/*.test.mjs src/lab/replay/*.test.mjs tools/*.test.mjs"
+    "test:unit": "node --test src/lab/*.test.mjs src/lab/apps/*.test.mjs src/lab/replay/*.test.mjs tools/*.test.mjs",
+    "build:release": "npm run build && node tools/bundle-relayops.mjs"
   },
   "dependencies": {
     "@splinetool/react-spline": "^4.1.0",

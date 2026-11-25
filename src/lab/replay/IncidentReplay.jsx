@@ -90,6 +90,10 @@ export default function IncidentReplay({ recording }) {
   const trace = imported || recording.library.find((item) => item.id === (selected || recording.id)) || recording.library[0];
   const closed = trace?.events.at(-1)?.type === 'recording.stopped';
 
+  useEffect(() => {
+    if (window.location.hash === '#incident-replay') document.getElementById('incident-replay')?.scrollIntoView();
+  }, []);
+
   async function importFile(event) {
     const file = event.target.files[0];
     event.target.value = '';
