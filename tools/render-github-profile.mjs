@@ -1,5 +1,5 @@
 import { BRAND_STATEMENT, CONTACT, CURRENT_ROLE, EDUCATION, EMPLOYMENT, POSITIONING, TECHNOLOGIES, employmentMonth, employmentPeriod, workplaceDetails } from '../src/data/professional.mjs';
-import { FEATURED_LAB_IDS, findProject, GITHUB, LAB_RELEASE, RELAYOPS, REPOSITORY } from '../src/data/projects.mjs';
+import { FEATURED_LAB_IDS, findProject, GITHUB, RELAYOPS, REPOSITORY } from '../src/data/projects.mjs';
 
 const live = (path) => CONTACT.website + path;
 const flagships = [RELAYOPS, ...FEATURED_LAB_IDS.slice(0, 5).map(findProject)];
@@ -28,7 +28,7 @@ const sections = [
     const heading = employer.roles.length > 1 ? `#### ${role.title}` : `**${role.title}**`;
     return `${heading}\n\n${employmentPeriod(role)} · ${workplaceDetails(role)}\n\n${role.summary}${role.highlights ? '\n\n' + role.highlights.map((detail) => `- ${detail}`).join('\n') : ''}`;
   }).join('\n\n')}`),
-  `## Engineering laboratory\n\n${supporting.map((project) => `- **${project.name}** · ${project.description} ${joinLinks([['Demo', live(project.links.demo)], ['Case study', live(project.links.caseStudy)]])}`).join('\n')}\n\n${joinLinks([['Standalone source exports', `${REPOSITORY}/releases/tag/${LAB_RELEASE.tag}`], ['Simulation API', live('/api/simulation?scenario=critical')], ['InfraPilot incident replay', live('/lab/infrapilot-ai#incident-replay')]])}`,
+  `## Engineering laboratory\n\n${supporting.map((project) => `- **${project.name}** · ${project.description} ${joinLinks([['Demo', live(project.links.demo)], ['Case study', live(project.links.caseStudy)]])}`).join('\n')}\n\n${joinLinks([['Standalone source and installation', `${REPOSITORY}/tree/main/packages/standalone`], ['Simulation API', live('/api/simulation?scenario=critical')], ['InfraPilot incident replay', live('/lab/infrapilot-ai#incident-replay')]])}`,
   '```mermaid\nflowchart LR\n  Simulator[Versioned synthetic facility and telemetry] --> RackOps\n  Simulator --> GPUWatch\n  Simulator --> PowerOps\n  Simulator --> VirtScan\n  Simulator --> InfraPilot[InfraPilot AI]\n  InfraPilot -->|Reviewed handoff| PowerOps\n  InfraPilot --> Replay[Incident timeline and replay]\n  PowerOps --> Replay\n  Input[Independent planning and knowledge inputs] --> FabricLab\n  Input --> StorageCalc\n  Input --> LocalMind\n  RelayOps[RelayOps AI] --> Services[Browser demo or local SQLite worker]\n  Services --> Trace[Workflow traces and evaluation]\n```',
   `## Selected software\n\n- **[SafeKelowna](https://safekelowna.com/)** · Community safety map, reporting, messaging, and moderation.\n- **Algorithmic Trading Platform** · Team capstone for market data processing and XGBoost prediction serving.\n- **Diagram Data Warehouse** · Academic collaboration for diagram upload, search, and analysis.\n\nEarlier work includes the [Financial Analytics iOS App](${GITHUB}/financial-analytic-ios-app), [Cybersecurity Home Lab](${GITHUB}/cybersecurity-home-lab), and [Computer Networks coursework](${GITHUB}/COSC-417-Computer-Network).`,
   `## Technology\n\n${TECHNOLOGIES.map(([category, tools]) => `- **${category}** · ${tools.join(', ')}`).join('\n')}`,
