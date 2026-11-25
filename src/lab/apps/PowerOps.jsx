@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPowerAdapter, historicalEnergy, loadStatus, phaseBalance } from './powerops.mjs';
 import { decimal, downloadReport, percent, scenarioWindow, toCsv } from './monitoring.mjs';
+import { approvedHandoff, validReplayId } from '../replay/incident.mjs';
+import { getRecording, recordEvent } from '../replay/store.mjs';
 import './monitoring.css';
 
 const actionNames = { on: 'Turn on', off: 'Turn off', reboot: 'Reboot' };
 const phases = ['A', 'B', 'C'];
 
-function selectedOutletFromUrl() {
-  return new URLSearchParams(window.location.search).get('outlet') ?? '';
+function initialHandoff() {
+  const params = new URLSearchParams(window.location.search);
+  const incident = params.get('incident');
+  const handoff = params.get('handoff');
+  return { outletId: params.get('outlet') ?? '', incident: validReplayId(incident) && validReplayId(handoff) ? incident : '', handoff };
 }
 
 function PowerConfirmation({ request, confirm, cancel }) {
@@ -39,7 +44,11 @@ function LoadIndicator({ watts, ratedW, threshold }) {
 
 export default function PowerOps({ snapshot, scenario }) {
   const [adapter] = useState(createPowerAdapter);
-  const [initialOutletId] = useState(selectedOutletFromUrl);
+  const [handoff] = useState(initialHandoff);
+  const [powerSessionId] = useState(() => crypto.randomUUID());
+  const initialOutletId = handoff.outletId;
+  const [isLinked, setLinked] = useState(false);
+  const [linkError, setLinkError] = useState('');
   const [pduId, setPduId] = useState(() => snapshot.pdus.find((pdu) => pdu.outlets.some((outlet) => outlet.id === initialOutletId))?.id ?? snapshot.pdus[0]?.id);
   const [outletId, setOutletId] = useState(initialOutletId);
   const [role, setRole] = useState('viewer');
@@ -48,6 +57,7 @@ export default function PowerOps({ snapshot, scenario }) {
   const [message, setMessage] = useState('');
   const [showBalance, setShowBalance] = useState(false);
   const [, setVersion] = useState(0);
+  const linkedReboot = useRef(null);
   const pdus = adapter.inspect(snapshot);
   const pdu = pdus.find((item) => item.id === pduId) ?? pdus[0];
   const outlet = pdu.outlets.find((item) => item.id === outletId) ?? pdu.outlets[0];
@@ -59,6 +69,31 @@ export default function PowerOps({ snapshot, scenario }) {
   const rackEnergy = historicalEnergy(energySamples, rack.id);
   const balance = showBalance ? phaseBalance(pdu.outlets) : null;
   const audit = adapter.history().reverse();
+
+  useEffect(() => {
+    if (!handoff.incident) return;
+    getRecording(handoff.incident).then((trace) => {
+      if (trace && trace.events.at(-1).type !== 'recording.stopped' && approvedHandoff(trace, handoff.handoff, handoff.outletId)) setLinked(true);
+      else setLinkError('The local incident recording is missing, closed, or unrelated to this outlet.');
+    }).catch(() => setLinkError('Local incident recording is unavailable.'));
+  }, [handoff]);
+
+  function capturePower(type, payload) {
+    if (!handoff.incident || handoff.outletId !== payload.outletId) return;
+    void recordEvent(handoff.incident, snapshot, { type, source: 'powerops', payload: { ...payload, handoffId: handoff.handoff, powerSessionId } }, { handoffId: handoff.handoff })
+      .catch((error) => setLinkError(error.message));
+  }
+
+  useEffect(() => {
+    const recordedReboot = linkedReboot.current;
+    if (!recordedReboot || rebootPending) return;
+    const recovered = adapter.inspect(snapshot).flatMap((device) => device.outlets).find((item) => item.id === recordedReboot.outletId);
+    if (recovered?.state !== 'on') return;
+    linkedReboot.current = null;
+    void recordEvent(handoff.incident, snapshot, { type: 'power.recovered', source: 'powerops', payload: {
+      outletId: recordedReboot.outletId, requestId: recordedReboot.id, handoffId: handoff.handoff, powerSessionId, observation: recovered,
+    } }, { handoffId: handoff.handoff }).catch((error) => setLinkError(error.message));
+  }, [adapter, snapshot, handoff, powerSessionId, rebootPending]);
 
   useEffect(() => {
     if (!rebootPending) return undefined;
@@ -75,23 +110,32 @@ export default function PowerOps({ snapshot, scenario }) {
   function prepare(action) {
     setMessage('');
     try {
-      setRequest(adapter.prepare(snapshot, { role, outletId: outlet.id, action }));
+      const next = adapter.prepare(snapshot, { role, outletId: outlet.id, action });
+      setRequest(next);
+      capturePower('power.prepared', { ...next, role, before: outlet });
     } catch (error) {
       setMessage(error.message);
+      capturePower('power.denied', { outletId: outlet.id, action, role, reason: error.message });
     }
   }
 
   function cancel() {
     adapter.cancel(request.id);
+    capturePower('power.cancelled', { ...request, role });
     setRequest(null);
   }
 
   function confirm() {
     try {
+      const before = adapter.inspect(snapshot).flatMap((device) => device.outlets).find((item) => item.id === request.outletId);
       const entry = adapter.confirm(snapshot, { role, id: request.id });
+      const after = adapter.inspect(snapshot).flatMap((device) => device.outlets).find((item) => item.id === request.outletId);
+      capturePower('power.confirmed', { ...entry, before, after });
+      if (handoff.incident && handoff.outletId === entry.outletId && entry.action === 'reboot') linkedReboot.current = entry;
       setMessage(actionNames[entry.action] + ' recorded for ' + entry.outletId + '.');
     } catch (error) {
       setMessage(error.message);
+      capturePower('power.denied', { ...request, role, reason: error.message });
     } finally {
       setRequest(null);
     }
@@ -108,7 +152,14 @@ export default function PowerOps({ snapshot, scenario }) {
     downloadReport('powerops-' + scenario + '.csv', toCsv([header, ...entries]), 'text/csv;charset=utf-8');
   }
 
+  const replayParams = new URLSearchParams({ incident: handoff.incident, scenario });
+  if (snapshot.step) replayParams.set('step', String(snapshot.step));
   return <div className="ops-stack">
+    {isLinked && <section className="lab-panel" aria-label="Linked incident recording">
+      <strong>Incident recording linked</strong><p>Actions on this handoff’s outlet are added to the local incident timeline.</p>
+      <a href={'/lab/infrapilot-ai?' + replayParams + '#incident-replay'}>Return to incident replay</a>
+    </section>}
+    {linkError && <p role="alert">{linkError}</p>}
     <div className="lab-grid ops-stats" aria-label="Rack power summary">
       <div className="lab-stat"><span>Rack draw · {rack.name}</span><strong>{decimal(rackPower / 1000, 2)} kW</strong></div>
       <div className="lab-stat"><span>Rack rated capacity</span><strong>{decimal(rack.capacityW / 1000, 2)} kW</strong></div>

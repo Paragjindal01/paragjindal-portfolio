@@ -1,0 +1,29 @@
+.incident-replay { scroll-margin-top: 1rem; }
+.replay-heading { display: flex; justify-content: space-between; gap: .7rem; align-items: start; margin-bottom: .85rem; }
+.replay-heading h2 { font-size: clamp(1.35rem, 2.4vw, 1.85rem); letter-spacing: -.045em; }
+.replay-heading p, .replay-empty { color: var(--lab-muted); font-size: .9rem; }
+.replay-heading .replay-live { display: flex; align-items: center; gap: .35rem; }
+.replay-controls input[type='file'] { max-width: min(100%, 260px); padding: .2rem; }
+.replay-picker { display: block; max-width: 365px; margin-block: .75rem; }
+.replay-review { margin-top: .85rem; }
+.replay-playback { padding: .65rem .75rem; border: 1px solid var(--line); border-radius: 6px; background: #eff3ea; }
+.replay-playback input[type='range'] { width: 100%; }
+.replay-columns { display: grid; gap: .85rem; grid-template-columns: minmax(12rem, .8fr) minmax(0, 1.6fr); margin-top: .8rem; }
+.replay-timeline { min-width: 0; max-height: 27rem; overflow: auto; padding: .22rem; }
+.replay-timeline li + li { margin-top: .33rem; }
+.replay-timeline button { width: 100%; display: flex; align-items: center; gap: .65rem; min-height: 43px; text-align: left; }
+.replay-timeline button[aria-current] { background: #dce9db; border-color: #7c9b81; }
+.replay-timeline strong, .replay-timeline small { display: block; }
+.replay-timeline small { color: var(--lab-muted); }
+.replay-sequence { font: 700 .72rem/1 ui-monospace, monospace; }
+.replay-event { min-width: 0; padding: .8rem; border: 1px solid var(--line); background: #f8faf4; border-radius: 6px; overflow-wrap: anywhere; }
+.replay-event h3 { font-size: 1.15rem; }
+.replay-event ul { padding-inline-start: 1rem; list-style: disc; }
+.replay-event details { margin-top: .5rem; }
+.replay-event summary { cursor: pointer; color: var(--lab-accent); font-size: .86rem; font-weight: 700; }
+.replay-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: .6rem; margin-block: .75rem; }
+.replay-metrics div { border-left: 2px solid #789e83; padding-inline: .55rem; }
+.replay-metrics dt { font-size: .73rem; color: var(--lab-muted); }
+.replay-metrics dd { font-weight: 750; }
+.replay-json { max-height: 18rem; overflow: auto; padding: .45rem; color: #edf5ea; background: #1e3126; border-radius: 5px; font-size: .77rem; }
+@media (max-width: 640px) { .replay-columns { grid-template-columns: minmax(0, 1fr); } .replay-timeline { max-height: 15rem; } }

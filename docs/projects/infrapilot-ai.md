@@ -47,3 +47,7 @@ To enable an external OpenAI-compatible provider, configure all three server-sid
 - Model integration uses a separate Node process bound to loopback with exact Host and Origin checks, request limits and validated responses. Models have no infrastructure tool or control access. The adapter tests use mocked responses. Live model inference remains unverified because this environment has no Ollama installation or configured external provider.
 - Schedules and audit display are tab-scoped. Browser suspension can delay a run, and closing the tab clears its history. The demo role models an authorization step for the handoff.
 - All inventory, metrics and actions in the application are synthetic.
+
+## Incident replay
+
+[Record and replay a simulated incident](incident-replay.md), including scenario transitions, full telemetry checkpoints, recommendations and approval decisions.

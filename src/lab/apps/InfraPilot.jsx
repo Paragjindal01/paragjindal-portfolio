@@ -4,13 +4,15 @@ import {
 } from './infrapilot.mjs';
 import { AiProvider } from './LabAiProvider.jsx';
 import { requestAi } from './lab-ai-client.mjs';
+import IncidentReplay from '../replay/IncidentReplay.jsx';
+import { useIncidentRecording } from '../replay/useIncidentRecording.js';
 import './lab-ai.css';
 
 const INITIAL_QUERY = EXAMPLE_QUERIES[0];
 const nowMs = () => Date.now();
 const formatTime = (time) => new Date(time).toLocaleTimeString();
 
-function Handoffs({ snapshot, record }) {
+function Handoffs({ snapshot, record, capture }) {
   const [outlet, setOutlet] = useState('');
   const [operation, setOperation] = useState('reboot');
   const [role, setRole] = useState('viewer');
@@ -26,21 +28,36 @@ function Handoffs({ snapshot, record }) {
       setRequests((prior) => [request, ...prior].slice(0, 20));
       setMessage('Handoff saved for review.');
       record('Handoff prepared', request.operation + ' · ' + request.assetLabel);
+      void capture('handoff.prepared', { request });
     } catch (failure) {
       setMessage(failure.message);
     }
   }
 
-  function review(request, approved) {
+  async function review(request, approved) {
     try {
       const next = decideHandoff(request, role, approved, nowMs());
-      setRequests((prior) => prior.map((item) => item.id === request.id ? next : item));
+      const pendingTrace = capture('handoff.' + next.status, { request: next, role });
+      setRequests((prior) => prior.map((item) => item.id === request.id ? { ...next, linking: approved } : item));
+      const trace = await pendingTrace;
+      setRequests((prior) => prior.map((item) => item.id === request.id ? { ...next, incidentId: trace?.id } : item));
       setMessage(approved ? 'Approved for handoff to PowerOps.' : 'Handoff rejected.');
       record('Handoff ' + next.status, request.operation + ' · ' + request.assetLabel);
     } catch (failure) {
       setMessage(failure.message);
       record('Handoff denied', failure.message);
+      void capture('handoff.denied', { request, role, reason: failure.message });
     }
+  }
+
+  function powerLink(request) {
+    const params = new URLSearchParams({ outlet: request.outletId, scenario: snapshot.scenario });
+    if (snapshot.step) params.set('step', String(snapshot.step));
+    if (request.incidentId) {
+      params.set('incident', request.incidentId);
+      params.set('handoff', request.id);
+    }
+    return '/lab/powerops?' + params;
   }
 
   return (
@@ -70,7 +87,7 @@ function Handoffs({ snapshot, record }) {
               <button type="button" onClick={() => review(request, true)}>Approve handoff</button>
               <button type="button" onClick={() => review(request, false)}>Reject</button>
             </div>}
-            {request.status === 'approved' && <p><a href={'/lab/powerops?' + new URLSearchParams({ outlet: request.outletId, scenario: snapshot.scenario })}>Review selected outlet in PowerOps</a></p>}
+            {request.status === 'approved' && !request.linking && <p><a href={powerLink(request)}>Review selected outlet in PowerOps</a></p>}
           </li>
         ))}
       </ol>}
@@ -92,6 +109,8 @@ export default function InfraPilot({ snapshot }) {
   const [schedule, setSchedule] = useState(0);
   const [lastScheduled, setLastScheduled] = useState(null);
   const [history, setHistory] = useState([]);
+  const recording = useIncidentRecording(snapshot);
+  const { capture } = recording;
 
   const record = useCallback((actor, text, result = null) => {
     const item = { id: crypto.randomUUID(), time: nowMs(), actor, text, result };
@@ -104,13 +123,15 @@ export default function InfraPilot({ snapshot }) {
       try {
         const result = runTool('report', snapshot, thresholds);
         record('Scheduled report', result.summary, result);
+        void capture('analysis.completed', { trigger: 'scheduled report', thresholds, result });
         setLastScheduled(nowMs());
       } catch (failure) {
         record('Scheduled report failed', failure.message);
+        void capture('analysis.rejected', { trigger: 'scheduled report', reason: failure.message });
       }
     }, schedule * 1000);
     return () => window.clearInterval(timer);
-  }, [schedule, snapshot, thresholds, record]);
+  }, [schedule, snapshot, thresholds, record, capture]);
 
   const display = execution || { question: INITIAL_QUERY, result: runTool('health', snapshot, thresholds), scenario: snapshot.scenario };
 
@@ -126,6 +147,7 @@ export default function InfraPilot({ snapshot }) {
       const nextExecution = { question: query.trim(), result, scenario: snapshot.scenario };
       setExecution(nextExecution);
       record('Query', query.trim(), result);
+      void capture('analysis.completed', { trigger: 'operator query', thresholds, result });
       if (provider !== 'offline') {
         setPending(true);
         try {
@@ -142,6 +164,7 @@ export default function InfraPilot({ snapshot }) {
     } catch (failure) {
       setError(failure.message);
       record('Query rejected', failure.message);
+      void capture('analysis.rejected', { trigger: 'operator query', reason: failure.message });
     }
   }
 
@@ -152,6 +175,7 @@ export default function InfraPilot({ snapshot }) {
       validateThresholds(next);
       setThresholds(next);
       setThresholdError('');
+      void capture('thresholds.changed', { previous: thresholds, next });
       record('Thresholds updated', next.gpuC + ' °C GPU · ' + next.inletC + ' °C inlet · ' + next.outletPercent + '% outlet');
     } catch (failure) {
       setThresholdError(failure.message);
@@ -178,7 +202,7 @@ export default function InfraPilot({ snapshot }) {
     <div className="lab-ai-stack">
       <section className="lab-panel" aria-labelledby="infrapilot-query">
         <h2 id="infrapilot-query">Infrastructure operations console</h2>
-        <p>Run validated inventory, telemetry, and incident queries against the active simulation.</p>
+        <p>Run validated inventory, telemetry, and incident queries against the active simulation. <a href="#incident-replay">Open incident replay</a></p>
         <form className="lab-ai-form" onSubmit={submit}>
           <label>Ask about the laboratory <input value={query} onChange={(event) => setQuery(event.target.value)} maxLength={500} required /></label>
           <div className="lab-controls">
@@ -232,6 +256,7 @@ export default function InfraPilot({ snapshot }) {
               const seconds = Number(event.target.value);
               setSchedule(seconds);
               record('Schedule changed', seconds ? 'Every ' + seconds + ' seconds' : 'Disabled');
+              void capture('schedule.changed', { seconds });
             }}>
               <option value={0}>Disabled</option><option value={15}>Every 15 seconds</option><option value={60}>Every minute</option><option value={300}>Every five minutes</option>
             </select></label>
@@ -240,6 +265,7 @@ export default function InfraPilot({ snapshot }) {
               setExecution({ question: 'Manual report workflow', result, scenario: snapshot.scenario });
               setGenerated(null);
               record('Manual report', result.summary, result);
+              void capture('analysis.completed', { trigger: 'manual report', thresholds, result });
             }}>Run health report now</button>
           </div>
           {lastScheduled && <p aria-live="polite">Last scheduled run: {formatTime(lastScheduled)}</p>}
@@ -258,8 +284,10 @@ export default function InfraPilot({ snapshot }) {
           </form>
           {thresholdError && <p role="alert">{thresholdError}</p>}
         </section>
-        <Handoffs snapshot={snapshot} record={record} />
+        <Handoffs snapshot={snapshot} record={record} capture={capture} />
       </div>
+
+      <IncidentReplay recording={recording} />
 
       <section className="lab-panel" aria-labelledby="infrapilot-history">
         <h2 id="infrapilot-history">Activity and execution history</h2>
