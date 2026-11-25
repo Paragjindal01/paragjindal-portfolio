@@ -21,7 +21,8 @@
 .scroll-scrub__layer,
 .scroll-scrub__picture,
 .scroll-scrub__poster,
-.scroll-scrub__video {
+.scroll-scrub__video,
+.scroll-scrub__frames {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -44,7 +45,8 @@
 }
 
 .scroll-scrub__poster,
-.scroll-scrub__video {
+.scroll-scrub__video,
+.scroll-scrub__frames {
   display: block;
   object-fit: cover;
   object-position: var(--ss-object-position);
@@ -54,12 +56,14 @@
   z-index: 0;
 }
 
-.scroll-scrub__video {
+.scroll-scrub__video,
+.scroll-scrub__frames {
   z-index: 1;
   opacity: 0;
 }
 
-.scroll-scrub__layer[data-video-painted="true"] .scroll-scrub__video {
+.scroll-scrub__layer[data-video-painted="true"] .scroll-scrub__video,
+.scroll-scrub__layer[data-phone-frame] .scroll-scrub__frames {
   opacity: 1;
 }
 
@@ -242,14 +246,16 @@
     margin-top: 0;
   }
 
-  .scroll-scrub__video {
+  .scroll-scrub__video,
+  .scroll-scrub__frames {
     transition: opacity 120ms linear;
   }
 }
 
 @media (max-width: 860px) {
   .scroll-scrub__poster,
-  .scroll-scrub__video {
+  .scroll-scrub__video,
+  .scroll-scrub__frames {
     object-position: var(--ss-mobile-position);
   }
 

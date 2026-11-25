@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { devices, test, expect } from '@playwright/test';
 
 // Portfolio layout and contact checks stay local. Live Spline tests load the
 // existing external scene and can run separately from the main CI suite.
@@ -196,6 +196,39 @@ test.describe('hero', () => {
     });
     await expect.poll(() => clips).toEqual(['hall-01-mobile.mp4', 'hall-02-mobile.mp4']);
     await expect(storyboard).toHaveAttribute('data-active-section', '0');
+  });
+
+  test('touch phones paint changing frames throughout the cinematic chapters', async ({ browser, browserName }) => {
+    test.skip(browserName === 'firefox', 'Firefox does not support Playwright mobile viewport emulation.');
+    const { viewport, deviceScaleFactor, userAgent, hasTouch, isMobile } = devices['iPhone 13'];
+    const page = await browser.newPage({ viewport, deviceScaleFactor, userAgent, hasTouch, isMobile, reducedMotion: 'no-preference' });
+    const mediaRequests = [];
+    page.on('request', (request) => {
+      const { pathname } = new URL(request.url());
+      if (pathname.includes('/phone-frames/') || pathname.endsWith('.mp4')) mediaRequests.push(pathname);
+    });
+
+    try {
+      await page.goto(new URL('/', test.info().project.use.baseURL).href);
+      const bands = page.locator('[data-scroll-scrub-band]');
+      const scenes = page.locator('[data-scroll-scrub-layer]');
+      await expect(bands).toHaveCount(5);
+      await expect.poll(() => mediaRequests).toEqual(['/assets/world/phone-frames/hall-01-frames.webp']);
+
+      for (let index = 0; index < 5; index += 1) {
+        for (const [fraction, frame] of [[0.25, '6'], [0.75, '17']]) {
+          await bands.nth(index).evaluate((band, position) => {
+            const { top, height } = band.getBoundingClientRect();
+            window.scrollTo({ top: top + window.scrollY + height * position, behavior: 'instant' });
+          }, fraction);
+          await expect(scenes.nth(index)).toHaveAttribute('data-phone-frame', frame);
+        }
+      }
+      await expect(page.locator('.scroll-scrub__video')).toHaveCount(0);
+      expect(mediaRequests.filter((file) => file.endsWith('.mp4'))).toEqual([]);
+    } finally {
+      await page.close();
+    }
   });
 });
 

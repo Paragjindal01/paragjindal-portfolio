@@ -14,6 +14,7 @@ export interface ScrollScrubScene {
   mobilePoster?: string;
   clip: string;
   mobileClip?: string;
+  phoneFrames?: string;
   title: string;
   body: string;
   kicker?: string;
@@ -63,6 +64,7 @@ interface Segment {
   mobilePoster?: string;
   clip: string;
   mobileClip?: string;
+  phoneFrames?: string;
   weight: number;
   linger: number;
   objectPosition: string;
@@ -83,6 +85,12 @@ interface RuntimeSegment extends Segment {
   failed: boolean;
   loadedSource?: string;
   video?: HTMLVideoElement;
+  phoneFilm?: {
+    atlas: HTMLImageElement;
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    frame: number;
+  };
   objectUrl?: string;
   abort?: AbortController;
 }
@@ -92,6 +100,12 @@ interface Controller {
 }
 
 type ThemeStyle = CSSProperties & Record<`--ss-${string}`, string | number>;
+
+const PHONE_FRAME_WIDTH = 384;
+const PHONE_FRAME_HEIGHT = 640;
+const PHONE_FRAME_COLUMNS = 4;
+const PHONE_FRAME_ROWS = 6;
+const PHONE_FRAME_COUNT = PHONE_FRAME_COLUMNS * PHONE_FRAME_ROWS;
 
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
@@ -124,6 +138,7 @@ function buildSegments(
       kind: "scene",
       linger: scene.linger ?? 0,
       mobileClip: scene.mobileClip,
+      phoneFrames: scene.phoneFrames,
       mobilePoster: scene.mobilePoster,
       mobileObjectPosition:
         scene.mobileObjectPosition ?? scene.objectPosition ?? "50% 50%",
@@ -215,9 +230,13 @@ export function ScrollScrub({
       "(hover: none) and (pointer: coarse)"
     ).matches;
     const smallViewport = window.matchMedia("(max-width: 860px)");
+    const phonePortrait = window.matchMedia(
+      "(max-width: 600px) and (orientation: portrait) and (hover: none) and (pointer: coarse)"
+    );
     const isMobile = () => coarsePointer || smallViewport.matches;
-    const sourceFor = (segment: RuntimeSegment) =>
-      isMobile() && segment.mobileClip ? segment.mobileClip : segment.clip;
+    const phoneSource = (segment: Segment) => phonePortrait.matches ? segment.phoneFrames : undefined;
+    const sourceFor = (segment: Segment) => phoneSource(segment) ??
+      (isMobile() && segment.mobileClip ? segment.mobileClip : segment.clip);
     const runtime: RuntimeSegment[] = segments.map((segment, index) => ({
       ...segment,
       band: bandNodes[index],
@@ -255,10 +274,11 @@ export function ScrollScrub({
     };
 
     const unloadClip = (segment: RuntimeSegment) => {
-      const { video, objectUrl } = segment;
+      const { video, phoneFilm, objectUrl } = segment;
       segment.abort?.abort();
       delete segment.abort;
       delete segment.video;
+      delete segment.phoneFilm;
       delete segment.objectUrl;
       delete segment.loadedSource;
       if (video) {
@@ -267,6 +287,7 @@ export function ScrollScrub({
         video.load();
         video.remove();
       }
+      phoneFilm?.canvas.remove();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       segment.loading = false;
       segment.ready = false;
@@ -274,6 +295,7 @@ export function ScrollScrub({
       segment.current = segment.target;
       delete segment.layer.dataset.videoPainted;
       delete segment.layer.dataset.videoFailed;
+      delete segment.layer.dataset.phoneFrame;
     };
 
     const layout = () => {
@@ -330,6 +352,7 @@ export function ScrollScrub({
       segment.loadedSource = source;
       segment.abort = new AbortController();
       const request = segment.abort;
+      const isCurrent = () => !destroyed && !request.signal.aborted && segment.loadedSource === source;
 
       try {
         const response = await fetch(source, {
@@ -339,15 +362,35 @@ export function ScrollScrub({
           throw new Error(`Clip failed: ${response.status}`);
         }
         const blob = await response.blob();
-        if (
-          destroyed ||
-          request.signal.aborted ||
-          segment.loadedSource !== source
-        ) {
+        if (!isCurrent()) return;
+
+        const objectUrl = URL.createObjectURL(blob);
+        segment.objectUrl = objectUrl;
+        if (source === phoneSource(segment)) {
+          const atlas = new Image();
+          atlas.src = objectUrl;
+          await atlas.decode();
+          if (!isCurrent()) return;
+
+          const canvas = document.createElement("canvas");
+          canvas.className = "scroll-scrub__frames";
+          canvas.width = PHONE_FRAME_WIDTH;
+          canvas.height = PHONE_FRAME_HEIGHT;
+          const context = canvas.getContext("2d", { alpha: false });
+          if (
+            !context ||
+            atlas.naturalWidth !== PHONE_FRAME_WIDTH * PHONE_FRAME_COLUMNS ||
+            atlas.naturalHeight !== PHONE_FRAME_HEIGHT * PHONE_FRAME_ROWS
+          ) {
+            throw new Error("Invalid phone frame atlas");
+          }
+          segment.phoneFilm = { atlas, canvas, context, frame: -1 };
+          segment.ready = true;
+          segment.loading = false;
+          scheduleFrame();
           return;
         }
 
-        const objectUrl = URL.createObjectURL(blob);
         const video = document.createElement("video");
         video.className = "scroll-scrub__video";
         video.muted = true;
@@ -412,16 +455,11 @@ export function ScrollScrub({
         );
 
         segment.layer.append(video);
-        segment.objectUrl = objectUrl;
         segment.video = video;
-      } catch (error) {
-        if (
-          request.signal.aborted ||
-          (error instanceof Error && error.name === "AbortError") ||
-          segment.loadedSource !== source
-        ) {
-          return;
-        }
+      } catch {
+        if (!isCurrent()) return;
+        if (segment.objectUrl) URL.revokeObjectURL(segment.objectUrl);
+        delete segment.objectUrl;
         segment.layer.dataset.videoFailed = "true";
         segment.failed = true;
         segment.loading = false;
@@ -434,9 +472,9 @@ export function ScrollScrub({
       const y = clamp(scrollY, 0, total);
       const mobile = isMobile();
       const crossfade = 0.1 * viewportHeight;
-      // On a swipe, give the incoming mobile clip more time to buffer.
-      // The first scene is still the only clip requested at the top.
-      const ahead = mobile && y > 0 ? 0.95 : 0.6;
+      // Start warming the next scene as the user swipes.
+      // At rest on arrival only the first scene uses the network.
+      const ahead = mobile && y > 0 ? (phonePortrait.matches ? 1.15 : 0.95) : 0.6;
       activeLayer = Math.max(0, runtime.findLastIndex((segment) => y >= segment.start));
 
       for (const [index, segment] of runtime.entries()) {
@@ -462,7 +500,10 @@ export function ScrollScrub({
         segment.layer.style.opacity = String(opacity);
         segment.layer.style.zIndex = index === activeLayer ? "2" : "1";
 
-        const nearby = !mobile || Math.abs(index - activeLayer) <= 1;
+        const nearby = !mobile || (
+          Math.abs(index - activeLayer) <= 1 &&
+          (!phoneSource(segment) || index >= activeLayer || segment.visible)
+        );
         if (mobile && (!nearby || scrollY >= total) && segment.loadedSource) {
           unloadClip(segment);
         }
@@ -497,15 +538,32 @@ export function ScrollScrub({
       root.style.setProperty("--ss-progress", String(clamp(y / total)));
     };
 
-    const updateVideos = (now: number) => {
+    const updateMedia = (now: number) => {
       const mobile = isMobile();
       for (const [index, segment] of runtime.entries()) {
+        if (!segment.visible || !segment.ready) continue;
+
+        const film = segment.phoneFilm;
+        if (film) {
+          const frameIndex = Math.round(segment.target * (PHONE_FRAME_COUNT - 1));
+          if (film.frame === frameIndex || (film.frame === -1 && frameIndex === 0)) continue;
+          film.context.drawImage(
+            film.atlas,
+            (frameIndex % PHONE_FRAME_COLUMNS) * PHONE_FRAME_WIDTH,
+            Math.floor(frameIndex / PHONE_FRAME_COLUMNS) * PHONE_FRAME_HEIGHT,
+            PHONE_FRAME_WIDTH, PHONE_FRAME_HEIGHT,
+            0, 0, PHONE_FRAME_WIDTH, PHONE_FRAME_HEIGHT
+          );
+          if (film.frame === -1) segment.layer.append(film.canvas);
+          film.frame = frameIndex;
+          segment.layer.dataset.phoneFrame = String(frameIndex);
+          continue;
+        }
+
         const { video } = segment;
         if (
-          !segment.visible ||
           (mobile && index !== activeLayer) ||
           !video ||
-          !segment.ready ||
           video.seeking
         ) {
           continue;
@@ -549,7 +607,7 @@ export function ScrollScrub({
         dirty = false;
         readScroll();
       }
-      updateVideos(now);
+      updateMedia(now);
     };
     const onResize = () => {
       if (coarsePointer && window.innerWidth === layoutWidth) {
@@ -586,6 +644,8 @@ export function ScrollScrub({
     window.addEventListener("scroll", invalidate, { passive: true });
     window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", layout);
+    phonePortrait.addEventListener("change", layout);
+    smallViewport.addEventListener("change", layout);
     window.addEventListener("pointerdown", onFirstGesture, {
       once: true,
       passive: true,
@@ -604,6 +664,8 @@ export function ScrollScrub({
       window.removeEventListener("scroll", invalidate);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", layout);
+      phonePortrait.removeEventListener("change", layout);
+      smallViewport.removeEventListener("change", layout);
       window.removeEventListener("pointerdown", onFirstGesture);
       window.removeEventListener("touchstart", onFirstGesture);
       root.style.removeProperty("--ss-progress");

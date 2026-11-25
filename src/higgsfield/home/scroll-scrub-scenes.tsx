@@ -38,6 +38,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     clip: "/assets/world/hall-01.mp4",
     poster: "/assets/world/hall-01-poster.webp",
     mobileClip: "/assets/world/hall-01-mobile.mp4",
+    phoneFrames: "/assets/world/phone-frames/hall-01-frames.webp",
     mobilePoster: "/assets/world/hall-01-mobile-poster.webp",
   },
   {
@@ -52,6 +53,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     clip: "/assets/world/hall-02.mp4",
     poster: "/assets/world/hall-02-poster.webp",
     mobileClip: "/assets/world/hall-02-mobile.mp4",
+    phoneFrames: "/assets/world/phone-frames/hall-02-frames.webp",
     mobilePoster: "/assets/world/hall-02-mobile-poster.webp",
   },
   {
@@ -65,6 +67,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     clip: "/assets/world/hall-03.mp4",
     poster: "/assets/world/hall-03-poster.webp",
     mobileClip: "/assets/world/hall-03-mobile.mp4",
+    phoneFrames: "/assets/world/phone-frames/hall-03-frames.webp",
     mobilePoster: "/assets/world/hall-03-mobile-poster.webp",
   },
   {
@@ -78,6 +81,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     clip: "/assets/world/hall-04.mp4",
     poster: "/assets/world/hall-04-poster.webp",
     mobileClip: "/assets/world/hall-04-mobile.mp4",
+    phoneFrames: "/assets/world/phone-frames/hall-04-frames.webp",
     mobilePoster: "/assets/world/hall-04-mobile-poster.webp",
   },
   {
@@ -95,6 +99,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     clip: "/assets/world/hall-05.mp4",
     poster: "/assets/world/hall-05-poster.webp",
     mobileClip: "/assets/world/hall-05-mobile.mp4",
+    phoneFrames: "/assets/world/phone-frames/hall-05-frames.webp",
     mobilePoster: "/assets/world/hall-05-mobile-poster.webp",
   },
 ];
