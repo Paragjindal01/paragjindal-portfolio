@@ -49,7 +49,7 @@
       ]
     },
     {
-      "source": "/compute-flow/:path*",
+      "source": "/compute-flow(/.*)?",
       "headers": [
         {
           "key": "Content-Security-Policy",

@@ -42,8 +42,14 @@ jobs:
         run: |
           set -euo pipefail
           container="$(docker run -d -p 127.0.0.1:4173:4173 portfolio-compute-flow)"
-          trap 'docker rm -f "$container" >/dev/null' EXIT
+          cleanup() {
+            local code="$?"
+            if [ "$code" -ne 0 ]; then docker logs "$container"; fi
+            docker rm -f "$container" >/dev/null
+          }
+          trap cleanup EXIT
           base=http://127.0.0.1:4173
-          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 "$base/lab" > /dev/null
-          curl --fail --silent --show-error "$base/relayops/" | grep -q '<title>RelayOps AI'
-          curl --fail --silent --show-error "$base/compute-flow/" | grep -q '<title>ComputeFlow'
+          curl --fail --silent --show-error --max-time 3 --retry 10 --retry-all-errors --retry-delay 1 "$base/lab" > /dev/null
+          curl --fail --silent --show-error "$base/relayops/" | grep -F '<title>RelayOps AI' >/dev/null
+          curl --fail --silent --show-error "$base/compute-flow/" | grep -F '<title>ComputeFlow' >/dev/null
+          curl --fail --silent --show-error "$base/api/simulation?scenario=critical&step=3" | grep -F '"schemaVersion":2' >/dev/null
