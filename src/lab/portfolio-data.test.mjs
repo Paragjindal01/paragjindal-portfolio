@@ -24,7 +24,7 @@ test('AltaAI roles, education, and structured biography agree', () => {
 
 test('centralized project data retains every lab route and supplies a real screenshot and case study', async () => {
   assert.equal(LAB_PROJECTS.length, 8);
-  assert.equal(ALL_PROJECTS.length, 9);
+  assert.equal(ALL_PROJECTS.length, 10);
   assert.equal(new Set(ALL_PROJECTS.map(({ id }) => id)).size, ALL_PROJECTS.length);
   for (const project of ALL_PROJECTS) {
     assert.ok(CASE_STUDIES[project.id]?.flow.length >= 3);
@@ -32,7 +32,7 @@ test('centralized project data retains every lab route and supplies a real scree
     const relative = project.screenshot.source ?? `public${project.screenshot.path}`;
     await access(new URL(`../../${relative}`, import.meta.url));
     assert.deepEqual(resolvePortfolioRoute(project.links.caseStudy), { page: 'case-study', slug: project.id });
-    if (project.id !== 'relayops-ai') assert.deepEqual(resolvePortfolioRoute(project.links.demo), { page: 'lab', slug: project.id });
+    if (LAB_PROJECTS.includes(project)) assert.deepEqual(resolvePortfolioRoute(project.links.demo), { page: 'lab', slug: project.id });
   }
   assert.deepEqual(resolvePortfolioRoute('/greeting'), { page: 'greeting' });
 });

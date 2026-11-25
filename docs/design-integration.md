@@ -15,7 +15,7 @@ The current React/Vite portfolio remains the published presentation. The future 
 | Optional existing 3D experience | `/greeting`, lazy-loaded Spline component |
 | GitHub profile text | `node tools/render-github-profile.mjs` |
 
-`npm run build` builds the portfolio and labs. After both dependency sets are installed, `npm run build:release` adds the static RelayOps experience in `dist/relayops`. The local SQLite service is installed and run from `relayops-ai` independently. There is a single portfolio project catalog so a new presentation can consume descriptions, links, status, screenshots and verification without scraping markup or copying content.
+`npm run build` builds the portfolio and labs. After their dependencies are installed, `npm run build:release` adds both independent static workbenches in `dist/relayops` and `dist/compute-flow`. The local SQLite service is installed and run from `relayops-ai` independently. There is a single portfolio project catalog so a new presentation can consume descriptions, links, status, screenshots and verification without scraping markup or copying content.
 
 ## When the export arrives
 

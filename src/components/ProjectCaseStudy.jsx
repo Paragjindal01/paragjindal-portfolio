@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { CASE_STUDIES } from '../data/case-studies.mjs';
 import { CONTACT } from '../data/professional.mjs';
-import { ALL_PROJECTS, findProject, RELAYOPS } from '../data/projects.mjs';
+import { ALL_PROJECTS, COMPUTE_FLOW, findProject, RELAYOPS } from '../data/projects.mjs';
 import relayStudio from '../../relayops-ai/docs/screenshots/studio.webp';
+import computeFlowWorkbench from '../../compute-flow/docs/workbench.webp';
 import LabIcon from '../lab/LabIcon.jsx';
+
+const standaloneScreenshots = { [RELAYOPS.id]: relayStudio, [COMPUTE_FLOW.id]: computeFlowWorkbench };
 
 function CaseNavigation() {
   return <div className="site-header"><div className="site-frame site-topbar"><a className="site-brand" href="/"><span className="brand-symbol">PJ</span>Parag Jindal</a><a className="site-button site-button-outline" href="/lab">Engineering lab <LabIcon name="arrow" size={15} /></a></div></div>;
@@ -17,7 +20,7 @@ export default function ProjectCaseStudy({ slug }) {
     if (canonical) canonical.href = `${CONTACT.website}${project?.links.caseStudy ?? '/case-studies'}`;
     document.title = `${project ? `${project.name} Case Study` : 'Engineering Case Studies'} | ${CONTACT.name}`;
   }, [project]);
-  const picture = project?.id === RELAYOPS.id ? relayStudio : project?.screenshot.path;
+  const picture = project?.screenshot.path ?? standaloneScreenshots[project?.id];
 
   return <div className="engineering-site"><CaseNavigation />
     <main className="site-frame case-study" id="main-content">

@@ -71,7 +71,21 @@ export const RELAYOPS = {
   verification: 'Node and HTTP lifecycle coverage, all four templates in browser tests, signed webhook integration, and Docker Compose verification.',
 };
 
-export const ALL_PROJECTS = [RELAYOPS, ...LAB_PROJECTS];
+export const COMPUTE_FLOW = {
+  id: 'compute-flow', name: 'ComputeFlow', area: 'GPU workload scheduling', icon: 'activity',
+  description: 'Compare GPU scheduling policies with the same training and inference workload, then replay queue and resource decisions.',
+  stack: 'React · Discrete-event simulation · Deterministic workload generation',
+  version: '0.1.0', status: 'Interactive simulator', standaloneRepositoryUrl: null,
+  screenshot: { source: 'compute-flow/docs/workbench.webp', alt: 'ComputeFlow showing a completed GPU scheduling run and its workload timeline', width: 1440, height: 1080 },
+  links: {
+    demo: '/compute-flow/', source: `${REPOSITORY}/tree/main/compute-flow`, caseStudy: '/case-studies/compute-flow',
+    documentation: `${REPOSITORY}/blob/main/compute-flow/README.md`, verification: `${REPOSITORY}/actions/workflows/compute-flow.yml`,
+    benchmark: `${REPOSITORY}/blob/main/compute-flow/docs/benchmarks.md`,
+  },
+  verification: 'Deterministic engine tests check allocation, power, failure and recovery, queue ordering, and measured metrics. Browser tests exercise the workbench and policy comparison in Chromium, Firefox, and WebKit.',
+};
+
+export const ALL_PROJECTS = [RELAYOPS, COMPUTE_FLOW, ...LAB_PROJECTS];
 export const findProject = (id) => ALL_PROJECTS.find((project) => project.id === id);
 export const FEATURED_LAB_IDS = ['infrapilot-ai', 'rackops', 'gpuwatch', 'powerops', 'localmind', 'fabriclab', 'virtscan', 'storagecalc'];
 
@@ -85,6 +99,7 @@ export const EXPERTISE = [
   ['server', 'Full-stack engineering', 'Accessible interfaces, typed APIs, relational data, reproducible deployments, and automated testing.'],
 ];
 export const SELECTED_SOFTWARE = [
+  { title: COMPUTE_FLOW.name, description: COMPUTE_FLOW.description, tech: COMPUTE_FLOW.stack, url: COMPUTE_FLOW.links.demo, link: 'Open scheduling workbench' },
   { title: 'SafeKelowna', description: 'Community safety platform with map-based reporting, lost-and-found listings, private messaging, and moderation.', tech: 'Next.js · TypeScript · PostgreSQL · Leaflet', url: 'https://safekelowna.com', link: 'Visit website' },
   { title: 'Algorithmic Trading Platform', description: 'Team capstone for preparing market data and serving XGBoost predictions through backend APIs.', tech: 'FastAPI · XGBoost · Docker · Slurm' },
   { title: 'Diagram Data Warehouse', description: 'Educational diagram uploads, metadata, advanced search, API access, and analysis exports.', tech: 'React · GraphQL · PostgreSQL · AWS S3' },

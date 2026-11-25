@@ -1,5 +1,5 @@
 import { BRAND_STATEMENT, CONTACT, CURRENT_ROLE, EDUCATION, EMPLOYMENT, POSITIONING, TECHNOLOGIES, employmentMonth, employmentPeriod, workplaceDetails } from '../src/data/professional.mjs';
-import { FEATURED_LAB_IDS, findProject, GITHUB, RELAYOPS, REPOSITORY } from '../src/data/projects.mjs';
+import { COMPUTE_FLOW, FEATURED_LAB_IDS, findProject, GITHUB, RELAYOPS, REPOSITORY } from '../src/data/projects.mjs';
 
 const live = (path) => CONTACT.website + path;
 const flagships = [RELAYOPS, ...FEATURED_LAB_IDS.slice(0, 5).map(findProject)];
@@ -23,6 +23,7 @@ const sections = [
     const screenshot = project.screenshot.source ? `https://raw.githubusercontent.com/Paragjindal01/paragjindal-portfolio/main/${project.screenshot.source}` : live(project.screenshot.path);
     return `### ${project.name}\n\n${capabilities[project.id]}\n\n<img src="https://raw.githubusercontent.com/Paragjindal01/paragjindal-portfolio/main/docs/artwork/${project.id}.webp" width="340" alt="${project.name} conceptual cover artwork" /> <a href="${live(project.links.demo)}"><img src="${screenshot}" width="340" alt="${project.screenshot.alt}" /></a>\n\n${joinLinks([['Demo', live(project.links.demo)], ['Source', project.links.source], ['Technical case study', live(project.links.caseStudy)]])}`;
   }),
+  `### ${COMPUTE_FLOW.name}\n\n${COMPUTE_FLOW.description}\n\n<img src="https://raw.githubusercontent.com/Paragjindal01/paragjindal-portfolio/main/${COMPUTE_FLOW.screenshot.source}" width="680" alt="${COMPUTE_FLOW.screenshot.alt}" />\n\n${joinLinks([['Demo', live(COMPUTE_FLOW.links.demo)], ['Source', COMPUTE_FLOW.links.source], ['Technical case study', live(COMPUTE_FLOW.links.caseStudy)], ['Benchmarks', COMPUTE_FLOW.links.benchmark]])}`,
   '## Professional experience',
   ...EMPLOYMENT.map((employer) => `### ${employer.organization}\n\n${employer.roles.map((role) => {
     const heading = employer.roles.length > 1 ? `#### ${role.title}` : `**${role.title}**`;

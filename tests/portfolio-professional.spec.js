@@ -25,7 +25,7 @@ test('each published case-study route loads its evidence and points to a working
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto('/case-studies');
   await expect(page.getByRole('heading', { name: 'Engineering case studies' })).toBeVisible();
-  await expect(page.locator('.case-study-index a')).toHaveCount(9);
+  await expect(page.locator('.case-study-index a')).toHaveCount(ALL_PROJECTS.length);
   for (const project of ALL_PROJECTS) {
     expect((await page.goto(project.links.caseStudy)).ok()).toBeTruthy();
     await expect(page.getByRole('heading', { level: 1, name: project.name, exact: true })).toBeVisible();

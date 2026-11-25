@@ -1,10 +1,15 @@
 .git
 node_modules
+**/node_modules
 dist
+**/dist
 .env
 .env.*
 !*.env.example
 !.env.example
 test-output
+**/test-output
 test-results
+**/test-results
 playwright-report
+**/playwright-report

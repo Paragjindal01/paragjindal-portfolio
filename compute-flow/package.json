@@ -1,0 +1,27 @@
+{
+  "name": "compute-flow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A deterministic GPU workload scheduling simulator and policy comparison workbench.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test",
+    "test:browser": "playwright test",
+    "benchmark": "node scripts/benchmark.mjs"
+  },
+  "dependencies": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@vitejs/plugin-react": "6.0.2",
+    "vite": "8.0.16"
+  }
+}

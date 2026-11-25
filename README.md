@@ -1,8 +1,8 @@
 # Parag Jindal · Engineering Lab
 
-Eight browser-based engineering demonstrations and a personal portfolio for AI infrastructure, operations, automation, network design, storage planning, and local AI. The operational apps share a fictional data centre. Every demonstration runs with its bundled data and without a hardware connection, account, or model API key.
+The personal portfolio includes eight infrastructure lab applications, the independent RelayOps workflow studio, and the ComputeFlow scheduling workbench. The public demonstrations use bundled fictional data and run without a hardware connection, account, or model API key.
 
-[Portfolio](https://paragjindal.com/) · [Engineering Lab](https://paragjindal.com/lab) · [Simulator repository](https://github.com/Paragjindal01/Paragjindal01/tree/main/labs/infra-sim)
+[Portfolio](https://paragjindal.com/) · [Engineering Lab](https://paragjindal.com/lab) · [Shared simulation package](packages/simulation/) · [Standalone application releases](https://github.com/Paragjindal01/paragjindal-portfolio/releases/tag/standalone-lab-v0.1.0)
 
 | Application | Try it | Case study and screenshot |
 | --- | --- | --- |
@@ -23,6 +23,12 @@ Eight browser-based engineering demonstrations and a personal portfolio for AI i
 
 [Open the offline workflow studio](https://paragjindal.com/relayops/) or see the [RelayOps source and local SQLite setup](relayops-ai/README.md). The Vercel release build bundles the browser-local version alongside the portfolio.
 
+## ComputeFlow
+
+Compare GPU scheduling policies with reproducible training and inference jobs. Inspect queue states, placement, failure recovery, and policy trade-offs on the same fictional cluster.
+
+[Open the scheduling workbench](https://paragjindal.com/compute-flow/) · [Source and local setup](compute-flow/README.md) · [Measured benchmarks](compute-flow/docs/benchmarks.md)
+
 ## Run locally
 
 Use Node.js 22.12+ or 24 LTS.
@@ -33,6 +39,15 @@ npm run dev
 ```
 
 Open `http://localhost:5173/lab`. Each application also opens directly at its route in the table. The portfolio's contact form uses the optional `VITE_WEB3FORMS_ACCESS_KEY` from `.env.example`. Leave it unset for lab-only use. The 3D greeting at `/greeting` uses the existing Spline scene and bundled audio.
+
+To preview the complete Vercel build locally, install both independent workbenches and bundle them with the portfolio.
+
+```sh
+npm --prefix relayops-ai ci
+npm --prefix compute-flow ci
+npm run build:release
+npm run preview
+```
 
 ```sh
 npm run lint
@@ -57,6 +72,8 @@ Open `http://127.0.0.1:4173/lab`. The container includes the browser demos and r
 ```mermaid
 flowchart LR
   Browser[Portfolio and lab launcher] --> Apps[Eight independent React views]
+  Browser --> Scheduling[ComputeFlow discrete-event simulator]
+  Browser --> Workflows[RelayOps offline workflow studio]
   Scenarios[Scenario and 15-minute step] --> Engine[Version 2 simulator]
   Engine --> Ops[RackOps, GPUWatch, PowerOps, VirtScan, InfraPilot]
   Engine --> API[Read-only JSON and health API]

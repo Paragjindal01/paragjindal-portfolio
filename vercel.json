@@ -17,6 +17,10 @@
       "destination": "/relayops/index.html"
     },
     {
+      "source": "/compute-flow",
+      "destination": "/compute-flow/index.html"
+    },
+    {
       "source": "/case-studies",
       "destination": "/index.html"
     },
@@ -25,7 +29,7 @@
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "npm --prefix relayops-ai ci --no-audit --no-fund && npm run build:release",
+  "buildCommand": "npm --prefix relayops-ai ci --no-audit --no-fund && npm --prefix compute-flow ci --no-audit --no-fund && npm run build:release",
   "headers": [
     {
       "source": "/relayops/:path*",
@@ -37,6 +41,19 @@
         {
           "key": "Referrer-Policy",
           "value": "no-referrer"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/compute-flow/:path*",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
         },
         {
           "key": "X-Content-Type-Options",

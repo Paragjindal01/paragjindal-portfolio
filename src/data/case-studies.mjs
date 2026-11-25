@@ -1,4 +1,14 @@
 export const CASE_STUDIES = {
+  'compute-flow': {
+    problem: 'A GPU cluster can leave jobs waiting even with capacity apparently free. Memory, gang placement, power, deadlines, and failures can rule out an otherwise attractive schedule.',
+    objective: 'Compare scheduling policies on identical fictional inputs and inspect the events that produced each outcome.',
+    flow: ['Seeded training and inference arrivals', 'Deterministic arrivals, completions, and GPU failures', 'Queue ordering and feasible GPU allocation', 'Timeline, metrics, and policy comparison'],
+    decision: 'A dependency-free JavaScript engine advances between event times. The browser workbench and Node benchmark use the same simulator. Queue policy and placement strategy are independent configuration choices.',
+    challenge: 'A short backfilled job must preserve the blocked head job’s forecast start. Memory, same-node GPU placement, and simulated power still apply. Device failures release the entire allocation and eligible jobs restart from the beginning.',
+    security: 'The public workbench runs entirely in the browser with fictional clusters, training jobs, and inference jobs. It sends no workload submissions and has no infrastructure credentials.',
+    use: 'Choose a cluster and seed, run a simulation, then scrub the timeline to see queued jobs and GPU assignments. Compare policies with the same inputs and inspect the measured trade-offs.',
+    limits: 'The model uses exclusive GPUs, same-node allocation, and simplified compute and power estimates. No physical hardware measurements or production workload guarantees are implied.',
+  },
   'relayops-ai': {
     problem: 'A workflow can appear successful while losing approvals, inputs, or retry history. A reviewer needs to see what ran and why it advanced.',
     objective: 'Make workflow execution inspectable from graph design through reporting, approval, and replay.',

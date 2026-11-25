@@ -1,13 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { LAB_PROJECTS } from '../src/lab/catalog.mjs';
+import { COMPUTE_FLOW } from '../src/data/projects.mjs';
 
-test('launcher has eight direct routes with mobile layouts and no runtime errors', async ({ page }) => {
+test('launcher preserves eight direct lab routes and links the standalone scheduler', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/lab');
   const cards = page.locator('.lab-card-grid a');
-  await expect(cards).toHaveCount(LAB_PROJECTS.length);
+  await expect(cards).toHaveCount(LAB_PROJECTS.length + 1);
+  await expect(cards.last()).toHaveAttribute('href', COMPUTE_FLOW.links.demo);
   for (const [index, { id }] of LAB_PROJECTS.entries()) {
     await expect(cards.nth(index)).toHaveAttribute('href', `/lab/${id}`);
   }

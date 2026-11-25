@@ -11,7 +11,7 @@
     "test": "playwright test",
     "test:chromium": "playwright test --project=chromium",
     "test:unit": "node --test src/lab/*.test.mjs src/lab/apps/*.test.mjs src/lab/replay/*.test.mjs tools/*.test.mjs packages/simulation/test/*.test.mjs",
-    "build:release": "npm run build && node tools/bundle-relayops.mjs",
+    "build:release": "npm run build && node tools/bundle-demos.mjs",
     "export:standalone": "node tools/export-lab.mjs",
     "verify:standalone": "node tools/verify-standalone.mjs"
   },

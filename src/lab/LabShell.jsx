@@ -1,5 +1,6 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { GITHUB, LAB_PROJECTS, REPOSITORY } from './catalog.mjs';
+import { COMPUTE_FLOW } from '../data/projects.mjs';
 import LabIcon from './LabIcon.jsx';
 import { createSnapshot, SCENARIOS } from './simulator.mjs';
 
@@ -63,7 +64,7 @@ export default function LabShell({ slug }) {
         </> : slug ? <div className="lab-heading"><h1>Application unavailable</h1><p>Choose a project from the engineering lab.</p><a className="site-button site-button-primary" href="/lab">Open lab overview</a></div> : <>
           <div className="lab-heading lab-overview"><span className="eyebrow">Independent projects by Parag Jindal</span><h1>Engineering Lab</h1><p>Eight interactive applications for infrastructure operations, capacity planning, and local AI. Explore the fictional Alder Research Facility or open a standalone tool.</p></div>
           <div className="lab-overview-stats"><div><strong>{snapshot.racks.length}</strong><span>Simulation racks</span></div><div><strong>{snapshot.servers.length}</strong><span>Fictional servers</span></div><div><strong>{SCENARIOS.length}</strong><span>Operational scenarios</span></div></div>
-          <div className="lab-card-grid">{LAB_PROJECTS.map((item) => <a href={routeFor(item.id, scenario)} className="lab-card" key={item.id}><span className="lab-icon"><LabIcon name={item.icon} /></span><span className="eyebrow">{item.area}</span><h2>{item.name}</h2><p>{item.description}</p><span className="lab-card-link">Open application <LabIcon name="arrow" size={16} /></span></a>)}</div>
+          <div className="lab-card-grid">{[...LAB_PROJECTS, COMPUTE_FLOW].map((item) => <a href={item.id === COMPUTE_FLOW.id ? item.links.demo : routeFor(item.id, scenario)} className="lab-card" key={item.id}><span className="lab-icon"><LabIcon name={item.icon} /></span><span className="eyebrow">{item.area}</span><h2>{item.name}</h2><p>{item.description}</p><span className="lab-card-link">Open application <LabIcon name="arrow" size={16} /></span></a>)}</div>
         </>}
         <footer className="lab-footer"><span>Independent engineering portfolio</span><a href={GITHUB}>Parag Jindal</a></footer>
       </main>

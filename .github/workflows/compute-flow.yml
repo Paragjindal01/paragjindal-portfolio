@@ -1,0 +1,49 @@
+name: Verify ComputeFlow
+on:
+  push:
+    paths: ['compute-flow/**', '.github/workflows/compute-flow.yml', 'tools/bundle-demos.mjs', 'vercel.json', 'Dockerfile', '.dockerignore']
+  pull_request:
+    paths: ['compute-flow/**', '.github/workflows/compute-flow.yml', 'tools/bundle-demos.mjs', 'vercel.json', 'Dockerfile', '.dockerignore']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: compute-flow
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: compute-flow/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build -- --base=/compute-flow/
+      - run: npm run benchmark
+      - run: npx playwright install --with-deps
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: compute-flow-browser-results
+          path: compute-flow/test-results/
+          if-no-files-found: ignore
+  portfolio-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build the full portfolio image
+        run: docker build -t portfolio-compute-flow .
+      - name: Smoke-test the integrated demo routes
+        run: |
+          set -euo pipefail
+          container="$(docker run -d -p 127.0.0.1:4173:4173 portfolio-compute-flow)"
+          trap 'docker rm -f "$container" >/dev/null' EXIT
+          base=http://127.0.0.1:4173
+          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 "$base/lab" > /dev/null
+          curl --fail --silent --show-error "$base/relayops/" | grep -q '<title>RelayOps AI'
+          curl --fail --silent --show-error "$base/compute-flow/" | grep -q '<title>ComputeFlow'
