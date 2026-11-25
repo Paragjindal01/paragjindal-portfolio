@@ -9,7 +9,7 @@ import LabIcon from '../lab/LabIcon.jsx';
 const standaloneScreenshots = { [RELAYOPS.id]: relayStudio, [COMPUTE_FLOW.id]: computeFlowWorkbench };
 
 function CaseNavigation() {
-  return <div className="site-header"><div className="site-frame site-topbar"><a className="site-brand" href="/"><span className="brand-symbol">PJ</span>Parag Jindal</a><a className="site-button site-button-outline" href="/lab">Engineering lab <LabIcon name="arrow" size={15} /></a></div></div>;
+  return <div className="site-header"><div className="site-frame site-topbar"><a className="site-brand" href="/"><img alt="" className="site-brand__logo" src="/assets/brand/logo.svg" width={35} height={35} />Parag Jindal</a><a className="site-button site-button-outline" href="/lab">Engineering lab <LabIcon name="arrow" size={15} /></a></div></div>;
 }
 
 export default function ProjectCaseStudy({ slug }) {

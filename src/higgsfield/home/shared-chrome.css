@@ -175,22 +175,11 @@
   text-decoration: none;
 }
 
-:where(.higgsfield-home, .hf-engineering-lab) .monogram {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--line-hot);
-  font-family: var(--display);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--bone);
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
-:where(.higgsfield-home, .hf-engineering-lab) .brand:hover .monogram {
-  background: var(--magenta);
-  color: var(--void);
+:where(.higgsfield-home, .hf-engineering-lab) .brand__logo {
+  display: block;
+  flex: none;
+  width: 40px;
+  height: 40px;
 }
 
 :where(.higgsfield-home, .hf-engineering-lab) .brand__name {
@@ -281,6 +270,10 @@
 }
 
 @media (max-width: 560px) {
+  :where(.higgsfield-home, .hf-engineering-lab) .brand__logo {
+    width: 34px;
+    height: 34px;
+  }
   :where(.higgsfield-home, .hf-engineering-lab) .brand__name {
     font-size: 0.66rem;
   }

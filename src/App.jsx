@@ -10,7 +10,7 @@ const ProjectCaseStudy = lazy(() => import('./components/ProjectCaseStudy.jsx'))
 
 function Greeting() {
   const position = useMotionValue(0);
-  return <div className="engineering-site"><header className="site-header"><div className="site-frame site-topbar"><a className="site-brand" href="/"><span className="brand-symbol">PJ</span> Parag Jindal</a><a href="/">Back to portfolio</a></div></header><main className="site-frame site-greeting"><h1>Interactive 3D greeting</h1><div className="site-spline"><Suspense fallback={<p role="status">Loading 3D greeting…</p>}><SplineHero smoothProgress={position} /></Suspense></div></main></div>;
+  return <div className="engineering-site"><header className="site-header"><div className="site-frame site-topbar"><a className="site-brand" href="/"><img alt="" className="site-brand__logo" src="/assets/brand/logo.svg" width={35} height={35} />Parag Jindal</a><a href="/">Back to portfolio</a></div></header><main className="site-frame site-greeting"><h1>Interactive 3D greeting</h1><div className="site-spline"><Suspense fallback={<p role="status">Loading 3D greeting…</p>}><SplineHero smoothProgress={position} /></Suspense></div></main></div>;
 }
 
 function DemoRedirect({ href }) {

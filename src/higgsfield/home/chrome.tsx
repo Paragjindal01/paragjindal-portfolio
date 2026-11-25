@@ -93,9 +93,7 @@ export function Kinetic({
 export function Brand({ href = "/" }: { href?: string }) {
   return (
     <a className="brand" href={href}>
-      <span aria-hidden="true" className="monogram">
-        PJ
-      </span>
+      <img alt="" className="brand__logo" height={40} src="/assets/brand/logo.svg" width={40} />
       <span className="brand__name">Parag Jindal</span>
     </a>
   );

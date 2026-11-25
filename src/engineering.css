@@ -30,7 +30,7 @@
 .site-header { position: sticky; top: 0; z-index: 12; border-bottom: 1px solid var(--line); background: var(--paper); }
 .site-topbar { min-height: 72px; display: flex; gap: 1.1rem; align-items: center; justify-content: space-between; }
 .site-brand, .lab-brand { display: inline-flex; align-items: center; gap: .68rem; font-weight: 750; letter-spacing: -.035em; white-space: nowrap; }
-.brand-symbol { display: inline-grid; place-items: center; flex: none; width: 35px; height: 35px; background: var(--green); border-radius: 7px; color: #f1f6eb; font: 700 .75rem/1 ui-monospace, Menlo, monospace; }
+.site-brand__logo { display: block; flex: none; width: 35px; height: 35px; }
 .site-topbar nav { display: flex; align-items: center; gap: clamp(.85rem, 2vw, 1.7rem); color: var(--muted); font-size: .88rem; font-weight: 600; }
 .site-topbar nav a:hover, .site-quiet-link:hover { color: var(--green); text-decoration: underline; text-underline-offset: 4px; }
 .site-menu { display: none; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: .6rem .7rem; cursor: pointer; font-size: .85rem; }
