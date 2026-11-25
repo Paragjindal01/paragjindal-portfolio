@@ -37,3 +37,42 @@ jobs:
       - name: Stop Compose
         if: always()
         run: docker compose down
+
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.repository == 'Paragjindal01/paragjindal-portfolio'
+    needs: workflow
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Publish verified source archive
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test "$(gh repo view --json nameWithOwner --jq '.nameWithOwner')" = 'Paragjindal01/paragjindal-portfolio'
+          version="$(node -p 'require("./relayops-ai/package.json").version')"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          tag="relayops-ai-v$version"
+          filename="$tag.tgz"
+          if gh release view "$tag" --json isDraft,assets > "$RUNNER_TEMP/relayops-existing.json" 2>/dev/null; then
+            test "$(jq -r .isDraft "$RUNNER_TEMP/relayops-existing.json")" = false
+            jq -e --arg filename "$filename" 'any(.assets[]; .name == $filename)' "$RUNNER_TEMP/relayops-existing.json" > /dev/null
+            echo "$tag is already published. No release assets changed."
+            exit 0
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "Refusing to reuse tag $tag without a verified release."
+            exit 1
+          else
+            code=$?
+            test "$code" -eq 2
+          fi
+          git archive --format=tar.gz --prefix=relayops-ai/ "$GITHUB_SHA:relayops-ai" > "$RUNNER_TEMP/$filename"
+          (cd "$RUNNER_TEMP" && sha256sum "$filename" > "$tag-SHA256SUMS")
+          gh release create "$tag" --target "$GITHUB_SHA" --title "RelayOps AI v$version" --latest=false \
+            --notes 'Verified source release for the browser-only demo and local SQLite service. Includes workflow studio, reusable templates, signed webhooks, traces, tests, and Docker Compose.' \
+            "$RUNNER_TEMP/$filename" "$RUNNER_TEMP/$tag-SHA256SUMS"

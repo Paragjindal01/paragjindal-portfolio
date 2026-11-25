@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { portfolioMetadata } from './src/data/seo.mjs';
 import { simulationResponse } from './api/simulation.js';
 
 function simulationMiddleware(req, res, next) {
@@ -23,5 +24,5 @@ const localSimulationApi = {
 };
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), localSimulationApi],
+  plugins: [react(), tailwindcss(), portfolioMetadata(), localSimulationApi],
 });

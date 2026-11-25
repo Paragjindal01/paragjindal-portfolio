@@ -4,6 +4,8 @@ RelayOps AI is a visual studio and durable local execution service for building 
 
 [Public offline demo](https://paragjindal.com/relayops/) · [API reference](docs/api.md) · [Security policy](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
+[Conceptual cover artwork](https://github.com/Paragjindal01/paragjindal-portfolio/blob/main/docs/artwork/relayops-ai.webp)
+
 ## Studio and execution trace
 
 ![RelayOps workflow studio](docs/screenshots/studio.webp)

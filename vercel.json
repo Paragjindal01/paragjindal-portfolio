@@ -15,6 +15,14 @@
     {
       "source": "/relayops",
       "destination": "/relayops/index.html"
+    },
+    {
+      "source": "/case-studies",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/case-studies/:project",
+      "destination": "/index.html"
     }
   ],
   "buildCommand": "npm --prefix relayops-ai ci --no-audit --no-fund && npm run build:release",

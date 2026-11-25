@@ -227,3 +227,28 @@
 .relay-feature-preview { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
 .relay-feature-preview img { width: 100%; height: auto; }
 @media (max-width: 720px) { .relay-feature { grid-template-columns: minmax(0, 1fr); } }
+.site-role-list { list-style: none; padding: 0; }
+.site-role-list > li { margin-top: .85rem; }
+.site-role-list > li + li { border-top: 1px solid var(--line); padding-top: .85rem; }
+.site-role-list h4 { font-size: 1.02rem; margin: .2rem 0; }
+.site-role-list ul { list-style: disc; margin: .45rem 0 0 1rem; color: var(--muted); font-size: .86rem; }
+.site-role-list ul > li + li { margin-top: .38rem; }
+.site-technology-groups { display: grid; gap: .9rem; }
+.site-technology-groups h3 { margin-bottom: .32rem; font-size: .88rem; }
+.case-study { max-width: 990px; padding-block: clamp(2rem, 6vw, 5rem); }
+.case-study header { margin-block: 1.3rem 1.9rem; }
+.case-study h1 { font-size: clamp(2.6rem, 6.5vw, 5rem); letter-spacing: -.055em; line-height: 1.02; margin-block: .3rem .65rem; }
+.case-study header p, .case-study-sections p, .case-study-index p { color: var(--muted); }
+.case-study figure { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; overflow: hidden; }
+.case-study figure img { display: block; width: 100%; height: auto; }
+.case-study figcaption { color: var(--muted); border-top: 1px solid var(--line); padding: .6rem .85rem; font-size: .83rem; }
+.case-study-sections { display: grid; gap: 1.5rem; margin-block: 2rem; }
+.case-study-sections section { border-top: 1px solid var(--line); padding-top: 1rem; }
+.case-study-sections h2 { font-size: 1.35rem; margin-bottom: .3rem; }
+.case-study-sections h3 { margin-top: .65rem; }
+.case-study-sections a, .case-study-index a { color: var(--green); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.case-study-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: .5rem; padding: 0; margin: .6rem 0; }
+.case-study-flow li { padding: .45rem .62rem; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); font-size: .86rem; font-weight: 650; }
+.case-study-index { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr)); gap: .75rem; }
+.case-study-index li { padding: .8rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); }
+.case-study-index li a { display: inline-flex; align-items: center; gap: .35rem; }

@@ -1,0 +1,13 @@
+# Public engineering quality benchmark
+
+Reviewed the requested [Harshksaw public profile](https://github.com/Harshksaw) and recent public repositories on November 25, 2026. The review used repository metadata, public documentation, and HTTP checks of the referenced deployment. Architecture and workflow claims below are scoped to the evidence shown by each project.
+
+| Public work | Observed evidence | Standard for this portfolio |
+| --- | --- | --- |
+| [Interactive 3D portfolio](https://github.com/Harshksaw/Portfolio) | Documents React, TypeScript, Three.js, React Three Fiber, and GSAP, separates areas of the experience, and points to a [Vercel URL](https://portfolio-harshksaw.vercel.app) that returned HTTP 404 during this check. The latest listed [Lighthouse CI run](https://github.com/Harshksaw/Portfolio/actions/runs/27170188152) was unsuccessful | Keep cinematic presentation independent of application entry points, then measure the actual imported media and mobile behavior once the design is available. |
+| [Job Machine](https://github.com/Harshksaw/job-machine) | Describes browser automation, a local service, startup checks, a successful [CI run](https://github.com/Harshksaw/job-machine/actions/runs/44943177790), and a documented [architecture](https://github.com/Harshksaw/job-machine/blob/main/docs/ARCHITECTURE.md) | Publish runnable setup, visible workflow verification, clear boundaries for integrations, and a reproducible case study. |
+| [AI Research Report Generation](https://github.com/Harshksaw/AI-Research-Report-Generation) | Shows a backend/front end, Docker Compose, CI/deployment files, and a successful [CodeQL run](https://github.com/Harshksaw/AI-Research-Report-Generation/actions/runs/28611506889) | Make RelayOps research evidence and samples explicit, then document the durable execution path, trace, and measured result. |
+| [Public multi-agent workflow repository](https://github.com/Harshksaw/career-ops) | Documents parallel worker modes, browser tooling, data contracts, and pipeline checks | Demonstrate dependency-aware concurrency, idempotency, retry and approval enforcement with real tests. |
+| [Self-hosted monitoring notes](https://github.com/Harshksaw/AI-Terminal-agent) | Documents separate hub and agent Compose setup | Keep public demos isolated from operational data and verify optional local setup independently. |
+
+Portfolio performance must be evaluated from measurements of the actual build. Repository metadata and declared stacks do not establish a performance ranking. Project naming, visual identity, implementation, and personal content are independent.

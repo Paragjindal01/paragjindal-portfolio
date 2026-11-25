@@ -15,6 +15,10 @@ Eight browser-based engineering demonstrations and a personal portfolio for AI i
 | StorageCalc | [Capacity and resilience](https://paragjindal.com/lab/storagecalc) | [StorageCalc](docs/projects/storagecalc.md) |
 | LocalMind | [Document retrieval](https://paragjindal.com/lab/localmind) | [LocalMind](docs/projects/localmind.md) |
 
+## Product evidence and integration
+
+[Technical case studies](https://paragjindal.com/case-studies) pair an actual app screenshot with architecture, implementation choices, test evidence, and limitations. [Presentation integration](docs/design-integration.md) documents the data and route contracts for the future Higgsfield export. See the [public engineering benchmark](docs/engineering-quality.md), [mobile Lighthouse baseline](docs/performance-baseline.md), and [flagship cover artwork](docs/artwork/) for supporting evidence.
+
 ## RelayOps AI
 
 [Open the offline workflow studio](https://paragjindal.com/relayops/) or see the [RelayOps source and local SQLite setup](relayops-ai/README.md). The Vercel release build bundles the browser-local version alongside the portfolio.
