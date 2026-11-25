@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Comparison, Metrics, Queue, Resources, Timeline } from './Panels.jsx';
 import { format } from './format.mjs';
+import LabMasthead from './design/LabMasthead.jsx';
 import './workbench.css';
 
 const DEVICES_NOTE = 'Each multi-GPU job needs its requested devices on the same node.';
@@ -267,6 +268,7 @@ export default function App({ presets, policies, generateWorkloads, simulate, co
 
   return (
     <>
+      <LabMasthead title="ComputeFlow" index="10" category="Scheduling" description="Compare GPU scheduling policies on the same workload and replay each queue decision." source="https://github.com/Paragjindal01/compute-flow" status="Live demo · Synthetic data" />
       <header className="site-header">
         <div className="header-inner">
           <a className="wordmark" href="#main"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>ComputeFlow</a>

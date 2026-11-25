@@ -1,0 +1,517 @@
+/* ---------- sound toggle ---------- */
+
+:where(.higgsfield-home) .sound-toggle {
+  position: fixed;
+  left: var(--gutter);
+  bottom: clamp(0.85rem, 2vw, 1.5rem);
+  z-index: 80;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  background: rgba(6, 5, 10, 0.74);
+  backdrop-filter: blur(8px);
+  color: var(--smoke);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+:where(.higgsfield-home) .sound-toggle:hover {
+  color: var(--bone);
+  border-color: rgba(255, 46, 126, 0.55);
+  background: rgba(6, 5, 10, 0.9);
+}
+
+:where(.higgsfield-home) .sound-toggle[aria-pressed="true"] {
+  color: var(--bone);
+  border-color: rgba(79, 227, 255, 0.5);
+}
+
+:where(.higgsfield-home) .sound-toggle__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+:where(.higgsfield-home) .sound-toggle__bars i {
+  display: block;
+  width: 2px;
+  height: 3px;
+  background: currentColor;
+  transition: height 0.3s ease;
+}
+
+:where(.higgsfield-home) .sound-toggle[aria-pressed="true"] .sound-toggle__bars i {
+  animation: sound-bar 0.85s ease-in-out infinite alternate;
+}
+
+:where(.higgsfield-home) .sound-toggle[aria-pressed="true"] .sound-toggle__bars i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+:where(.higgsfield-home) .sound-toggle[aria-pressed="true"] .sound-toggle__bars i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+:where(.higgsfield-home) .sound-toggle[aria-pressed="true"] .sound-toggle__bars i:nth-child(4) {
+  animation-delay: 0.09s;
+}
+
+@keyframes sound-bar {
+  from {
+    height: 3px;
+  }
+  to {
+    height: 12px;
+  }
+}
+
+/* ---------- episode card button reset ---------- */
+
+:where(.higgsfield-home) .episode[data-card="true"] {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:where(.higgsfield-home) .episode[data-card="true"]:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+:where(.higgsfield-home) .episode__open {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+:where(.higgsfield-home) .episode[data-card="true"]:hover .episode__open,
+:where(.higgsfield-home) .episode[data-card="true"]:focus-visible .episode__open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- dossier modal ---------- */
+
+:where(.higgsfield-home) .modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.6rem, 2.2vw, 1.8rem);
+}
+
+:where(.higgsfield-home) .modal__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 2, 6, 0.88);
+  backdrop-filter: blur(12px) saturate(120%);
+  animation: scrim-in 0.4s ease both;
+}
+
+:where(.higgsfield-home) .modal[data-state="out"] .modal__scrim {
+  animation: scrim-out 0.34s ease-in both;
+}
+
+:where(.higgsfield-home) .modal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1180px, 100%);
+  height: min(92dvh, 100%);
+  overflow: hidden;
+  background: var(--void);
+  border: 1px solid var(--line-hot);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(79, 227, 255, 0.12);
+}
+
+:where(.higgsfield-home) .modal[data-state="in"] .modal__panel {
+  animation: panel-in 0.54s cubic-bezier(0.16, 0.8, 0.2, 1) both;
+}
+
+:where(.higgsfield-home) .modal[data-state="out"] .modal__panel {
+  animation: panel-out 0.34s ease-in both;
+}
+
+:where(.higgsfield-home) .modal__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 4;
+  padding: 0.85rem 1rem;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(6, 5, 10, 0.85);
+  color: var(--bone);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.25s ease, background 0.25s ease;
+}
+
+:where(.higgsfield-home) .modal__close:hover {
+  color: var(--magenta);
+  background: rgba(6, 5, 10, 0.98);
+}
+
+:where(.higgsfield-home) .modal__scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 46, 126, 0.5) transparent;
+}
+
+:where(.higgsfield-home) .modal__still {
+  position: relative;
+  margin: 0;
+  height: clamp(230px, 40vh, 440px);
+  overflow: hidden;
+  border-bottom: 1px solid var(--line-hot);
+}
+
+:where(.higgsfield-home) .modal__still img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.15) contrast(1.03);
+  animation: still-drift 14s ease-out both;
+}
+
+:where(.higgsfield-home) .modal__still::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 90px rgba(255, 46, 126, 0.22),
+    inset 0 -60px 90px rgba(6, 5, 10, 0.9);
+}
+
+:where(.higgsfield-home) .modal__still-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.06) 0px,
+    rgba(255, 255, 255, 0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+:where(.higgsfield-home) .modal__still figcaption {
+  position: absolute;
+  left: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(0.8rem, 2vw, 1.2rem);
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .modal__body {
+  padding: clamp(1.4rem, 4vw, 3rem);
+}
+
+:where(.higgsfield-home) .modal__kicker {
+  margin: 0 0 0.9rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+:where(.higgsfield-home) .modal__kicker span {
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .modal__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(2rem, 4.8vw, 4.2rem);
+  line-height: 0.87;
+  letter-spacing: 0.005em;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .modal[data-state="in"] .modal__title {
+  animation: ca-title 0.85s cubic-bezier(0.16, 0.8, 0.2, 1) both;
+}
+
+:where(.higgsfield-home) .modal__summary {
+  margin: 1.1rem 0 0;
+  max-width: 62ch;
+  color: #cfc9d8;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+:where(.higgsfield-home) .modal__sections {
+  display: grid;
+  margin-top: clamp(1.6rem, 3vw, 2.4rem);
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .modal__section {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  padding: 1.15rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .modal__label {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  padding-top: 0.2rem;
+}
+
+:where(.higgsfield-home) .modal__text {
+  margin: 0;
+  max-width: 64ch;
+  color: #b8b1c2;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+:where(.higgsfield-home) .modal__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.higgsfield-home) .modal__stack li {
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .modal__hint {
+  margin: clamp(1.8rem, 3vw, 2.6rem) 0 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: scale(1.035) translateY(16px);
+    filter: blur(10px) saturate(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes panel-out {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.985) translateY(-10px);
+    filter: blur(7px);
+  }
+}
+
+@keyframes ca-title {
+  0% {
+    text-shadow: -16px 0 rgba(255, 46, 126, 0.9), 16px 0 rgba(79, 227, 255, 0.9);
+    letter-spacing: 0.05em;
+  }
+  55% {
+    text-shadow: -3px 0 rgba(255, 46, 126, 0.45),
+      3px 0 rgba(79, 227, 255, 0.45);
+  }
+  100% {
+    text-shadow: 0 0 rgba(255, 46, 126, 0), 0 0 rgba(79, 227, 255, 0);
+    letter-spacing: 0.005em;
+  }
+}
+
+@keyframes still-drift {
+  from {
+    transform: scale(1.11) translate3d(1.6%, -1.4%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  :where(.higgsfield-home) .modal__section {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  :where(.higgsfield-home) .modal__still {
+    height: clamp(180px, 28vh, 280px);
+  }
+  :where(.higgsfield-home) .sound-toggle {
+    font-size: 0.66rem;
+    padding: 0.45rem 0.55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.higgsfield-home) .modal__panel,
+  :where(.higgsfield-home) .modal__scrim,
+  :where(.higgsfield-home) .modal__title,
+  :where(.higgsfield-home) .modal__still img {
+    animation: none !important;
+  }
+  :where(.higgsfield-home) .sound-toggle__bars i {
+    animation: none !important;
+  }
+}
+
+/* ---------- legibility pass (from rendered review) ---------- */
+
+:where(.higgsfield-home) .modal .modal__close {
+  padding: 1rem 1.15rem;
+  font-size: 0.66rem;
+  background: rgba(6, 5, 10, 0.96);
+  box-shadow: 0 0 0 1px rgba(255, 46, 126, 0.35);
+}
+
+:where(.higgsfield-home) .modal .modal__close:hover {
+  box-shadow: 0 0 0 1px var(--magenta);
+}
+
+:where(.higgsfield-home) .modal .modal__label {
+  color: var(--cyan);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+}
+
+:where(.higgsfield-home) .modal .modal__section {
+  padding: 1.5rem 0;
+}
+
+:where(.higgsfield-home) .modal .modal__text {
+  border-left: 1px solid var(--line);
+  padding-left: clamp(1rem, 2vw, 1.6rem);
+  color: #c6bfd2;
+}
+
+:where(.higgsfield-home) .modal .modal__stack li {
+  font-size: 0.66rem;
+  padding: 0.35rem 0.6rem;
+  border-color: rgba(245, 242, 234, 0.24);
+}
+
+:where(.higgsfield-home) .modal .modal__summary {
+  color: #ded8e6;
+}
+
+:where(.higgsfield-home) .sound-toggle {
+  font-size: 0.66rem;
+  padding: 0.6rem 0.8rem;
+  color: #a9a2b4;
+}
+
+/* ---------- one left axis for the dossier body ---------- */
+
+:where(.higgsfield-home) .modal .modal__section {
+  display: block;
+  padding: 1.55rem 0;
+}
+
+:where(.higgsfield-home) .modal .modal__label {
+  margin-bottom: 0.55rem;
+}
+
+:where(.higgsfield-home) .modal .modal__text {
+  border-left: 0;
+  padding-left: 0;
+  max-width: 74ch;
+}
+
+:where(.higgsfield-home) .modal .modal__close {
+  top: 0.8rem;
+  right: 0.8rem;
+  border: 1px solid rgba(255, 46, 126, 0.45);
+  padding: 0.85rem 1.05rem;
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .modal .modal__sections {
+  margin-top: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+:where(.higgsfield-home) .modal .modal__summary {
+  max-width: 68ch;
+}
+
+:where(.higgsfield-home) .modal .modal__still figcaption {
+  left: clamp(1.4rem, 4vw, 3rem);
+  bottom: clamp(1rem, 2.2vw, 1.5rem);
+  font-size: 0.66rem;
+  color: #ded8e6;
+}

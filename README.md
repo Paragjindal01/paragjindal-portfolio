@@ -17,7 +17,7 @@ The personal portfolio includes eight infrastructure lab applications, the indep
 
 ## Product evidence and integration
 
-[Technical case studies](https://paragjindal.com/case-studies) pair an actual app screenshot with architecture, implementation choices, test evidence, and limitations. [Presentation integration](docs/design-integration.md) documents the data and route contracts for the future Higgsfield export. See the [public engineering benchmark](docs/engineering-quality.md), [mobile Lighthouse baseline](docs/performance-baseline.md), and [flagship cover artwork](docs/artwork/) for supporting evidence.
+[Technical case studies](https://paragjindal.com/case-studies) pair an actual app screenshot with architecture, implementation choices, test evidence, and limitations. [Presentation integration](docs/design-integration.md) documents how the Higgsfield design uses the portfolio’s existing application routes and data. See the [public engineering benchmark](docs/engineering-quality.md), [mobile Lighthouse baseline](docs/performance-baseline.md), and [flagship cover artwork](docs/artwork/) for supporting evidence.
 
 ## RelayOps AI
 

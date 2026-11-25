@@ -7,6 +7,7 @@ import Studio, { startTemplate } from './Studio.jsx';
 import Execution from './Execution.jsx';
 import { Agents, Evaluation, Integrations, Overview, Reports, Settings } from './Views.jsx';
 import { pretty } from './format.mjs';
+import LabMasthead from './design/LabMasthead.jsx';
 import './styles.css';
 
 const routes = [
@@ -107,7 +108,9 @@ function App() {
   const title = routes.find(([id]) => id === page)?.[1];
   const warning = client.warning();
 
-  return <div className="app-shell"><a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content').focus(); }}>Skip to main content</a>
+  return <><a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content').focus(); }}>Skip to main content</a>
+    <LabMasthead title="RelayOps AI" index="01" category="Orchestration" description="Read each workflow step, inspect its result, and review the human approval gate." source="https://github.com/Paragjindal01/relayops-ai" status={client.mode === 'offline' ? 'Live demo · Synthetic data' : 'Local SQLite workspace'} />
+    <div className="app-shell">
     <aside className="sidebar" data-open={open}>
       <a className="brand" href="#overview" onClick={() => go('overview')}><span><Icon name="brand" size={20} /></span><strong>RelayOps <b>AI</b></strong></a>
       <button type="button" className="icon-button nav-toggle" aria-controls="main-navigation" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)}><Icon name={open ? 'close' : 'menu'} /></button>
@@ -115,7 +118,7 @@ function App() {
       <div className="sidebar-foot"><span className="node-icon"><Icon name="approval" size={15} /></span><div><strong>{client.mode === 'offline' ? 'Private browser session' : 'Isolated local session'}</strong><small>{client.mode === 'offline' ? 'Stored on this device' : 'Backed by SQLite'}</small></div></div>
     </aside>
     <div className="main-shell"><header className="topbar"><div><span>Workspace</span><Icon name="chevron" size={12} /><strong>{title}</strong></div><span className="environment"><i aria-hidden="true" />{client.mode === 'offline' ? 'Offline demonstration' : 'Local service'}</span></header><main id="main-content" className="page-content" tabIndex={-1}>{globalError && <p className="notice failure" role="alert">{globalError}</p>}{warning && <p className="notice failure" role="status">{warning}</p>}{views[page]}</main></div>
-  </div>;
+  </div></>;
 }
 
 createRoot(document.getElementById('root')).render(<App />);

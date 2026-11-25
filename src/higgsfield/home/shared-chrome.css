@@ -1,0 +1,363 @@
+@font-face {
+  font-family: "Anton";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/anton-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-700.woff2") format("woff2");
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) {
+  --void: #06050a;
+  --panel: #0c0a12;
+  --bone: #f5f2ea;
+  --smoke: #9a93a6;
+  --magenta: #ff2e7e;
+  --cyan: #4fe3ff;
+  --silver: #c9d2d6;
+  --muted: var(--smoke);
+  --line: rgba(245, 242, 234, 0.14);
+  --line-hot: rgba(255, 46, 126, 0.55);
+  --display: "Anton", "Arial Narrow", sans-serif;
+  --body: "Space Grotesk", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --gutter: clamp(1.15rem, 5vw, 5rem);
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-toggle,
+:where(.higgsfield-home, .hf-engineering-lab) .nav-links .nav-link--mobile {
+  display: none;
+}
+
+/* ---------- cinematic overlays ---------- */
+
+:where(.higgsfield-home, .hf-engineering-lab) .grain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 42%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  mix-blend-mode: overlay;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .scan {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 91;
+  height: 34vh;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(79, 227, 255, 0.05) 60%,
+    rgba(255, 46, 126, 0.05)
+  );
+  animation: hf-scan-drift 9s linear infinite;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 95;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 1px solid var(--cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  transition: width 0.22s ease, height 0.22s ease, border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .cursor[data-hover="true"] {
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-color: var(--magenta);
+  background: rgba(255, 46, 126, 0.16);
+}
+
+@media (hover: none), (pointer: coarse) {
+  :where(.higgsfield-home, .hf-engineering-lab) .cursor {
+    display: none;
+  }
+}
+
+/* ---------- nav ---------- */
+
+:where(.higgsfield-home, .hf-engineering-lab) .site-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  height: 70px;
+  padding: 0 var(--gutter);
+  background: linear-gradient(
+    to bottom,
+    rgba(6, 5, 10, 0.92),
+    rgba(6, 5, 10, 0.55) 70%,
+    transparent
+  );
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .site-nav::after {
+  content: "";
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .monogram {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-hot);
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .brand:hover .monogram {
+  background: var(--magenta);
+  color: var(--void);
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .brand__name {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-right {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2.4vw, 2.2rem);
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-links {
+  display: flex;
+  gap: clamp(0.9rem, 2vw, 1.8rem);
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-link {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--smoke);
+  text-decoration: none;
+  padding: 0.4rem 0;
+  transition: color 0.25s ease;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-link:hover {
+  color: var(--bone);
+  text-shadow: -1px 0 var(--magenta), 1px 0 var(--cyan);
+}
+
+/* ---------- CTAs ---------- */
+
+:where(.higgsfield-home, .hf-engineering-lab) .cta-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bone);
+  text-decoration: none;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line-hot);
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .cta-text:hover {
+  color: var(--magenta);
+  border-bottom-color: var(--cyan);
+}
+
+/* ---------- motion ---------- */
+
+@keyframes hf-scan-drift {
+  from {
+    transform: translateY(-40vh);
+  }
+  to {
+    transform: translateY(140vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.higgsfield-home, .hf-engineering-lab) .scan {
+    animation: none;
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .cursor {
+    display: none;
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 860px) {
+  :where(.higgsfield-home, .hf-engineering-lab) .site-nav {
+    height: 62px;
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  :where(.higgsfield-home, .hf-engineering-lab) .brand__name {
+    font-size: 0.66rem;
+  }
+}
+
+/* ---------- legibility pass (from rendered review) ---------- */
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-link {
+  font-size: 0.66rem;
+  color: #a9a2b4;
+}
+
+:where(.higgsfield-home, .hf-engineering-lab) .cta-text {
+  font-size: 0.68rem;
+}
+
+/* micro-type floor: nothing below 10px in normal reading zones */
+
+:where(.higgsfield-home, .hf-engineering-lab) .nav-link,
+:where(.higgsfield-home, .hf-engineering-lab) .cta-text {
+  font-size: 0.66rem;
+}
+
+/* touch targets */
+@media (pointer: coarse), (max-width: 900px) {
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-link,
+  :where(.higgsfield-home, .hf-engineering-lab) .cta-text {
+    min-height: 40px;
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-link,
+  :where(.higgsfield-home, .hf-engineering-lab) .cta-text {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* phones: the chapter rail is redundant with scroll and cannot be tapped
+   comfortably, so it steps aside and the progress bar carries orientation */
+
+/* Keep the design's compact header and expose its section links on touch screens. */
+@media (max-width: 860px) {
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.35rem 0.45rem;
+    border: 1px solid var(--line);
+    color: var(--bone);
+    background: var(--panel);
+    font: 500 0.66rem/1 var(--mono);
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-links[data-open="true"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    position: absolute;
+    inset: 61px var(--gutter) auto auto;
+    width: min(21rem, calc(100vw - 2 * var(--gutter)));
+    z-index: 72;
+    padding: 0.45rem 0.9rem;
+    background: var(--panel);
+    border: 1px solid var(--line-hot);
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-links .nav-link--mobile {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 375px) {
+  :where(.higgsfield-home, .hf-engineering-lab) .site-nav {
+    gap: 0.5rem;
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .nav-right {
+    gap: 0.45rem;
+  }
+  :where(.higgsfield-home, .hf-engineering-lab) .brand__name {
+    letter-spacing: 0.09em;
+  }
+}

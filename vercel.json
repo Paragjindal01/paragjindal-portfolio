@@ -1,4 +1,9 @@
 {
+  "redirects": [
+    { "source": "/lab/infrapilot", "destination": "/lab/infrapilot-ai", "permanent": true },
+    { "source": "/lab/:demo(relayops|relayops-ai)", "destination": "/relayops/", "permanent": true },
+    { "source": "/lab/:demo(computeflow|compute-flow)", "destination": "/compute-flow/", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/lab",

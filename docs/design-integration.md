@@ -1,6 +1,6 @@
 # Portfolio presentation integration
 
-The current React/Vite portfolio remains the published presentation. The future Higgsfield export can present the same engineering products through the following existing interfaces.
+The Higgsfield portfolio export at revision `abf3f80` supplies the cinematic homepage, lab index, tool mastheads, and interface styling. The portfolio uses React and Vite and serves the media from its own deployment.
 
 | Surface | Stable source or route |
 | --- | --- |
@@ -10,7 +10,9 @@ The current React/Vite portfolio remains the published presentation. The future 
 | Contact and external profile links | `src/components/ContactSection.jsx`, professional data, `VITE_WEB3FORMS_ACCESS_KEY` |
 | Browser routes and deployments | `src/data/routes.mjs`, `vercel.json`, and both Vite configurations |
 | Structured metadata | `src/data/seo.mjs`, injected into the HTML by Vite |
-| Engineering applications | `/lab`, `/lab/:app`, `/relayops/` |
+| Engineering applications | `/lab`, `/lab/:app`, `/relayops/`, `/compute-flow/` |
+| Cinematic homepage and shared navigation | `src/higgsfield/home`, `public/assets`, `public/fonts` |
+| Lab index and shared tool theme | `src/lab/LabOverview.jsx`, `src/lab/LabShell.jsx`, `src/higgsfield/lab` |
 | Simulator snapshot API | `GET /api/simulation` |
 | Optional existing 3D experience | `/greeting`, lazy-loaded Spline component |
 | GitHub profile text | `node tools/render-github-profile.mjs` |
@@ -19,8 +21,8 @@ The current React/Vite portfolio remains the published presentation. The future 
 
 The catalog’s `standaloneRepositoryUrl` and `links.source` point to the individual GitHub repositories. The `links.demo` and `links.caseStudy` entries continue to identify the portfolio’s public routes.
 
-## When the export arrives
+## How the presentation uses the existing applications
 
-Inspect the exported component and dependency graph, licenses, responsive variants, 3D load boundaries, media sources and deployment expectations. Import self-contained presentation components when their framework and licensing permit. Keep the established route and API contracts, configure any old-path redirects before release, and preserve existing contact behavior and metadata.
+Lab navigation mounts the existing interactive React tools. Scenario and time controls continue to drive the original simulator. RelayOps uses its existing browser workflow engine on the public site and its SQLite service locally. ComputeFlow uses the same deterministic scheduler, benchmarks, and controls. Canonical demos, standalone source repositories, and case studies come from the project catalog.
 
-Store approved media and source in durable personal hosting. Encode video variants after inspecting the actual media, provide a mobile-appropriate poster or reduced-motion still, and reserve dimensions before media loads. Keep large animation dependencies independent of contact, applications, and navigation. Test keyboard access, media fallback, motion settings, mobile sizes, and page metrics against the existing baseline before deploying the design. The current scope does not include generating or modifying the cinematic homepage.
+The original desktop and mobile clips and their posters are served locally. The homepage renders the poster first and offers stills for reduced motion. The JetBrains Mono font files were encoded as WOFF2 while retaining their glyphs and metrics. The original contact form, professional metadata, and optional 3D greeting have independent entry points.

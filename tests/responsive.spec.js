@@ -37,7 +37,8 @@ const VIEWPORTS = [
   { w: 3440, h: 1440, label: 'ultrawide-3440' },
 ];
 
-const SECTIONS = ['#home', '#about', '#services', '#projects', '#software', '#experience', '#stack', '#github', '#contact'];
+const SECTIONS = ['#home', '#lab', '#story', '#work', '#about', '#services', '#projects', '#software', '#experience', '#stack', '#github', '#contact'];
+const ready = (page) => expect(page.getByRole('heading', { level: 1, name: 'Parag Jindal', exact: true })).toBeVisible();
 
 async function assertNoHorizontalOverflow(page) {
   const result = await page.evaluate(() => ({
@@ -78,6 +79,7 @@ test.describe('horizontal overflow matrix', () => {
       await page.setViewportSize({ width: w, height: h });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/');
+      await ready(page);
       // Top of page
       await assertNoHorizontalOverflow(page);
       await assertElementsInsideViewport(page);
@@ -108,8 +110,10 @@ test.describe('console and network health', () => {
         failures.push(`${res.url()} — HTTP ${res.status()}`);
       }
     });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
-    for (const screenshot of await page.locator('.site-project-preview img').all()) {
+    await ready(page);
+    for (const screenshot of await page.locator('.higgsfield-home img[loading="lazy"]:visible').all()) {
       await screenshot.scrollIntoViewIfNeeded();
       await expect.poll(() => screenshot.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
     }
@@ -149,27 +153,25 @@ test.describe('mobile menu', () => {
 
 test.describe('hero', () => {
   test('text is visible immediately and buttons work', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('Parag Jindal');
-    const hero = page.locator('.site-hero');
-    for (const [name, target] of [
-      ['Open the lab', '/lab'],
-      ['View My Work', '#projects'],
-      ['Open 3D greeting', '/greeting'],
-    ]) {
-      const link = hero.getByRole('link', { name });
-      await expect(link).toBeVisible();
-      await expect(link).toHaveAttribute('href', target);
-    }
-    await hero.getByRole('link', { name: 'Open the lab' }).click();
+    await ready(page);
+    const lab = page.locator('.scroll-scrub').getByRole('link', { name: 'Walk the lab', exact: true });
+    await expect(lab).toHaveAttribute('href', '#lab');
+    await expect(page.getByRole('link', { name: 'Open 3D greeting' })).toHaveAttribute('href', '/greeting');
+    await expect.poll(() => page.locator('.scroll-scrub__poster').first().evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
+    await lab.click();
+    const openLab = page.getByRole('link', { name: 'Enter the full lab' });
+    await expect(openLab).toHaveAttribute('href', '/lab');
+    await openLab.click();
     await expect(page.getByRole('heading', { name: 'Engineering Lab', exact: true })).toBeVisible();
   });
 
   test('anchor navigation reaches every section', async ({ page }) => {
     await page.goto('/');
+    await ready(page);
     for (const anchor of SECTIONS) {
-      const exists = await page.locator(anchor).count();
-      expect(exists, `${anchor} missing`).toBeGreaterThan(0);
+      expect(await page.locator(anchor).count(), `Expected one target for ${anchor}`).toBe(1);
     }
   });
 });

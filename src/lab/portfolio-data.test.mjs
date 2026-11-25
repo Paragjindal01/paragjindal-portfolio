@@ -40,6 +40,9 @@ test('centralized project data retains every lab route and supplies a real scree
   assert.equal(SIMULATION_REPOSITORY, 'https://github.com/Paragjindal01/infra-simulation');
   assert.equal(COMPUTE_FLOW.links.demo, '/compute-flow/');
   assert.equal(RELAYOPS.links.demo, '/relayops/');
+  assert.deepEqual(resolvePortfolioRoute('/lab/infrapilot'), { page: 'lab', slug: 'infrapilot-ai' });
+  assert.deepEqual(resolvePortfolioRoute('/lab/relayops'), { page: 'demo-redirect', href: RELAYOPS.links.demo });
+  assert.deepEqual(resolvePortfolioRoute('/lab/computeflow'), { page: 'demo-redirect', href: COMPUTE_FLOW.links.demo });
   assert.equal(RELAYOPS.links.release, 'https://github.com/Paragjindal01/paragjindal-portfolio/releases/tag/relayops-ai-v0.1.0');
   assert.deepEqual(resolvePortfolioRoute('/greeting'), { page: 'greeting' });
 });

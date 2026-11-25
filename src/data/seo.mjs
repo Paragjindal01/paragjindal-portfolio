@@ -47,7 +47,9 @@ export function portfolioMetadata() {
         ['name', 'description', SEO_DESCRIPTION], ['name', 'author', CONTACT.name],
         ['property', 'og:type', 'website'], ['property', 'og:url', url], ['property', 'og:title', SEO_TITLE],
         ['property', 'og:description', SEO_DESCRIPTION], ['property', 'og:site_name', CONTACT.name],
-        ['name', 'twitter:card', 'summary'], ['name', 'twitter:title', SEO_TITLE], ['name', 'twitter:description', SEO_DESCRIPTION],
+        ['property', 'og:image', `${url}assets/brand/og.png`],
+        ['name', 'twitter:card', 'summary_large_image'], ['name', 'twitter:title', SEO_TITLE], ['name', 'twitter:description', SEO_DESCRIPTION],
+        ['name', 'twitter:image', `${url}assets/brand/og.png`],
       ];
       return [
         { tag: 'title', children: SEO_TITLE },

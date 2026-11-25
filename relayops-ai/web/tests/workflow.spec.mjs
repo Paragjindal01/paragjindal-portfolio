@@ -38,6 +38,7 @@ test('runs and replays a critical incident with a durable approval trail', async
 test('edits and versions a graph, then imports a validated definition', async ({ page }) => {
   await page.goto('/relayops/');
   const node = page.getByRole('button', { name: 'Select Normalize telemetry node' });
+  await node.scrollIntoViewIfNeeded();
   const original = await node.getAttribute('style');
   const rectangle = await node.boundingBox();
   await page.mouse.move(rectangle.x + 15, rectangle.y + 20);

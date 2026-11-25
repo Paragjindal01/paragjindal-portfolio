@@ -1,0 +1,1631 @@
+html:has(.higgsfield-home) {
+  background: var(--void);
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+.higgsfield-home {
+  margin: 0;
+  background: var(--void);
+  color: var(--bone);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+:where(.higgsfield-home) *,
+:where(.higgsfield-home) *::before,
+:where(.higgsfield-home) *::after {
+  box-sizing: border-box;
+}
+
+:where(.higgsfield-home) ::selection {
+  background: var(--magenta);
+  color: var(--void);
+}
+
+:where(.higgsfield-home) a {
+  color: inherit;
+}
+
+:where(.higgsfield-home) :focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+/* ---------- journey typography ---------- */
+
+:where(.higgsfield-home) .scroll-scrub {
+  font-family: var(--body);
+}
+
+:where(.higgsfield-home) .scroll-scrub__title {
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.86;
+  font-size: clamp(2.8rem, 6.4vw, 7rem);
+  max-width: 15ch;
+  text-shadow: 0 0 40px rgba(6, 5, 10, 0.9);
+}
+
+:where(.higgsfield-home) .scroll-scrub__kicker {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+
+:where(.higgsfield-home) .scroll-scrub__kicker::before {
+  content: "[ ";
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .scroll-scrub__kicker::after {
+  content: " ]";
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .scroll-scrub__body {
+  font-family: var(--body);
+  color: #cfc9d8;
+  font-size: clamp(0.98rem, 1.3vw, 1.12rem);
+  max-width: 40ch;
+}
+
+:where(.higgsfield-home) .scroll-scrub__copy {
+  width: min(38rem, 46vw);
+}
+
+:where(.higgsfield-home) .scroll-scrub__copy::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(6, 5, 10, 0.9) 0%,
+    rgba(6, 5, 10, 0.55) 55%,
+    transparent 78%
+  );
+}
+
+:where(.higgsfield-home) .scroll-scrub__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.4rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+:where(.higgsfield-home) .scroll-scrub__tags li {
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.5rem;
+  color: var(--bone);
+  background: rgba(6, 5, 10, 0.45);
+}
+
+:where(.higgsfield-home) .scroll-scrub__progress {
+  height: 2px;
+  background: rgba(245, 242, 234, 0.12);
+}
+
+:where(.higgsfield-home) .scroll-scrub__progress span {
+  background: linear-gradient(90deg, var(--magenta), var(--cyan));
+}
+
+:where(.higgsfield-home) .scroll-scrub__route {
+  top: 50%;
+  right: clamp(0.75rem, 2vw, 1.6rem);
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+:where(.higgsfield-home) .scroll-scrub__route-button {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(245, 242, 234, 0.45);
+  padding: 0.35rem 0;
+  min-height: 0;
+}
+
+:where(.higgsfield-home) .scroll-scrub__route-button span::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 1px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  background: var(--magenta);
+  transition: width 0.3s ease;
+}
+
+:where(.higgsfield-home) .scroll-scrub__route-button:hover span::after,
+:where(.higgsfield-home) .scroll-scrub__route-button[aria-current="step"] span::after {
+  width: 1.6rem;
+}
+
+:where(.higgsfield-home) .scroll-scrub__route-button[aria-current="step"] {
+  color: var(--bone);
+  text-decoration: none;
+}
+
+:where(.higgsfield-home) .chapter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.8rem;
+}
+
+:where(.higgsfield-home) .chapter-actions .cta-ghost,
+:where(.higgsfield-home) .chapter-actions .cta-primary {
+  font-size: 0.66rem;
+}
+
+/* ---------- CTAs ---------- */
+
+:where(.higgsfield-home) .cta-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--magenta);
+  color: #10040a;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 92% 100%, 0 100%);
+  transition: transform 0.18s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+:where(.higgsfield-home) .cta-primary:hover {
+  background: #ff5c9a;
+  box-shadow: -4px 4px 0 rgba(79, 227, 255, 0.55);
+}
+
+:where(.higgsfield-home) .cta-primary:active {
+  transform: translateY(1px);
+}
+
+:where(.higgsfield-home) .cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid rgba(245, 242, 234, 0.4);
+  background: rgba(6, 5, 10, 0.3);
+  color: var(--bone);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+:where(.higgsfield-home) .cta-ghost:hover {
+  background: var(--bone);
+  color: var(--void);
+  border-color: var(--bone);
+}
+
+:where(.higgsfield-home) .cta-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--smoke);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+:where(.higgsfield-home) .cta-top::before {
+  content: "";
+  width: 1.2rem;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+:where(.higgsfield-home) .cta-top:hover {
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .cta-top:hover::before {
+  width: 2.2rem;
+  background: var(--magenta);
+}
+
+/* ---------- marquee ---------- */
+
+:where(.higgsfield-home) .marquee {
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(12, 10, 18, 0.6);
+  padding: 0.7rem 0;
+}
+
+:where(.higgsfield-home) .marquee__track {
+  display: flex;
+  gap: 2.5rem;
+  width: max-content;
+  animation: hf-marquee 38s linear infinite;
+}
+
+:where(.higgsfield-home) .marquee span {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(245, 242, 234, 0.55);
+  white-space: nowrap;
+}
+
+:where(.higgsfield-home) .marquee span b {
+  color: var(--magenta);
+  font-weight: 500;
+}
+
+/* ---------- sections ---------- */
+
+:where(.higgsfield-home) .section {
+  position: relative;
+  padding: clamp(4.5rem, 9vw, 8.5rem) var(--gutter);
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .section__head {
+  position: relative;
+  max-width: 62rem;
+}
+
+:where(.higgsfield-home) .section__number {
+  position: absolute;
+  top: clamp(-3rem, -4vw, -2rem);
+  left: 0;
+  font-family: var(--display);
+  font-size: clamp(4rem, 11vw, 9rem);
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(245, 242, 234, 0.16);
+  pointer-events: none;
+  user-select: none;
+}
+
+:where(.higgsfield-home) .eyebrow {
+  margin: 0 0 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+:where(.higgsfield-home) .eyebrow::before {
+  content: "[ ";
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .eyebrow::after {
+  content: " ]";
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .display {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(2.3rem, 5.4vw, 4.8rem);
+  line-height: 0.88;
+  letter-spacing: 0.005em;
+  color: var(--bone);
+  max-width: 18ch;
+}
+
+:where(.higgsfield-home) .kinetic {
+  display: inline;
+}
+
+:where(.higgsfield-home) .kinetic__word {
+  display: inline-block;
+}
+
+:where(.higgsfield-home) .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:where(.higgsfield-home) .kinetic__word > span {
+  display: inline-block;
+  animation: hf-letter-rise 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 0.022s);
+}
+
+:where(.higgsfield-home) .lede {
+  margin: 1.25rem 0 0;
+  max-width: 56ch;
+  color: #b8b1c2;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+/* ---------- lab index ---------- */
+
+:where(.higgsfield-home) .index {
+  position: relative;
+  margin-top: clamp(2.2rem, 4.5vw, 3.4rem);
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .index__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr) minmax(0, 1.3fr) 9rem 1rem;
+  align-items: center;
+  gap: clamp(0.7rem, 1.8vw, 1.6rem);
+  padding: 1.15rem 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.3s ease, padding 0.3s ease;
+}
+
+:where(.higgsfield-home) .index__row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--magenta), transparent);
+  transition: width 0.35s ease;
+  opacity: 0.35;
+}
+
+:where(.higgsfield-home) .index__row:hover {
+  padding-left: 1rem;
+}
+
+:where(.higgsfield-home) .index__row:hover::before {
+  width: 3px;
+  opacity: 1;
+}
+
+:where(.higgsfield-home) .index__num {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--smoke);
+}
+
+:where(.higgsfield-home) .index__name {
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: clamp(1.15rem, 1.9vw, 1.6rem);
+  letter-spacing: 0.015em;
+  color: var(--bone);
+  transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+:where(.higgsfield-home) .index__row:hover .index__name {
+  color: #ffffff;
+  text-shadow: -2px 0 var(--magenta), 2px 0 var(--cyan);
+}
+
+:where(.higgsfield-home) .index__desc {
+  color: #b8b1c2;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+:where(.higgsfield-home) .index__cat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  color: var(--smoke);
+  text-align: right;
+}
+
+:where(.higgsfield-home) .index__status {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  border: 1px solid rgba(79, 227, 255, 0.4);
+  padding: 0.12rem 0.3rem;
+}
+
+:where(.higgsfield-home) .index__arrow {
+  justify-self: end;
+  color: var(--magenta);
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+:where(.higgsfield-home) .index__row:hover .index__arrow {
+  transform: translateX(5px);
+}
+
+:where(.higgsfield-home) .index__preview {
+  position: absolute;
+  z-index: 8;
+  right: clamp(0rem, 3vw, 2rem);
+  width: min(26rem, 32vw);
+  pointer-events: none;
+  border: 1px solid var(--line-hot);
+  background: var(--panel);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(79, 227, 255, 0.15);
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:where(.higgsfield-home) .index__preview[data-on="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+:where(.higgsfield-home) .index__preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(1.15) contrast(1.05);
+}
+
+:where(.higgsfield-home) .index__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-top: 1.2rem;
+}
+
+:where(.higgsfield-home) .index__foot p {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+/* ---------- episodes (story) ---------- */
+
+:where(.higgsfield-home) .episodes {
+  margin-top: clamp(2.2rem, 4.5vw, 3.4rem);
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .episode {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) 10rem;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  padding: clamp(1.4rem, 2.6vw, 2rem);
+  background: var(--void);
+  align-items: start;
+  transition: background 0.35s ease;
+}
+
+:where(.higgsfield-home) .episode:hover {
+  background: var(--panel);
+}
+
+:where(.higgsfield-home) .episode__num {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 0.9;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 46, 126, 0.75);
+  letter-spacing: 0.02em;
+}
+
+:where(.higgsfield-home) .episode__tag {
+  margin: 0 0 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--cyan);
+}
+
+:where(.higgsfield-home) .episode__title {
+  margin: 0;
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.3vw, 1.9rem);
+  line-height: 0.95;
+  letter-spacing: 0.015em;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .episode__desc {
+  margin: 0.6rem 0 0;
+  max-width: 56ch;
+  color: #b8b1c2;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+:where(.higgsfield-home) .episode__meta {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--smoke);
+  text-align: right;
+}
+
+/* ---------- work ---------- */
+
+:where(.higgsfield-home) .work__grid {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: clamp(1.5rem, 3.5vw, 3rem);
+  margin-top: clamp(2.2rem, 4.5vw, 3.4rem);
+}
+
+:where(.higgsfield-home) .work__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1.5rem 1.4rem 1.6rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(255, 46, 126, 0.06), transparent 55%);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+:where(.higgsfield-home) .work__cell:hover {
+  border-color: var(--line-hot);
+  transform: translateY(-2px);
+}
+
+:where(.higgsfield-home) .work__cell--wide {
+  border-color: rgba(245, 242, 234, 0.22);
+  background: linear-gradient(160deg, rgba(79, 227, 255, 0.07), transparent 60%);
+}
+
+:where(.higgsfield-home) .work__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--cyan);
+}
+
+:where(.higgsfield-home) .work__title {
+  margin: 0;
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.7vw, 2.3rem);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .work__cell--wide .work__title {
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+}
+
+:where(.higgsfield-home) .work__desc {
+  margin: 0;
+  max-width: 48ch;
+  color: #b8b1c2;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+:where(.higgsfield-home) .work__stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+:where(.higgsfield-home) .work__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+:where(.higgsfield-home) .work__earlier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.4rem;
+  margin-top: clamp(1.8rem, 3vw, 2.4rem);
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .work__earlier p {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--smoke);
+}
+
+/* ---------- experience ---------- */
+
+:where(.higgsfield-home) .timeline {
+  margin-top: clamp(2.2rem, 4.5vw, 3.4rem);
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .timeline__item {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 3rem);
+  padding: clamp(1.3rem, 2.4vw, 2rem) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .timeline__date {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  padding-top: 0.35rem;
+}
+
+:where(.higgsfield-home) .timeline__role {
+  margin: 0;
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  line-height: 0.95;
+  letter-spacing: 0.015em;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .timeline__org {
+  margin: 0.4rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+:where(.higgsfield-home) .timeline__desc {
+  margin: 0.7rem 0 0;
+  max-width: 62ch;
+  color: #b8b1c2;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* ---------- bento ---------- */
+
+:where(.higgsfield-home) .bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: clamp(2.2rem, 4.5vw, 3.4rem);
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .bento__cell {
+  background: var(--void);
+  padding: clamp(1.2rem, 2vw, 1.9rem);
+  min-height: 11rem;
+}
+
+:where(.higgsfield-home) .bento__photo {
+  grid-column: span 5;
+  grid-row: span 2;
+  padding: 0;
+  min-height: 26rem;
+  overflow: hidden;
+}
+
+:where(.higgsfield-home) .bento__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.1) contrast(1.05);
+  transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:where(.higgsfield-home) .bento__photo:hover img {
+  transform: scale(1.04);
+}
+
+:where(.higgsfield-home) .bento__figure {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+:where(.higgsfield-home) .bento__figure strong {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(3.5rem, 7vw, 6rem);
+  line-height: 0.8;
+  color: var(--magenta);
+  text-shadow: 4px 4px 0 rgba(79, 227, 255, 0.25);
+}
+
+:where(.higgsfield-home) .bento__figure span {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+:where(.higgsfield-home) .bento__list {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  justify-content: center;
+}
+
+:where(.higgsfield-home) .bento__list p {
+  margin: 0;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--line-hot);
+  color: #b8b1c2;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+:where(.higgsfield-home) .bento__note {
+  grid-column: span 7;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+:where(.higgsfield-home) .bento__note p {
+  margin: 0;
+  max-width: 36ch;
+  color: #b8b1c2;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+/* ---------- about ---------- */
+
+:where(.higgsfield-home) .about {
+  position: relative;
+  padding: clamp(4.5rem, 9vw, 8.5rem) var(--gutter);
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .about__grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+:where(.higgsfield-home) .about__media {
+  position: relative;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+:where(.higgsfield-home) .about__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(1.1);
+}
+
+:where(.higgsfield-home) .about__media figcaption {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding: 0.6rem 0.8rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone);
+  background: linear-gradient(to top, rgba(6, 5, 10, 0.9), transparent);
+}
+
+:where(.higgsfield-home) .about__lead {
+  margin: 0 0 1.5rem;
+  max-width: 20ch;
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: clamp(1.9rem, 3.6vw, 3rem);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .about__text p {
+  margin: 0 0 1.1rem;
+  max-width: 58ch;
+  color: #b8b1c2;
+  font-size: 0.97rem;
+  line-height: 1.7;
+}
+
+:where(.higgsfield-home) .about__text p:last-child {
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .about__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 2rem;
+}
+
+:where(.higgsfield-home) .about__note {
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  line-height: 1.7;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+/* ---------- handover ---------- */
+
+:where(.higgsfield-home) .handover {
+  position: relative;
+  padding: clamp(5rem, 11vw, 9rem) var(--gutter) clamp(3.5rem, 7vw, 5.5rem);
+  border-top: 1px solid var(--line);
+  background: radial-gradient(
+    ellipse at 20% 0%,
+    rgba(255, 46, 126, 0.14),
+    transparent 55%
+  );
+}
+
+:where(.higgsfield-home) .statement {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 6.6vw, 6rem);
+  line-height: 0.86;
+  letter-spacing: 0.005em;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .handover__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: clamp(1.8rem, 3.5vw, 2.5rem);
+}
+
+:where(.higgsfield-home) .contact-rows {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  border-top: 1px solid var(--line);
+}
+
+:where(.higgsfield-home) .contact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1.2rem 1.2rem 1.2rem 0;
+  border-right: 1px solid var(--line);
+  text-decoration: none;
+}
+
+:where(.higgsfield-home) .contact-row:last-child {
+  border-right: 0;
+}
+
+:where(.higgsfield-home) .contact-row span {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--smoke);
+}
+
+:where(.higgsfield-home) .contact-row strong {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--bone);
+  transition: color 0.25s ease;
+}
+
+:where(.higgsfield-home) a.contact-row:hover strong {
+  color: var(--magenta);
+}
+
+/* ---------- footer ---------- */
+
+:where(.higgsfield-home) .higgsfield-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 1.6rem var(--gutter) 2rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+:where(.higgsfield-home) .higgsfield-footer nav {
+  display: flex;
+  gap: 1.2rem;
+}
+
+/* ---------- motion ---------- */
+
+@keyframes hf-letter-rise {
+  from {
+    transform: translateY(0.55em);
+    opacity: 0.001;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes hf-fade-rise {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hf-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+:where(.higgsfield-home) .rise {
+  animation: hf-fade-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+:where(.higgsfield-home) .rise-2 {
+  animation: hf-fade-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+
+:where(.higgsfield-home) .rise-3 {
+  animation: hf-fade-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.higgsfield-home) {
+    scroll-behavior: auto;
+  }
+  :where(.higgsfield-home) .rise,
+  :where(.higgsfield-home) .rise-2,
+  :where(.higgsfield-home) .rise-3,
+  :where(.higgsfield-home) .kinetic span {
+    animation: none;
+    opacity: 1;
+  }
+  :where(.higgsfield-home) .marquee__track {
+    animation: none;
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1100px) {
+  :where(.higgsfield-home) .index__row {
+    grid-template-columns: 2.4rem minmax(0, 1fr) 1rem;
+    row-gap: 0.3rem;
+  }
+  :where(.higgsfield-home) .index__desc {
+    grid-column: 2 / 3;
+  }
+  :where(.higgsfield-home) .index__cat {
+    grid-column: 2 / 3;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+  :where(.higgsfield-home) .index__preview {
+    display: none;
+  }
+  :where(.higgsfield-home) .episode {
+    grid-template-columns: 5rem minmax(0, 1fr);
+  }
+  :where(.higgsfield-home) .episode__meta {
+    display: none;
+  }
+  :where(.higgsfield-home) .bento__photo {
+    grid-column: span 12;
+    grid-row: auto;
+    min-height: 18rem;
+  }
+  :where(.higgsfield-home) .bento__figure,
+  :where(.higgsfield-home) .bento__list,
+  :where(.higgsfield-home) .bento__note {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 860px) {
+  :where(.higgsfield-home) .work__grid {
+    grid-template-columns: 1fr;
+  }
+  :where(.higgsfield-home) .about__grid {
+    grid-template-columns: 1fr;
+  }
+  :where(.higgsfield-home) .timeline__item {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  :where(.higgsfield-home) .contact-rows {
+    grid-template-columns: 1fr 1fr;
+  }
+  :where(.higgsfield-home) .contact-row {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  :where(.higgsfield-home) .scroll-scrub__copy {
+    width: min(32rem, 84vw);
+  }
+  :where(.higgsfield-home) .scroll-scrub__copy::before {
+    inset: -1.5rem -1.5rem;
+  }
+  :where(.higgsfield-home) .scroll-scrub__route {
+    flex-direction: row;
+    top: auto;
+    bottom: 1rem;
+    right: var(--gutter);
+    left: var(--gutter);
+    transform: none;
+    gap: 0.2rem;
+    flex-wrap: wrap;
+  }
+  :where(.higgsfield-home) .scroll-scrub__route-button {
+    font-size: 0.66rem;
+    padding: 0.3rem 0.35rem;
+  }
+  :where(.higgsfield-home) .scroll-scrub__route-button span::after {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  :where(.higgsfield-home) .contact-rows {
+    grid-template-columns: 1fr;
+  }
+  :where(.higgsfield-home) .section__number {
+    display: none;
+  }
+  :where(.higgsfield-home) .work__cell {
+    padding: 1.2rem 1rem 1.3rem;
+  }
+}
+
+/* ---------- engine overrides ----------
+ * The scroll-scrub stylesheet is bundled after this file and sets several of
+ * these properties with equal specificity, so every override here is scoped to
+ * .scroll-scrub to win on specificity rather than on load order.
+ */
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__title {
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.86;
+  font-size: clamp(2.6rem, 6vw, 6.4rem);
+  max-width: 15ch;
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__kicker {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  max-width: 34ch;
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__body {
+  font-family: var(--body);
+  font-size: clamp(0.98rem, 1.25vw, 1.1rem);
+  line-height: 1.55;
+  color: #cfc9d8;
+  max-width: 40ch;
+  margin-top: 1.4rem;
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__copy {
+  width: min(38rem, 46vw);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__tags {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__progress span {
+  background: linear-gradient(90deg, var(--magenta), var(--cyan));
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route {
+  top: 50%;
+  right: clamp(0.75rem, 2vw, 1.6rem);
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 0.45rem;
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.3rem 0;
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__route {
+    top: auto;
+    bottom: 0.85rem;
+    right: var(--gutter);
+    left: var(--gutter);
+    transform: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.15rem;
+  }
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button {
+    font-size: 0.66rem;
+  }
+}
+
+/* ---------- legibility pass (from rendered review) ---------- */
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__copy::before {
+  inset: -3.5rem -6rem;
+  background: radial-gradient(
+    ellipse at 35% 50%,
+    rgba(6, 5, 10, 0.97) 0%,
+    rgba(6, 5, 10, 0.86) 42%,
+    rgba(6, 5, 10, 0.4) 70%,
+    transparent 88%
+  );
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__body {
+  color: #ded8e6;
+  text-shadow: 0 1px 12px rgba(6, 5, 10, 0.85);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button {
+  color: rgba(245, 242, 234, 0.62);
+  font-size: 0.66rem;
+  text-shadow: 0 1px 8px rgba(6, 5, 10, 0.9);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button:hover,
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button[aria-current="step"] {
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button[aria-current="step"]::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  background: var(--magenta);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__tags {
+  gap: 0;
+  color: rgba(245, 242, 234, 0.72);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__tags li {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: rgba(245, 242, 234, 0.72);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__tags li + li::before {
+  content: "/";
+  margin: 0 0.55rem;
+  color: var(--magenta);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route {
+  gap: 0.3rem;
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button {
+  font-size: 0.66rem;
+  color: rgba(245, 242, 234, 0.78);
+  padding: 0.4rem 0.55rem;
+  background: rgba(6, 5, 10, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button:hover,
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button[aria-current="step"] {
+  color: #ffffff;
+  background: rgba(6, 5, 10, 0.7);
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__kicker {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #7ce9ff;
+  text-shadow: 0 1px 10px rgba(6, 5, 10, 0.9);
+}
+
+/* bento: fill the second row so no dead column remains */
+
+:where(.higgsfield-home) .bento__slot {
+  grid-column: span 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.1rem;
+}
+
+:where(.higgsfield-home) .bento__slot p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+:where(.higgsfield-home) .bento__slot .bento__slot-label {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+@media (max-width: 1100px) {
+  :where(.higgsfield-home) .bento__slot {
+    grid-column: span 12;
+  }
+}
+
+:where(.higgsfield-home) .bento__note {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+:where(.higgsfield-home) .bento__note-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+:where(.higgsfield-home) .bento__note-col p {
+  max-width: 32ch;
+}
+
+:where(.higgsfield-home) .bento__figure {
+  gap: 1rem;
+}
+
+:where(.higgsfield-home) .bento__figure-rows {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+
+:where(.higgsfield-home) .bento__figure-rows p {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+:where(.higgsfield-home) .bento__figure-rows b {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+}
+
+/* ---------- responsive + accessibility pass ---------- */
+
+html:has(.higgsfield-home),
+.higgsfield-home {
+  overflow-x: clip;
+}
+
+/* micro-type floor: nothing below 10px in normal reading zones */
+:where(.higgsfield-home) .chip {
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .index__num,
+:where(.higgsfield-home) .index__cat {
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .index__status {
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .episode__tag,
+:where(.higgsfield-home) .episode__meta,
+:where(.higgsfield-home) .episode__open {
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .work__meta,
+:where(.higgsfield-home) .work__earlier p {
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .timeline__org,
+:where(.higgsfield-home) .about__note,
+:where(.higgsfield-home) .higgsfield-footer,
+:where(.higgsfield-home) .sound-toggle {
+  font-size: 0.66rem;
+}
+
+:where(.higgsfield-home) .marquee span {
+  font-size: 0.66rem;
+}
+
+/* iPhone safe areas */
+:where(.higgsfield-home) .sound-toggle {
+  bottom: calc(clamp(0.85rem, 2vw, 1.5rem) + env(safe-area-inset-bottom, 0px));
+  left: max(var(--gutter), env(safe-area-inset-left, 0px));
+}
+
+:where(.higgsfield-home) .higgsfield-footer {
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* chapter rail must never sit under the sound toggle */
+@media (max-width: 900px) {
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__route {
+    left: auto;
+    right: max(var(--gutter), env(safe-area-inset-right, 0px));
+    bottom: calc(3.6rem + env(safe-area-inset-bottom, 0px));
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    max-width: 46vw;
+  }
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__route-button {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.66rem;
+  }
+}
+
+/* touch targets */
+@media (pointer: coarse), (max-width: 900px) {
+  :where(.higgsfield-home) .sound-toggle {
+    min-height: 40px;
+  }
+  :where(.higgsfield-home) .sound-toggle {
+    display: inline-flex;
+    align-items: center;
+  }
+  :where(.higgsfield-home) .index__row {
+    padding-top: 1.35rem;
+    padding-bottom: 1.35rem;
+  }
+}
+
+/* phones: the chapter rail is redundant with scroll and cannot be tapped
+   comfortably, so it steps aside and the progress bar carries orientation */
+@media (max-width: 560px) {
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__route {
+    display: none;
+  }
+  :where(.higgsfield-home) .sound-toggle {
+    bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+:where(.higgsfield-home) .scroll-scrub .scroll-scrub__tags li {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: #e8e2f0;
+  border-color: rgba(245, 242, 234, 0.30);
+}
+
+@media (max-width: 900px) {
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__copy::before {
+    inset: -1.2rem -1.4rem;
+    background: linear-gradient(
+      to top,
+      rgba(6, 5, 10, 0.96) 0%,
+      rgba(6, 5, 10, 0.74) 62%,
+      transparent 100%
+    );
+  }
+}
+
+@media (max-width: 560px) {
+  :where(.higgsfield-home) .scroll-scrub .scroll-scrub__chapter-pin {
+    padding-top: 4.75rem;
+    padding-bottom: 6.5rem;
+  }
+}
+
+/* Established portfolio routes and real engineering data use the exported visual language. */
+html:has(.higgsfield-home) {
+  background: #06050a;
+}
+
+:where(.higgsfield-home) [id] {
+  scroll-margin-top: 78px;
+}
+
+:where(.higgsfield-home) .higgsfield-skip {
+  position: fixed;
+  top: 0;
+  left: var(--gutter);
+  z-index: 101;
+  transform: translateY(-130%);
+  padding: 0.65rem 0.95rem;
+  background: var(--bone);
+  color: var(--void);
+  font: 500 0.8rem/1.3 var(--mono);
+}
+
+:where(.higgsfield-home) .higgsfield-skip:focus {
+  transform: translateY(0);
+}
+
+:where(.higgsfield-home) .higgsfield-heading {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+:where(.higgsfield-home) .index__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.7rem;
+}
+
+:where(.higgsfield-home) .timeline__company {
+  margin: 0;
+  padding: 1.4rem 0 0.5rem;
+  color: var(--cyan);
+  font: 500 0.72rem/1.3 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+:where(.higgsfield-home) .timeline__details {
+  margin-top: 0.6rem;
+  max-width: 62ch;
+  color: var(--smoke);
+  font-size: 0.88rem;
+}
+
+:where(.higgsfield-home) .timeline__details summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--bone);
+}
+
+:where(.higgsfield-home) .timeline__details ul {
+  list-style: disc;
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+}
+
+:where(.higgsfield-home) .timeline__details li + li {
+  margin-top: 0.35rem;
+}
+
+:where(.higgsfield-home) #contact {
+  --color-text-primary: var(--bone);
+  --color-text-secondary: #d9d1e0;
+  --color-text-muted: var(--smoke);
+  --color-accent-cyan: var(--cyan);
+  --color-accent-coral: #ff739f;
+}
+
+:where(.higgsfield-home) #contact .glass-card {
+  border-radius: 0;
+  background: var(--panel);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.higgsfield-home) {
+    scroll-behavior: auto;
+  }
+}

@@ -1,17 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { LAB_PROJECTS } from '../src/lab/catalog.mjs';
-import { COMPUTE_FLOW } from '../src/data/projects.mjs';
+import { LAB_TOOLS } from '../src/lab/lab-design.mjs';
 
-test('launcher preserves eight direct lab routes and links the standalone scheduler', async ({ page }) => {
+test('launcher lists all ten real tools and preserves the eight direct lab routes', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/lab');
-  const cards = page.locator('.lab-card-grid a');
-  await expect(cards).toHaveCount(LAB_PROJECTS.length + 1);
-  await expect(cards.last()).toHaveAttribute('href', COMPUTE_FLOW.links.demo);
-  for (const [index, { id }] of LAB_PROJECTS.entries()) {
-    await expect(cards.nth(index)).toHaveAttribute('href', `/lab/${id}`);
+  const tools = page.locator('.index__row');
+  await expect(tools).toHaveCount(10);
+  for (const [index, tool] of LAB_TOOLS.entries()) {
+    await expect(tools.nth(index)).toHaveAttribute('href', tool.links.demo);
   }
   for (const { id, name } of LAB_PROJECTS) {
     await page.goto(`/lab/${id}`);
@@ -22,6 +21,19 @@ test('launcher preserves eight direct lab routes and links the standalone schedu
   expect(errors).toEqual([]);
   await page.getByRole('link', { name: 'Lab overview', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Engineering Lab', exact: true })).toBeVisible();
+});
+
+test('final lab search filters categories and restores the complete index', async ({ page }) => {
+  await page.goto('/lab');
+  const tools = page.locator('.index__row');
+  const search = page.getByRole('searchbox', { name: 'Search' });
+  await search.fill('inference');
+  await expect(tools).toContainText(['ComputeFlow']);
+  await page.getByRole('group', { name: 'Filter by category' }).getByRole('button', { name: 'Power 1' }).click();
+  await expect(page.getByText('No system matches “inference”.')).toBeVisible();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(tools).toHaveCount(10);
+  await expect(page.getByRole('status')).toHaveText('10 of 10 systems');
 });
 
 test('scenario links preserve the scenario and advance the deterministic clock', async ({ page }) => {

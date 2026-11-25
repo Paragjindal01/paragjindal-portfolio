@@ -1,9 +1,12 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
-import { GITHUB, LAB_PROJECTS, REPOSITORY } from './catalog.mjs';
-import { COMPUTE_FLOW } from '../data/projects.mjs';
-import LabIcon from './LabIcon.jsx';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Cursor, SiteNav } from '../higgsfield/home/chrome.tsx';
+import { GITHUB, REPOSITORY } from './catalog.mjs';
+import { LAB_TOOLS, toolHref } from './lab-design.mjs';
 import { createSnapshot, SCENARIOS } from './simulator.mjs';
+import '../higgsfield/home/shared-chrome.css';
+import '../higgsfield/lab/engineering-lab.css';
 
+const LabOverview = lazy(() => import('./LabOverview.jsx'));
 const applications = {
   rackops: lazy(() => import('./apps/RackOps.jsx')),
   gpuwatch: lazy(() => import('./apps/GPUWatch.jsx')),
@@ -15,13 +18,65 @@ const applications = {
   localmind: lazy(() => import('./apps/LocalMind.jsx')),
 };
 
-function routeFor(id, scenario) {
-  return `/lab/${id}${scenario === 'normal' ? '' : `?scenario=${scenario}`}`;
+function LabHero({ overview, project, slug, snapshot }) {
+  const title = project?.name ?? (slug ? 'Application unavailable' : 'Engineering Lab');
+  return <header className="labhero">
+    <div aria-hidden="true" className="labhero__art"><img alt="" decoding="async" fetchPriority="high" src={project?.art ?? '/assets/world/hall-01-poster.jpg'} /></div>
+    <div className="labhero__inner">
+      <div className="labhero__crumb">
+        <a href="/">Portfolio</a><i aria-hidden="true">/</i><a href="/lab">Engineering lab</a><i aria-hidden="true">/</i>
+        <span>{project ? `${project.number} / ${project.category}` : 'Overview'}</span>
+      </div>
+      <h1 className="labhero__title">{title}</h1>
+      <p className="labhero__sub">{project?.description ?? (slug ? 'Choose a project from the engineering lab.' : 'My independent projects run on synthetic data from the fictional Alder Research Facility. Explore each tool, try an incident scenario, and see how the software responds.')}</p>
+      {overview && <div className="labhero__facts">
+        <span className="chip">Tools <strong>{LAB_TOOLS.length}</strong></span>
+        <span className="chip">Servers <strong>{snapshot.servers.length}</strong></span>
+        <span className="chip chip--cool">Scenarios <strong>{String(SCENARIOS.length).padStart(2, '0')}</strong></span>
+        <span className="chip chip--hot">Synthetic data</span>
+      </div>}
+      {project && <div className="labhero__facts">
+        {project.simulation && <span className="chip chip--hot">Synthetic data</span>}
+        <a className="chip" href={project.links.source}>Source <span aria-hidden="true">↗</span></a>
+        <a className="chip chip--cool" href={project.links.caseStudy}>Case study <span aria-hidden="true">↗</span></a>
+        {project.id === 'infrapilot-ai' && <a className="chip" href="#incident-replay">Incident replay <span aria-hidden="true">↓</span></a>}
+      </div>}
+    </div>
+  </header>;
+}
+
+function LabNavigation({ project, scenario }) {
+  return <nav aria-label="Engineering applications" className="labswitch">
+    <a aria-current={!project ? 'page' : undefined} aria-label="Lab overview" data-on={!project ? 'true' : undefined} href="/lab">Overview</a>
+    {LAB_TOOLS.map((tool) => <a key={tool.id} href={toolHref(tool, scenario)} aria-current={project?.id === tool.id ? 'page' : undefined} data-on={project?.id === tool.id ? 'true' : undefined}>
+      <span aria-hidden="true">{tool.code} · </span>{tool.name}
+    </a>)}
+  </nav>;
+}
+
+function ScenarioControls({ snapshot, scenario, setScenario, advance }) {
+  return <div className="lab-scenario">
+    <div><strong><span className="status-dot" /> Simulated telemetry</strong><small>{snapshot.facilities[0].name} · step {snapshot.step}</small></div>
+    <div className="lab-controls">
+      <label>Scenario<select value={scenario} onChange={(event) => setScenario(event.target.value)}>{SCENARIOS.map((item) => <option key={item} value={item}>{item[0].toUpperCase() + item.slice(1)}</option>)}</select></label>
+      <button type="button" onClick={advance}>Advance 15 min</button>
+    </div>
+  </div>;
+}
+
+function ReplayAnchor({ enabled }) {
+  useEffect(() => {
+    if (enabled && window.location.hash === '#incident-replay') {
+      document.getElementById('incident-replay')?.scrollIntoView();
+    }
+  }, [enabled]);
+  return null;
 }
 
 export default function LabShell({ slug }) {
   const query = new URLSearchParams(window.location.search);
-  const project = LAB_PROJECTS.find(({ id }) => id === slug);
+  const Application = applications[slug];
+  const project = Application && LAB_TOOLS.find(({ id }) => id === slug);
   const requestedScenario = query.get('scenario');
   const [scenario, updateScenario] = useState(SCENARIOS.includes(requestedScenario) ? requestedScenario : 'normal');
   const [step, setStep] = useState(() => {
@@ -29,7 +84,7 @@ export default function LabShell({ slug }) {
     return Number.isSafeInteger(initial) && initial >= 0 && initial < 96 ? initial : 0;
   });
   const snapshot = useMemo(() => createSnapshot({ scenario, step }), [scenario, step]);
-  const Application = applications[slug];
+
   function setScenario(value) {
     if (!SCENARIOS.includes(value)) return;
     const url = new URL(window.location.href);
@@ -48,26 +103,25 @@ export default function LabShell({ slug }) {
     setStep(next);
   }
 
-  return <div className="lab-shell">
-    <a className="skip-link" href="#lab-main">Skip to application</a>
-    <header className="lab-header"><a className="lab-brand" href="/lab"><span className="brand-symbol"><LabIcon name="grid" size={17} /></span> Engineering Lab</a><div><a href="/">Portfolio</a><a href={REPOSITORY}>GitHub <LabIcon name="external" size={15} /></a></div></header>
-    <div className="lab-workspace">
-      <nav className="lab-sidebar" aria-label="Engineering applications">
-        <a className="sidebar-overview" href="/lab" aria-current={slug ? undefined : 'page'}><LabIcon name="grid" size={17} /> Lab overview</a>
-        {LAB_PROJECTS.map((item) => <a key={item.id} href={routeFor(item.id, scenario)} aria-current={slug === item.id ? 'page' : undefined}><LabIcon name={item.icon} size={17} />{item.name}</a>)}
-      </nav>
-      <main id="lab-main" className="lab-main" tabIndex={-1}>
-        {project ? <>
-          <div className="lab-heading"><span className="eyebrow">{project.area}</span><h1>{project.name}</h1><p>{project.description}</p><div className="lab-heading-links"><a href={project.links.source}>Source <LabIcon name="external" size={14} /></a><a href={project.links.caseStudy}>Case study <LabIcon name="external" size={14} /></a></div></div>
-          {project.simulation && <div className="lab-scenario"><div><strong><span className="status-dot" /> Simulated telemetry</strong><small>{snapshot.facilities[0].name} · step {snapshot.step}</small></div><div className="lab-controls"><label>Scenario<select value={scenario} onChange={(event) => setScenario(event.target.value)}>{SCENARIOS.map((item) => <option key={item} value={item}>{item[0].toUpperCase() + item.slice(1)}</option>)}</select></label><button type="button" onClick={advance}>Advance 15 min</button></div></div>}
-          <Suspense fallback={<p role="status">Loading {project.name}…</p>}><Application snapshot={snapshot} scenario={scenario} setScenario={setScenario} /></Suspense>
-        </> : slug ? <div className="lab-heading"><h1>Application unavailable</h1><p>Choose a project from the engineering lab.</p><a className="site-button site-button-primary" href="/lab">Open lab overview</a></div> : <>
-          <div className="lab-heading lab-overview"><span className="eyebrow">Independent projects by Parag Jindal</span><h1>Engineering Lab</h1><p>Eight interactive applications for infrastructure operations, capacity planning, and local AI. Explore the fictional Alder Research Facility or open a standalone tool.</p></div>
-          <div className="lab-overview-stats"><div><strong>{snapshot.racks.length}</strong><span>Simulation racks</span></div><div><strong>{snapshot.servers.length}</strong><span>Fictional servers</span></div><div><strong>{SCENARIOS.length}</strong><span>Operational scenarios</span></div></div>
-          <div className="lab-card-grid">{[...LAB_PROJECTS, COMPUTE_FLOW].map((item) => <a href={item.id === COMPUTE_FLOW.id ? item.links.demo : routeFor(item.id, scenario)} className="lab-card" key={item.id}><span className="lab-icon"><LabIcon name={item.icon} /></span><span className="eyebrow">{item.area}</span><h2>{item.name}</h2><p>{item.description}</p><span className="lab-card-link">Open application <LabIcon name="arrow" size={16} /></span></a>)}</div>
-        </>}
-        <footer className="lab-footer"><span>Independent engineering portfolio</span><a href={GITHUB}>Parag Jindal</a></footer>
-      </main>
-    </div>
+  return <div className="lab-shell hf-engineering-lab">
+    <a className="skip-link" href="#lab-main">Skip to {project ? 'application' : 'lab index'}</a>
+    <Cursor />
+    <div aria-hidden="true" className="grain" />
+    <div aria-hidden="true" className="scan" />
+    <SiteNav insideHome={false} />
+    <LabHero overview={!slug} project={project} slug={slug} snapshot={snapshot} />
+    <LabNavigation project={project} scenario={scenario} />
+    <main className="labbody lab-main" id="lab-main" tabIndex={-1}>
+      {project ? <>
+        {project.simulation && <ScenarioControls snapshot={snapshot} scenario={scenario} setScenario={setScenario} advance={advance} />}
+        <Suspense fallback={<p role="status">Loading {project.name}…</p>}>
+          <Application snapshot={snapshot} scenario={scenario} setScenario={setScenario} />
+          <ReplayAnchor enabled={project.id === 'infrapilot-ai'} />
+        </Suspense>
+      </> : slug ? <a className="cta-text" href="/lab">Open lab overview <span aria-hidden="true">↗</span></a> : (
+        <Suspense fallback={<p role="status">Loading lab tools…</p>}><LabOverview scenario={scenario} /></Suspense>
+      )}
+      <footer className="lab-footer"><a href={GITHUB}>Parag Jindal</a><a href={REPOSITORY}>Portfolio source <span aria-hidden="true">↗</span></a></footer>
+    </main>
   </div>;
 }
