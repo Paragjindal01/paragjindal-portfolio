@@ -1,4 +1,5 @@
 .scroll-scrub {
+  --ss-band-viewport: 100dvh;
   --ss-progress: 0;
   position: relative;
   isolation: isolate;
@@ -55,10 +56,11 @@
 
 .scroll-scrub__video {
   z-index: 1;
+  opacity: 0;
 }
 
-.scroll-scrub__layer[data-video-painted="true"] .scroll-scrub__poster {
-  visibility: hidden;
+.scroll-scrub__layer[data-video-painted="true"] .scroll-scrub__video {
+  opacity: 1;
 }
 
 .scroll-scrub__progress {
@@ -137,7 +139,7 @@
   top: 0;
   display: flex;
   align-items: center;
-  min-height: 100dvh;
+  min-height: var(--ss-band-viewport);
   padding: clamp(5rem, 9vw, 8rem) clamp(1.25rem, 6vw, 6rem);
   pointer-events: none;
 }
@@ -219,6 +221,32 @@
   margin-top: 2rem;
 }
 
+@media (hover: none) and (pointer: coarse), (max-width: 860px) {
+  .scroll-scrub {
+    /* Keep the scroll bands stable as the mobile browser chrome moves. */
+    --ss-band-viewport: 100svh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scroll-scrub__stage,
+  .scroll-scrub__story {
+    grid-area: 1 / 1;
+  }
+
+  .scroll-scrub__stage {
+    align-self: start;
+  }
+
+  .scroll-scrub__story {
+    margin-top: 0;
+  }
+
+  .scroll-scrub__video {
+    transition: opacity 120ms linear;
+  }
+}
+
 @media (max-width: 860px) {
   .scroll-scrub__poster,
   .scroll-scrub__video {
@@ -269,7 +297,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-scrub__chapter {
-    min-height: 100dvh !important;
+    min-height: var(--ss-band-viewport) !important;
   }
 
   .scroll-scrub__connector-band {

@@ -233,6 +233,7 @@ export function ScrollScrub({
     }));
 
     let active = -1;
+    let activeLayer = 0;
     let destroyed = false;
     let dirty = true;
     let frame = 0;
@@ -241,17 +242,32 @@ export function ScrollScrub({
     let viewportHeight = window.innerHeight;
     let layoutWidth = window.innerWidth;
     let userReady = false;
+    let lastMobileSeek = -Infinity;
+    const primed = new WeakSet<HTMLVideoElement>();
+
+    const scheduleFrame = () => {
+      if (!destroyed && !frame) frame = window.requestAnimationFrame(tick);
+    };
+
+    const invalidate = () => {
+      dirty = true;
+      scheduleFrame();
+    };
 
     const unloadClip = (segment: RuntimeSegment) => {
+      const { video, objectUrl } = segment;
       segment.abort?.abort();
-      segment.video?.remove();
-      if (segment.objectUrl) {
-        URL.revokeObjectURL(segment.objectUrl);
-      }
       delete segment.abort;
       delete segment.video;
       delete segment.objectUrl;
       delete segment.loadedSource;
+      if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+        video.remove();
+      }
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
       segment.loading = false;
       segment.ready = false;
       segment.failed = false;
@@ -263,7 +279,6 @@ export function ScrollScrub({
     const layout = () => {
       const pageY = window.scrollY || window.pageYOffset;
       rootTop = root.getBoundingClientRect().top + pageY;
-      viewportHeight = window.innerHeight;
       layoutWidth = window.innerWidth;
 
       for (const segment of runtime) {
@@ -277,14 +292,19 @@ export function ScrollScrub({
         segment.start = rect.top + pageY - rootTop;
         segment.end = segment.start + rect.height;
       }
+      const first = runtime[0];
+      viewportHeight = isMobile() && !reduceMotion
+        ? Math.max(1, (first.end - first.start) / Math.max(first.weight, 0.2))
+        : window.innerHeight;
       total = Math.max(runtime.at(-1)?.end ?? viewportHeight, viewportHeight);
-      dirty = true;
+      invalidate();
     };
 
     const primeVideo = async (video?: HTMLVideoElement) => {
-      if (!video || !isMobile()) {
+      if (!video || !isMobile() || !userReady || primed.has(video)) {
         return;
       }
+      primed.add(video);
       try {
         await video.play();
         video.pause();
@@ -345,7 +365,7 @@ export function ScrollScrub({
             }
             segment.ready = true;
             segment.loading = false;
-            dirty = true;
+            scheduleFrame();
           },
           { once: true }
         );
@@ -353,7 +373,8 @@ export function ScrollScrub({
           "loadeddata",
           () => {
             if (
-              userReady &&
+              runtime[activeLayer] === segment &&
+              segment.visible &&
               segment.video === video &&
               segment.loadedSource === source
             ) {
@@ -385,9 +406,9 @@ export function ScrollScrub({
           () => {
             if (segment.video === video && segment.loadedSource === source) {
               segment.layer.dataset.videoPainted = "true";
+              scheduleFrame();
             }
-          },
-          { once: true }
+          }
         );
 
         segment.layer.append(video);
@@ -409,15 +430,16 @@ export function ScrollScrub({
 
     const readScroll = () => {
       const pageY = window.scrollY || window.pageYOffset;
-      const y = clamp(pageY - rootTop, 0, total);
+      const scrollY = pageY - rootTop;
+      const y = clamp(scrollY, 0, total);
+      const mobile = isMobile();
       const crossfade = 0.1 * viewportHeight;
-      let currentIndex = 0;
+      // On a swipe, give the incoming mobile clip more time to buffer.
+      // The first scene is still the only clip requested at the top.
+      const ahead = mobile && y > 0 ? 0.95 : 0.6;
+      activeLayer = Math.max(0, runtime.findLastIndex((segment) => y >= segment.start));
 
       for (const [index, segment] of runtime.entries()) {
-        if (y >= segment.start) {
-          currentIndex = index;
-        }
-
         const length = Math.max(segment.end - segment.start, 1);
         const local = clamp((y - segment.start) / length);
         segment.target = segment.linger
@@ -436,19 +458,28 @@ export function ScrollScrub({
           opacity = outside === 0 ? 1 : 0;
         }
 
-        segment.visible = opacity > 0.001;
+        segment.visible = opacity > 0.001 && scrollY < total;
         segment.layer.style.opacity = String(opacity);
-        segment.layer.style.zIndex = index === currentIndex ? "2" : "1";
+        segment.layer.style.zIndex = index === activeLayer ? "2" : "1";
 
+        const nearby = !mobile || Math.abs(index - activeLayer) <= 1;
+        if (mobile && (!nearby || scrollY >= total) && segment.loadedSource) {
+          unloadClip(segment);
+        }
         if (
-          y > segment.start - 0.6 * viewportHeight &&
+          nearby &&
+          scrollY < total &&
+          y > segment.start - ahead * viewportHeight &&
           y < segment.end + 0.6 * viewportHeight
         ) {
           void loadClip(segment);
         }
       }
 
-      const current = runtime[currentIndex];
+      const current = runtime[activeLayer];
+      if (current.visible && current.video && current.video.readyState >= 2) {
+        void primeVideo(current.video);
+      }
       const currentLength = Math.max(current.end - current.start, 1);
       const currentProgress = clamp((y - current.start) / currentLength);
       const nextActive =
@@ -466,34 +497,51 @@ export function ScrollScrub({
       root.style.setProperty("--ss-progress", String(clamp(y / total)));
     };
 
-    const updateVideos = () => {
-      for (const segment of runtime) {
+    const updateVideos = (now: number) => {
+      const mobile = isMobile();
+      for (const [index, segment] of runtime.entries()) {
         const { video } = segment;
-        if (!video || !segment.ready || video.seeking) {
-          continue;
-        }
         if (
-          !segment.visible &&
-          Math.abs(segment.current - segment.target) < 0.002
+          !segment.visible ||
+          (mobile && index !== activeLayer) ||
+          !video ||
+          !segment.ready ||
+          video.seeking
         ) {
           continue;
         }
+        const duration = video.duration;
+        if (!Number.isFinite(duration) || duration <= 0) continue;
+        const epsilon = mobile ? 1 / 30 : 0.008;
+        const finalTime = clamp(segment.target, 0, 0.999) * duration;
+        if (Math.abs(video.currentTime - finalTime) <= epsilon) {
+          segment.current = segment.target;
+          continue;
+        }
 
-        segment.current += (segment.target - segment.current) * 0.2;
-        const targetTime =
-          clamp(segment.current, 0, 0.999) * (video.duration || 1);
-        const epsilon = isMobile() ? 0.02 : 0.008;
+        if (mobile && now - lastMobileSeek < 1000 / 24) {
+          scheduleFrame();
+          continue;
+        }
+        segment.current = mobile
+          ? segment.target
+          : segment.current + (segment.target - segment.current) * 0.2;
+        const targetTime = clamp(segment.current, 0, 0.999) * duration;
         if (Math.abs(video.currentTime - targetTime) > epsilon) {
           try {
             video.currentTime = targetTime;
+            if (mobile) lastMobileSeek = now;
           } catch {
             // Keep the last painted frame while the browser catches up.
           }
+        } else if (!mobile) {
+          scheduleFrame();
         }
       }
     };
 
-    const tick = () => {
+    const tick = (now: number) => {
+      frame = 0;
       if (destroyed) {
         return;
       }
@@ -501,12 +549,7 @@ export function ScrollScrub({
         dirty = false;
         readScroll();
       }
-      updateVideos();
-      frame = window.requestAnimationFrame(tick);
-    };
-
-    const onScroll = () => {
-      dirty = true;
+      updateVideos(now);
     };
     const onResize = () => {
       if (coarsePointer && window.innerWidth === layoutWidth) {
@@ -519,9 +562,7 @@ export function ScrollScrub({
         return;
       }
       userReady = true;
-      for (const segment of runtime) {
-        void primeVideo(segment.video);
-      }
+      void primeVideo(runtime[activeLayer].video);
     };
 
     controllerRef.current = {
@@ -542,7 +583,7 @@ export function ScrollScrub({
       },
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", invalidate, { passive: true });
     window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", layout);
     window.addEventListener("pointerdown", onFirstGesture, {
@@ -555,13 +596,12 @@ export function ScrollScrub({
     });
 
     layout();
-    frame = window.requestAnimationFrame(tick);
 
     return () => {
       destroyed = true;
       controllerRef.current = null;
       window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", invalidate);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", layout);
       window.removeEventListener("pointerdown", onFirstGesture);
@@ -651,7 +691,7 @@ export function ScrollScrub({
       <div className="scroll-scrub__story">
         {segments.map((segment) => {
           const bandStyle: CSSProperties = {
-            minHeight: `${Math.max(segment.weight, 0.2) * 100}dvh`,
+            minHeight: `calc(var(--ss-band-viewport) * ${Math.max(segment.weight, 0.2)})`,
           };
 
           if (segment.kind === "connector") {

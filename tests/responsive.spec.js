@@ -174,6 +174,29 @@ test.describe('hero', () => {
       expect(await page.locator(anchor).count(), `Expected one target for ${anchor}`).toBe(1);
     }
   });
+
+  test('phone starts buffering the second scene after the first swipe', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    const clips = [];
+    await page.route('**/assets/world/*.mp4', (route) => {
+      clips.push(new URL(route.request().url()).pathname.split('/').at(-1));
+      return route.abort();
+    });
+
+    await page.goto('/');
+    await ready(page);
+    const storyboard = page.locator('.scroll-scrub');
+    await expect(storyboard).toHaveAttribute('data-active-section', '0');
+    await expect.poll(() => clips).toEqual(['hall-01-mobile.mp4']);
+
+    const secondScene = storyboard.locator('[data-scroll-scrub-band]').nth(1);
+    await secondScene.evaluate((band) => {
+      window.scrollTo({ top: band.getBoundingClientRect().top + window.scrollY - 0.8 * window.innerHeight, behavior: 'instant' });
+    });
+    await expect.poll(() => clips).toEqual(['hall-01-mobile.mp4', 'hall-02-mobile.mp4']);
+    await expect(storyboard).toHaveAttribute('data-active-section', '0');
+  });
 });
 
 test.describe('Live Spline greeting controls', () => {
