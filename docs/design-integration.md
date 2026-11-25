@@ -17,6 +17,8 @@ The current React/Vite portfolio remains the published presentation. The future 
 
 `npm run build` builds the portfolio and labs. After their dependencies are installed, `npm run build:release` adds both independent static workbenches in `dist/relayops` and `dist/compute-flow`. The local SQLite service is installed and run from `relayops-ai` independently. There is a single portfolio project catalog so a new presentation can consume descriptions, links, status, screenshots and verification without scraping markup or copying content.
 
+The catalog’s `standaloneRepositoryUrl` and `links.source` point to the individual GitHub repositories. The `links.demo` and `links.caseStudy` entries continue to identify the portfolio’s public routes.
+
 ## When the export arrives
 
 Inspect the exported component and dependency graph, licenses, responsive variants, 3D load boundaries, media sources and deployment expectations. Import self-contained presentation components when their framework and licensing permit. Keep the established route and API contracts, configure any old-path redirects before release, and preserve existing contact behavior and metadata.

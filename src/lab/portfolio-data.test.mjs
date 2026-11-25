@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { access } from 'node:fs/promises';
 import { CASE_STUDIES } from '../data/case-studies.mjs';
-import { ALL_PROJECTS, LAB_PROJECTS } from '../data/projects.mjs';
+import { ALL_PROJECTS, COMPUTE_FLOW, LAB_PROJECTS, RELAYOPS, SIMULATION_REPOSITORY } from '../data/projects.mjs';
 import { CURRENT_ROLE, EDUCATION, EMPLOYMENT, workplaceDetails } from '../data/professional.mjs';
 import { resolvePortfolioRoute } from '../data/routes.mjs';
 import { STRUCTURED_DATA } from '../data/seo.mjs';
@@ -28,11 +28,18 @@ test('centralized project data retains every lab route and supplies a real scree
   assert.equal(new Set(ALL_PROJECTS.map(({ id }) => id)).size, ALL_PROJECTS.length);
   for (const project of ALL_PROJECTS) {
     assert.ok(CASE_STUDIES[project.id]?.flow.length >= 3);
-    assert.equal(project.standaloneRepositoryUrl, null);
+    const repository = `https://github.com/Paragjindal01/${project.id}`;
+    assert.equal(project.standaloneRepositoryUrl, repository);
+    assert.equal(project.links.source, repository);
+    assert.ok(project.links.documentation.startsWith(`${repository}/blob/main/`));
     const relative = project.screenshot.source ?? `public${project.screenshot.path}`;
     await access(new URL(`../../${relative}`, import.meta.url));
     assert.deepEqual(resolvePortfolioRoute(project.links.caseStudy), { page: 'case-study', slug: project.id });
     if (LAB_PROJECTS.includes(project)) assert.deepEqual(resolvePortfolioRoute(project.links.demo), { page: 'lab', slug: project.id });
   }
+  assert.equal(SIMULATION_REPOSITORY, 'https://github.com/Paragjindal01/infra-simulation');
+  assert.equal(COMPUTE_FLOW.links.demo, '/compute-flow/');
+  assert.equal(RELAYOPS.links.demo, '/relayops/');
+  assert.equal(RELAYOPS.links.release, 'https://github.com/Paragjindal01/paragjindal-portfolio/releases/tag/relayops-ai-v0.1.0');
   assert.deepEqual(resolvePortfolioRoute('/greeting'), { page: 'greeting' });
 });

@@ -2,18 +2,18 @@
 
 The personal portfolio includes eight infrastructure lab applications, the independent RelayOps workflow studio, and the ComputeFlow scheduling workbench. The public demonstrations use bundled fictional data and run without a hardware connection, account, or model API key.
 
-[Portfolio](https://paragjindal.com/) · [Engineering Lab](https://paragjindal.com/lab) · [Shared simulation package](packages/simulation/) · [Standalone application releases](https://github.com/Paragjindal01/paragjindal-portfolio/releases/tag/standalone-lab-v0.1.0)
+[Portfolio](https://paragjindal.com/) · [Engineering Lab](https://paragjindal.com/lab) · [Shared simulation repository](https://github.com/Paragjindal01/infra-simulation) · [Standalone application releases](https://github.com/Paragjindal01/paragjindal-portfolio/releases/tag/standalone-lab-v0.1.0)
 
 | Application | Try it | Case study and screenshot |
 | --- | --- | --- |
-| RackOps | [Digital twin](https://paragjindal.com/lab/rackops) | [RackOps](docs/projects/rackops.md) |
-| GPUWatch | [Accelerator telemetry](https://paragjindal.com/lab/gpuwatch?scenario=critical) | [GPUWatch](docs/projects/gpuwatch.md) |
-| PowerOps | [Power distribution](https://paragjindal.com/lab/powerops?scenario=critical) | [PowerOps](docs/projects/powerops.md) |
-| InfraPilot AI | [Operations automation](https://paragjindal.com/lab/infrapilot-ai?scenario=critical) | [InfraPilot AI](docs/projects/infrapilot-ai.md) |
-| FabricLab | [Network design](https://paragjindal.com/lab/fabriclab) | [FabricLab](docs/projects/fabriclab.md) |
-| VirtScan | [Infrastructure inventory](https://paragjindal.com/lab/virtscan) | [VirtScan](docs/projects/virtscan.md) |
-| StorageCalc | [Capacity and resilience](https://paragjindal.com/lab/storagecalc) | [StorageCalc](docs/projects/storagecalc.md) |
-| LocalMind | [Document retrieval](https://paragjindal.com/lab/localmind) | [LocalMind](docs/projects/localmind.md) |
+| [RackOps](https://github.com/Paragjindal01/rackops) | [Digital twin](https://paragjindal.com/lab/rackops) | [RackOps](docs/projects/rackops.md) |
+| [GPUWatch](https://github.com/Paragjindal01/gpuwatch) | [Accelerator telemetry](https://paragjindal.com/lab/gpuwatch?scenario=critical) | [GPUWatch](docs/projects/gpuwatch.md) |
+| [PowerOps](https://github.com/Paragjindal01/powerops) | [Power distribution](https://paragjindal.com/lab/powerops?scenario=critical) | [PowerOps](docs/projects/powerops.md) |
+| [InfraPilot AI](https://github.com/Paragjindal01/infrapilot-ai) | [Operations automation](https://paragjindal.com/lab/infrapilot-ai?scenario=critical) | [InfraPilot AI](docs/projects/infrapilot-ai.md) |
+| [FabricLab](https://github.com/Paragjindal01/fabriclab) | [Network design](https://paragjindal.com/lab/fabriclab) | [FabricLab](docs/projects/fabriclab.md) |
+| [VirtScan](https://github.com/Paragjindal01/virtscan) | [Infrastructure inventory](https://paragjindal.com/lab/virtscan) | [VirtScan](docs/projects/virtscan.md) |
+| [StorageCalc](https://github.com/Paragjindal01/storagecalc) | [Capacity and resilience](https://paragjindal.com/lab/storagecalc) | [StorageCalc](docs/projects/storagecalc.md) |
+| [LocalMind](https://github.com/Paragjindal01/localmind) | [Document retrieval](https://paragjindal.com/lab/localmind) | [LocalMind](docs/projects/localmind.md) |
 
 ## Product evidence and integration
 
@@ -21,13 +21,13 @@ The personal portfolio includes eight infrastructure lab applications, the indep
 
 ## RelayOps AI
 
-[Open the offline workflow studio](https://paragjindal.com/relayops/) or see the [RelayOps source and local SQLite setup](relayops-ai/README.md). The Vercel release build bundles the browser-local version alongside the portfolio.
+The Vercel release build bundles the browser-local version alongside the portfolio. [Open the offline workflow studio](https://paragjindal.com/relayops/) · [RelayOps source and local SQLite setup](https://github.com/Paragjindal01/relayops-ai)
 
 ## ComputeFlow
 
 Compare GPU scheduling policies with reproducible training and inference jobs. Inspect queue states, placement, failure recovery, and policy trade-offs on the same fictional cluster.
 
-[Open the scheduling workbench](https://paragjindal.com/compute-flow/) · [Source and local setup](compute-flow/README.md) · [Measured benchmarks](compute-flow/docs/benchmarks.md)
+[Open the scheduling workbench](https://paragjindal.com/compute-flow/) · [Source and local setup](https://github.com/Paragjindal01/compute-flow) · [Measured benchmarks](https://github.com/Paragjindal01/compute-flow/blob/main/docs/benchmarks.md)
 
 ## Run locally
 

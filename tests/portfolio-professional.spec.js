@@ -31,6 +31,8 @@ test('each published case-study route loads its evidence and points to a working
     await expect(page.getByRole('heading', { level: 1, name: project.name, exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Verified workflows' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Open demo' })).toHaveAttribute('href', project.links.demo);
+    await expect(page.getByRole('link', { name: 'Source', exact: true })).toHaveAttribute('href', project.standaloneRepositoryUrl);
+    await expect(page.getByRole('link', { name: 'Repository documentation' })).toHaveAttribute('href', project.links.documentation);
     await expect.poll(() => page.getByRole('img', { name: project.screenshot.alt }).evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
   }
