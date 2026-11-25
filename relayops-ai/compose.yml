@@ -1,0 +1,15 @@
+services:
+  relayops:
+    build: .
+    init: true
+    ports:
+      - '127.0.0.1:4174:4174'
+    volumes:
+      - relayops-state:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  relayops-state:

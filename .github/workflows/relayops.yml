@@ -1,0 +1,37 @@
+name: Verify RelayOps AI
+on:
+  push:
+    paths: ['relayops-ai/**', '.github/workflows/relayops.yml']
+  pull_request:
+    paths: ['relayops-ai/**', '.github/workflows/relayops.yml']
+permissions:
+  contents: read
+jobs:
+  workflow:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: relayops-ai
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: relayops-ai/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - name: Test the SQLite Compose image
+        run: |
+          docker compose up -d --build --wait
+          curl --fail --silent http://127.0.0.1:4174/relayops/ > /dev/null
+          npm run benchmark
+      - name: Collect Compose logs
+        if: failure()
+        run: docker compose logs
+      - name: Stop Compose
+        if: always()
+        run: docker compose down
