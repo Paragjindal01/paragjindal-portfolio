@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/lab", "destination": "/index.html" },
+    { "source": "/lab/:app", "destination": "/index.html" },
+    { "source": "/greeting", "destination": "/index.html" }
+  ]
+}

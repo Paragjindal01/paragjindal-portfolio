@@ -1,19 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * Responsive & alignment audit.
- *
- * - Overflow matrix: every required viewport, portrait and landscape.
- * - Bounding-box checks: key visible elements stay inside the viewport.
- * - Interaction checks: mobile menu, hero buttons, robot greeting controls,
- *   contact form layout.
- * - Screenshots for visual review in test-output/responsive/.
- *
- * Known, accepted console noise (excluded from the console-error check):
- * - Spline runtime logs "Missing property" errors — pre-existing, harmless.
- * - /audio/robot-welcome.mp3 404s until the voice file is added (documented
- *   graceful fallback).
- */
+// Portfolio layout and contact checks stay local. Live Spline tests load the
+// existing external scene and can run separately from the main CI suite.
 
 const VIEWPORTS = [
   // Phones (portrait)
@@ -49,15 +37,7 @@ const VIEWPORTS = [
   { w: 3440, h: 1440, label: 'ultrawide-3440' },
 ];
 
-const SCREENSHOT_SIZES = [
-  [375, 667], [390, 844], [430, 932], [768, 1024], [820, 1180],
-  [1024, 1366], [1366, 768], [1440, 900], [1920, 1080], [3440, 1440],
-];
-
-const SECTIONS = ['#home', '#about', '#services', '#projects', '#experience', '#contact'];
-
-const isExpectedNoise = (text) =>
-  text.includes('Missing property') || text.includes('robot-welcome.mp3');
+const SECTIONS = ['#home', '#about', '#services', '#projects', '#software', '#experience', '#stack', '#github', '#contact'];
 
 async function assertNoHorizontalOverflow(page) {
   const result = await page.evaluate(() => ({
@@ -95,22 +75,17 @@ async function assertElementsInsideViewport(page) {
 test.describe('horizontal overflow matrix', () => {
   for (const { w, h, label } of VIEWPORTS) {
     test(`no overflow at ${label} (${w}x${h})`, async ({ page }) => {
-      // Layout assertions don't need the external Spline scene (the robot
-      // panel has fixed dimensions either way). Blocking it keeps this
-      // 27-viewport matrix fast and independent of CDN congestion.
-      await page.route('**://prod.spline.design/**', (route) => route.abort());
       await page.setViewportSize({ width: w, height: h });
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/');
-      await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
       // Top of page
       await assertNoHorizontalOverflow(page);
       await assertElementsInsideViewport(page);
-      // Scrolled through the page (hero choreography + each section)
+      // Exercise the layout throughout the page as lazy content loads.
       for (const anchor of SECTIONS.slice(1)) {
         await page.evaluate((a) => {
           document.querySelector(a)?.scrollIntoView({ behavior: 'instant' });
         }, anchor);
-        await page.waitForTimeout(150);
         await assertNoHorizontalOverflow(page);
       }
       await assertElementsInsideViewport(page);
@@ -123,18 +98,22 @@ test.describe('console and network health', () => {
     const errors = [];
     const failures = [];
     page.on('console', (msg) => {
-      if (msg.type() === 'error' && !isExpectedNoise(msg.text())) errors.push(msg.text());
+      if (msg.type() === 'error') errors.push(msg.text());
     });
     page.on('requestfailed', (req) => {
-      if (!isExpectedNoise(req.url())) failures.push(`${req.url()} — ${req.failure()?.errorText}`);
+      failures.push(`${req.url()} — ${req.failure()?.errorText}`);
     });
     page.on('response', (res) => {
-      if (res.status() >= 400 && !isExpectedNoise(res.url())) {
+      if (res.status() >= 400) {
         failures.push(`${res.url()} — HTTP ${res.status()}`);
       }
     });
     await page.goto('/');
-    await page.waitForTimeout(6000); // let Spline + lazy chunks settle
+    for (const screenshot of await page.locator('.site-project-preview img').all()) {
+      await screenshot.scrollIntoViewIfNeeded();
+      await expect.poll(() => screenshot.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+    }
+    await page.waitForLoadState('networkidle');
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([]);
     expect(failures, `failed requests:\n${failures.join('\n')}`).toEqual([]);
   });
@@ -150,10 +129,10 @@ test.describe('mobile menu', () => {
     const toggle = page.getByRole('button', { name: 'Toggle menu' });
     await expect(toggle).toBeVisible();
     await toggle.click();
-    const menuLink = page.locator('nav a', { hasText: 'Services' }).last();
+    const menuLink = page.getByRole('navigation', { name: 'Portfolio' }).getByRole('link', { name: 'Expertise' });
     await expect(menuLink).toBeVisible();
     await menuLink.click();
-    // Menu closes and the services section scrolls into view
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(menuLink).toBeHidden();
     await expect
       .poll(
@@ -172,14 +151,18 @@ test.describe('hero', () => {
   test('text is visible immediately and buttons work', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1')).toContainText('Parag Jindal');
+    const hero = page.locator('.site-hero');
     for (const [name, target] of [
+      ['Open the lab', '/lab'],
       ['View My Work', '#projects'],
-      ['Explore Services', '#services'],
-      ['Contact Me', '#contact'],
+      ['Open 3D greeting', '/greeting'],
     ]) {
-      const btn = page.locator(`a[href="${target}"]`, { hasText: name }).first();
-      await expect(btn).toBeVisible();
+      const link = hero.getByRole('link', { name });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('href', target);
     }
+    await hero.getByRole('link', { name: 'Open the lab' }).click();
+    await expect(page.getByRole('heading', { name: 'Engineering Lab', exact: true })).toBeVisible();
   });
 
   test('anchor navigation reaches every section', async ({ page }) => {
@@ -191,14 +174,16 @@ test.describe('hero', () => {
   });
 });
 
-test.describe('robot greeting controls', () => {
+test.describe('Live Spline greeting controls', () => {
   // The robot depends on an external Spline CDN fetch — allow extra headroom.
   test.slow();
 
   test('invite → play → pause → resume → mute → close → reopen', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/');
-    // Bubble invitation appears after the robot loads
+    await page.getByRole('link', { name: 'Open 3D greeting' }).click();
+    await expect(page.getByRole('heading', { name: 'Interactive 3D greeting' })).toBeVisible();
+    // The invitation appears after the scene loads.
     const meetBtn = page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting/ });
     await expect(meetBtn).toBeVisible({ timeout: 45_000 });
 
@@ -233,7 +218,7 @@ test.describe('robot greeting controls', () => {
 
   test('speech bubble stays inside the viewport at 320px', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
-    await page.goto('/');
+    await page.goto('/greeting');
     const meetBtn = page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting/ });
     await expect(meetBtn).toBeVisible({ timeout: 45_000 });
     const box = await meetBtn.boundingBox();
@@ -270,20 +255,43 @@ test.describe('contact form', () => {
   });
 });
 
-test.describe('screenshots for visual review', () => {
-  for (const [w, h] of SCREENSHOT_SIZES) {
-    test(`capture ${w}x${h}`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'chromium', 'screenshots captured on chromium only');
-      await page.setViewportSize({ width: w, height: h });
-      await page.goto('/');
-      await page.waitForTimeout(4000); // robot + entrance animations
-      await page.screenshot({ path: `test-output/responsive/${w}x${h}-hero.png` });
-      await page.evaluate(() => document.querySelector('#services')?.scrollIntoView({ behavior: 'instant' }));
-      await page.waitForTimeout(800);
-      await page.screenshot({ path: `test-output/responsive/${w}x${h}-services.png` });
-      await page.evaluate(() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'instant' }));
-      await page.waitForTimeout(800);
-      await page.screenshot({ path: `test-output/responsive/${w}x${h}-contact.png` });
-    });
-  }
+test('contact form validates and sends the expected Web3Forms payload', async ({ page }) => {
+  const messages = [];
+  await page.route('https://api.web3forms.com/submit', async route => {
+    const headers = {
+      'access-control-allow-origin': '*',
+      'access-control-allow-headers': 'content-type, accept',
+      'access-control-allow-methods': 'POST, OPTIONS',
+    };
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers });
+      return;
+    }
+    messages.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, headers, json: { success: true } });
+  });
+
+  await page.goto('/#contact');
+  const submit = page.getByRole('button', { name: /Send Message/ });
+  await submit.click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Please enter your email address.' })).toBeVisible();
+  expect(messages).toHaveLength(0);
+
+  await page.locator('#contact-name').fill('Sample Visitor');
+  await page.locator('#contact-email').fill('visitor@example.test');
+  await page.locator('#contact-service').selectOption('AI or Automation');
+  await page.locator('#contact-location').fill('Ottawa');
+  await page.locator('#contact-message').fill('A synthetic portfolio test submission.');
+  await submit.click();
+  await expect(page.getByRole('status').filter({ hasText: /sent/i })).toBeVisible();
+  await expect(page.locator('#contact-name')).toHaveValue('');
+  expect(messages).toHaveLength(1);
+  expect(messages[0]).toMatchObject({
+    name: 'Sample Visitor',
+    email: 'visitor@example.test',
+    service: 'AI or Automation',
+    location: 'Ottawa',
+    preferred_contact: 'Email',
+    message: 'A synthetic portfolio test submission.',
+  });
 });

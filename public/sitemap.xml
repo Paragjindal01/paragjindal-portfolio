@@ -5,4 +5,13 @@
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url><loc>https://paragjindal.com/lab</loc></url>
+  <url><loc>https://paragjindal.com/lab/rackops</loc></url>
+  <url><loc>https://paragjindal.com/lab/gpuwatch</loc></url>
+  <url><loc>https://paragjindal.com/lab/powerops</loc></url>
+  <url><loc>https://paragjindal.com/lab/infrapilot-ai</loc></url>
+  <url><loc>https://paragjindal.com/lab/fabriclab</loc></url>
+  <url><loc>https://paragjindal.com/lab/virtscan</loc></url>
+  <url><loc>https://paragjindal.com/lab/storagecalc</loc></url>
+  <url><loc>https://paragjindal.com/lab/localmind</loc></url>
 </urlset>

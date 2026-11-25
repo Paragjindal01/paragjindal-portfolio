@@ -151,7 +151,7 @@ export default function ContactSection() {
     <SectionWrapper id="contact">
       <div className="text-center mb-16">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-[var(--color-text-primary)]">
-          Let&apos;s Build Something or <span className="text-[var(--color-accent-blue)]">Solve Your Tech Problem</span>
+          Discuss a project
         </h2>
         <p className="section-subtitle">
           Need a website, custom application, AI solution, or help with a computer or home technology

@@ -1,87 +1,70 @@
-# Parag Jindal — Portfolio & Technology Services
+# Parag Jindal · Engineering Lab
 
-Personal portfolio and independent technology-services website, live at [paragjindal.com](https://paragjindal.com).
+Eight browser-based engineering demonstrations and a personal portfolio for AI infrastructure, operations, automation, network design, storage planning, and local AI. The operational apps share a fictional data centre. Every demonstration runs with its bundled data and without a hardware connection, account, or model API key.
 
-![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
-![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss)
+[Portfolio](https://paragjindal.com/) · [Engineering Lab](https://paragjindal.com/lab) · [Simulator repository](https://github.com/Paragjindal01/Paragjindal01/tree/main/labs/infra-sim)
 
-## ✨ Features
+| Application | Try it | Case study and screenshot |
+| --- | --- | --- |
+| RackOps | [Digital twin](https://paragjindal.com/lab/rackops) | [RackOps](docs/projects/rackops.md) |
+| GPUWatch | [Accelerator telemetry](https://paragjindal.com/lab/gpuwatch?scenario=critical) | [GPUWatch](docs/projects/gpuwatch.md) |
+| PowerOps | [Power distribution](https://paragjindal.com/lab/powerops?scenario=critical) | [PowerOps](docs/projects/powerops.md) |
+| InfraPilot AI | [Operations automation](https://paragjindal.com/lab/infrapilot-ai?scenario=critical) | [InfraPilot AI](docs/projects/infrapilot-ai.md) |
+| FabricLab | [Network design](https://paragjindal.com/lab/fabriclab) | [FabricLab](docs/projects/fabriclab.md) |
+| VirtScan | [Infrastructure inventory](https://paragjindal.com/lab/virtscan) | [VirtScan](docs/projects/virtscan.md) |
+| StorageCalc | [Capacity and resilience](https://paragjindal.com/lab/storagecalc) | [StorageCalc](docs/projects/storagecalc.md) |
+| LocalMind | [Document retrieval](https://paragjindal.com/lab/localmind) | [LocalMind](docs/projects/localmind.md) |
 
-- **Interactive Spline robot hero** — lazy-loaded so it never blocks initial page load
-- **Services showcase** — six independent technology-service cards (development + local tech support)
-- **Featured projects** — SafeKelowna (live), trading platform backend, diagram warehouse
-- **Full contact form** — service dropdown, validation, Web3Forms email delivery
-- **SEO** — meta/OG/Twitter tags, canonical URL, JSON-LD (Person + ProfessionalService), sitemap, robots.txt
-- **Accessible** — reduced-motion support, visible keyboard focus states, semantic headings
-- **Glassmorphism dark design** — Framer Motion scroll choreography throughout
+## Run locally
 
-## 🛠 Tech Stack
+Use Node.js 22.12+ or 24 LTS.
 
-| Technology | Purpose |
-|-----------|---------|
-| React 19 | UI Framework |
-| Vite 8 | Build Tool |
-| Tailwind CSS 4 | Styling |
-| Framer Motion | Animations |
-| @splinetool/react-spline | 3D hero scene |
-| Web3Forms | Contact form email delivery |
-
-## 🚀 Quick Start
-
-```bash
-git clone https://github.com/Paragjindal01/paragjindal-portfolio.git
-cd paragjindal-portfolio
-npm install
-cp .env.example .env.local   # then fill in your Web3Forms key
-npm run dev                  # http://localhost:5173
+```sh
+npm ci
+npm run dev
 ```
 
-### Environment variables
+Open `http://localhost:5173/lab`. Each application also opens directly at its route in the table. The portfolio's contact form uses the optional `VITE_WEB3FORMS_ACCESS_KEY` from `.env.example`. Leave it unset for lab-only use. The 3D greeting at `/greeting` uses the existing Spline scene and bundled audio.
 
-| Variable | Purpose |
-|----------|---------|
-| `VITE_WEB3FORMS_ACCESS_KEY` | Web3Forms access key for the contact form (get one free at web3forms.com). Public-facing by design — Web3Forms access keys are safe to expose in frontend code. |
-
-### Build & deploy
-
-```bash
-npm run lint      # ESLint
-npm run build     # production build to dist/
-npm run preview   # preview the production build locally
+```sh
+npm run lint
+npm run test:unit
+npx playwright install
+npm test
 ```
 
-Deployed on Vercel: push to `main` and Vercel auto-deploys (framework preset: **Vite**). Set `VITE_WEB3FORMS_ACCESS_KEY` in Vercel → Project → Settings → Environment Variables.
+The browser tests serve the production Vite build. `npm run test:chromium -- --grep-invert 'Live Spline'` runs the offline-compatible Chromium suite. The Live Spline cases require the external scene and WebGL support. The Web3Forms tests intercept delivery.
 
-## 📁 Project Structure
+### Run in Docker
 
-```
-src/
-├── components/
-│   ├── Navbar.jsx             # Sticky glass navigation (active-section highlight)
-│   ├── HeroSection.jsx        # Hero with scroll choreography + lazy Spline
-│   ├── SplineHero.jsx         # Spline robot scene (async chunk)
-│   ├── AboutSection.jsx       # Bio + compact skill tags
-│   ├── ServicesSection.jsx    # Six service cards + CTA
-│   ├── ProjectsSection.jsx    # Project data (SafeKelowna featured)
-│   ├── ProjectCard.jsx        # Card with live-site / details buttons
-│   ├── ExperienceSection.jsx  # Timeline experience
-│   ├── HowItWorksSection.jsx  # 3-step client process
-│   ├── ContactSection.jsx     # Validated contact form (Web3Forms)
-│   ├── SectionWrapper.jsx     # Scroll-reveal section HOC
-│   ├── AnimatedBackground.jsx # Gradient orbs + particles
-│   ├── MouseGlow.jsx          # Cursor-following glow
-│   ├── ScrollProgress.jsx     # Top progress bar
-│   └── Footer.jsx             # Footer with services disclaimer
-├── App.jsx
-├── main.jsx
-└── index.css                  # Design system, focus states, reduced motion
-public/
-├── favicon.svg
-├── robots.txt
-└── sitemap.xml
+```sh
+docker build -t parag-engineering-lab .
+docker run --rm -p 127.0.0.1:4173:4173 parag-engineering-lab
 ```
 
-## 📄 License
+Open `http://127.0.0.1:4173/lab`. The container includes the browser demos and read-only simulator API. Optional CLI adapters are documented in their case studies.
 
-MIT License © Parag Jindal
+## Architecture
+
+```mermaid
+flowchart LR
+  Browser[Portfolio and lab launcher] --> Apps[Eight independent React views]
+  Scenarios[Scenario and 15-minute step] --> Engine[Version 2 simulator]
+  Engine --> Ops[RackOps, GPUWatch, PowerOps, VirtScan, InfraPilot]
+  Engine --> API[Read-only JSON and health API]
+  Apps --> Ops
+  Apps --> Planner[FabricLab and StorageCalc]
+  Apps --> RAG[LocalMind browser index]
+  Ops -. optional local collectors .-> CLI[NVML-backed CLI and Proxmox GET adapter]
+  RAG -. optional loopback service .-> Model[Ollama or an explicitly configured provider]
+```
+
+React and Vite serve the independently routed applications. The shared JavaScript simulator returns deterministic, versioned inventory and telemetry. Vercel provides direct navigation and the JSON function. See the [API and scenario contract](docs/simulator-api.md) for supported requests, units, and thresholds.
+
+## Security and development status
+
+The public demos ship fictional inventory, source documents, reserved IPs, and locally administered MACs. The simulation API is GET-only. Power actions require a demo operator and a confirmed, expiring action token. They change in-memory simulator state and produce a session audit record. InfraPilot tools validate inputs and results and remain read-only. Its reviewed handoff opens PowerOps for a separate control decision.
+
+LocalMind keeps files and retrieval in browser memory by default. The optional loopback model service is off by default. An explicitly selected external model receives the query and selected context. Proxmox access is a separately configured inventory-only CLI. It uses HTTPS, a locally supplied read-only token, and a fixed API path. The public browser does not run that collector.
+
+The current release is a set of interactive portfolio MVPs. Persistent operational data, multi-user authentication, hardware control, and production monitoring are outside the lab. The simulator in the profile repository retains its original v1 CLI alongside the v2 contract. Consult individual case studies for measured scope and model, rendering, and hardware integration limits.
