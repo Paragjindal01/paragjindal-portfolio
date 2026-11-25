@@ -57,6 +57,8 @@ test('each lab hover preview loads the current app capture on both indexes', asy
     const firstRow = rows.first();
     const firstHref = await firstRow.getAttribute('href');
     const firstTool = LAB_TOOLS.find(({ links }) => links.demo === firstHref);
+    await page.mouse.move(0, 0);
+    await expect(preview).toHaveAttribute('data-on', 'false');
     await firstRow.focus();
     await expect(preview).toHaveAttribute('data-on', 'true');
     await expect(image).toHaveAttribute('src', `/lab-previews/${firstTool.id}.webp`);
