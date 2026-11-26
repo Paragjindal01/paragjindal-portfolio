@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import { useReducedMotion } from 'framer-motion';
+import { getSoundPreference, onSoundInteraction, setSoundPreference } from '../../data/sound-preference.mjs';
 import RobotSpeechBubble from './RobotSpeechBubble';
 import useSplineRobotActions from './useSplineRobotActions';
+import './robot-greeting.css';
 import {
   GREETING_AUDIO_SOURCES,
   GREETING_STORAGE_KEY,
   GREETING_SEGMENTS,
   GREETING_FULL_TEXT,
-  SEGMENT_FALLBACK_MS,
+  GREETING_DURATION_MS,
 } from './robotGreeting';
 
 const INVITE_TEXT = "Hi! I'm Parag's digital assistant.";
@@ -46,27 +47,39 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
     reducedMotion,
   });
 
-  const [open, setOpen] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [open, setOpen] = useState(true);
   const [status, setStatus] = useState(() => (readPlayed() ? 'completed' : 'ready'));
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(() => !getSoundPreference());
   const [segmentIdx, setSegmentIdx] = useState(-1);
 
   const audioRef = useRef(null); // single HTMLAudioElement, created lazily
   const modeRef = useRef('audio'); // 'audio' | 'tts' | 'text'
   const startLockRef = useRef(false); // guards rapid clicks / double start
+  const playbackRef = useRef(0);
+  const mutedRef = useRef(muted);
+  const autoplayPending = useRef(true);
   const textTimerRef = useRef(0);
   const statusRef = useRef(status);
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
+  const actionRef = useRef(null);
+  const reopenRef = useRef(null);
+  const restoreFocusRef = useRef(false);
 
-  /* ── Show the invitation shortly after the robot loads ── */
+  const changeStatus = useCallback((next) => {
+    statusRef.current = next;
+    setStatus(next);
+  }, []);
+
+  // If audio starts while the scene is loading, join the current greeting
+  // once the model is ready without interrupting playback.
   useEffect(() => {
-    if (!robotLoaded || dismissed) return undefined;
-    const t = setTimeout(() => setOpen(true), 1400);
-    return () => clearTimeout(t);
-  }, [robotLoaded, dismissed]);
+    if (robotLoaded && statusRef.current === 'speaking') startTalking();
+  }, [robotLoaded, startTalking]);
+
+  useEffect(() => {
+    if (!restoreFocusRef.current) return;
+    (open ? actionRef : reopenRef).current?.focus({ preventScroll: true });
+    restoreFocusRef.current = false;
+  }, [open]);
 
   /* ── Helpers ── */
   const clearTextTimer = () => {
@@ -77,57 +90,95 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
   };
 
   const finish = useCallback(() => {
+    playbackRef.current += 1;
     clearTextTimer();
     stopTalking();
     resetPose();
     setSegmentIdx(-1);
-    setStatus('completed');
+    changeStatus('completed');
     startLockRef.current = false;
-  }, [stopTalking, resetPose]);
+  }, [changeStatus, stopTalking, resetPose]);
 
   /* Timed captions only — final fallback (no sound available). */
   const runTextCaptions = useCallback(
     (fromIdx = 0) => {
+      const playback = playbackRef.current;
       modeRef.current = 'text';
       const advance = (idx) => {
+        if (playback !== playbackRef.current || modeRef.current !== 'text' || statusRef.current !== 'speaking') return;
         if (idx >= GREETING_SEGMENTS.length) {
           finish();
           return;
         }
         setSegmentIdx(idx);
-        textTimerRef.current = setTimeout(() => advance(idx + 1), SEGMENT_FALLBACK_MS);
+        const end = GREETING_SEGMENTS[idx + 1]?.at ?? 1;
+        const duration = (end - GREETING_SEGMENTS[idx].at) * GREETING_DURATION_MS;
+        textTimerRef.current = setTimeout(() => advance(idx + 1), duration);
       };
-      setStatus('speaking');
+      changeStatus('speaking');
       advance(fromIdx);
     },
-    [finish]
+    [changeStatus, finish]
   );
 
   /* Browser speech synthesis fallback. */
   const runSpeechSynthesis = useCallback(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis || muted) {
+    if (typeof window === 'undefined' || !window.speechSynthesis || mutedRef.current) {
       runTextCaptions();
       return;
     }
+    const playback = playbackRef.current;
+    const isCurrent = () => playback === playbackRef.current && modeRef.current === 'tts' && statusRef.current === 'speaking';
+    const speech = window.speechSynthesis;
+    const voice = speech.getVoices().find(item => item.lang.startsWith('en') && /samantha|ava|female|susan|sandy|serena/i.test(item.name));
     modeRef.current = 'tts';
-    window.speechSynthesis.cancel();
-    setStatus('speaking');
+    speech.cancel();
+    changeStatus('speaking');
     GREETING_SEGMENTS.forEach((seg, i) => {
       const u = new SpeechSynthesisUtterance(seg.text);
-      u.rate = 1;
+      if (voice) u.voice = voice;
+      u.rate = .92;
       u.pitch = 1;
-      u.onstart = () => setSegmentIdx(i);
-      if (i === GREETING_SEGMENTS.length - 1) u.onend = () => finish();
-      window.speechSynthesis.speak(u);
+      u.onstart = () => { if (isCurrent()) setSegmentIdx(i); };
+      if (i === GREETING_SEGMENTS.length - 1) u.onend = () => { if (isCurrent()) finish(); };
+      speech.speak(u);
     });
-  }, [muted, runTextCaptions, finish]);
+  }, [changeStatus, runTextCaptions, finish]);
 
-  /* Primary path: prerecorded audio via a single HTMLAudioElement.
-     Sources are tried in order (final MP3 first, committed M4A placeholder
-     second) before degrading to speech synthesis, then captions. */
+  /* Prerecorded narration, with browser speech and captions as fallbacks. */
   const sourceIdxRef = useRef(0);
 
-  const runAudio = useCallback(() => {
+  const playAudio = useCallback((audio, onStarted, onAutoplayBlocked) => {
+    const playback = ++playbackRef.current;
+    const isCurrent = () => playback === playbackRef.current &&
+      modeRef.current === 'audio' && statusRef.current === 'speaking';
+    async function attempt() {
+      try {
+        await audio.play();
+        if (isCurrent()) onStarted?.();
+      } catch (error) {
+        // A paused or replaced request can still reject after the browser
+        // stops it. Only the current play request may pick another source.
+        if (!isCurrent()) return;
+        if (error?.name === 'NotAllowedError' && onAutoplayBlocked) {
+          onAutoplayBlocked();
+          return;
+        }
+        if (sourceIdxRef.current < GREETING_AUDIO_SOURCES.length - 1) {
+          sourceIdxRef.current += 1;
+          audio.src = GREETING_AUDIO_SOURCES[sourceIdxRef.current];
+          audio.currentTime = 0;
+          void attempt();
+          return;
+        }
+        onStarted?.();
+        runSpeechSynthesis();
+      }
+    }
+    void attempt();
+  }, [runSpeechSynthesis]);
+
+  const runAudio = useCallback((onStarted, onAutoplayBlocked) => {
     let audio = audioRef.current;
     if (!audio) {
       audio = new Audio(GREETING_AUDIO_SOURCES[sourceIdxRef.current]);
@@ -135,7 +186,7 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
       audioRef.current = audio;
 
       audio.addEventListener('timeupdate', () => {
-        if (!audio.duration || !isFinite(audio.duration)) return;
+        if (modeRef.current !== 'audio' || statusRef.current !== 'speaking' || !audio.duration || !Number.isFinite(audio.duration)) return;
         const frac = audio.currentTime / audio.duration;
         let idx = 0;
         for (let i = GREETING_SEGMENTS.length - 1; i >= 0; i--) {
@@ -146,93 +197,86 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
         }
         setSegmentIdx((prev) => (prev === idx ? prev : idx));
       });
-      audio.addEventListener('ended', () => finish());
+      audio.addEventListener('ended', () => {
+        if (modeRef.current === 'audio' && statusRef.current === 'speaking' && audio.ended) finish();
+      });
     }
 
-    audio.muted = muted;
+    audio.muted = mutedRef.current;
     audio.currentTime = 0;
     modeRef.current = 'audio';
-    setStatus('speaking');
+    changeStatus('speaking');
     setSegmentIdx(0);
-
-    const attempt = () => {
-      const p = audio.play();
-      if (!p || typeof p.then !== 'function') return;
-      p.catch((err) => {
-        const failedSrc = GREETING_AUDIO_SOURCES[sourceIdxRef.current];
-        if (sourceIdxRef.current < GREETING_AUDIO_SOURCES.length - 1) {
-          // Try the next source (e.g. MP3 missing → M4A placeholder).
-          sourceIdxRef.current += 1;
-          audio.src = GREETING_AUDIO_SOURCES[sourceIdxRef.current];
-          audio.currentTime = 0;
-          attempt();
-          return;
-        }
-        // All sources failed or playback blocked — degrade gracefully.
-        if (import.meta.env.DEV) {
-          console.warn(
-            '[RobotVoiceGreeting] Audio unavailable (%s on %s). Place the final greeting MP3 at public/audio/robot-welcome.mp3. Falling back to speech synthesis / captions.',
-            err?.name || err,
-            failedSrc
-          );
-        }
-        runSpeechSynthesis();
-      });
-    };
-    attempt();
-  }, [muted, finish, runSpeechSynthesis]);
+    playAudio(audio, onStarted, onAutoplayBlocked);
+  }, [changeStatus, finish, playAudio]);
 
   /* ── Public actions ── */
-  const start = useCallback(() => {
+  const start = useCallback((automatic = false) => {
     if (startLockRef.current || statusRef.current === 'speaking' || statusRef.current === 'paused') return;
+    if (automatic && (!autoplayPending.current || mutedRef.current || document.hidden)) return;
+    const previous = statusRef.current;
     startLockRef.current = true;
-    markPlayed();
-    // Wave greeting first (≈1.8s, skipped under reduced motion), audio in parallel.
-    playWave(() => {
-      if (statusRef.current === 'speaking') startTalking();
-    });
-    runAudio();
-  }, [playWave, startTalking, runAudio]);
+    if (!automatic) autoplayPending.current = false;
+    runAudio(() => {
+      autoplayPending.current = false;
+      markPlayed();
+      playWave(() => {
+        if (statusRef.current === 'speaking') startTalking();
+      });
+    }, automatic ? () => {
+      startLockRef.current = false;
+      setSegmentIdx(-1);
+      stopTalking();
+      resetPose();
+      changeStatus(previous);
+    } : undefined);
+  }, [changeStatus, playWave, resetPose, runAudio, startTalking, stopTalking]);
 
   const pause = useCallback(() => {
     if (statusRef.current !== 'speaking') return;
-    if (modeRef.current === 'audio') audioRef.current?.pause();
-    else if (modeRef.current === 'tts') window.speechSynthesis?.pause();
+    autoplayPending.current = false;
+    changeStatus('paused');
+    if (modeRef.current === 'audio') {
+      playbackRef.current += 1;
+      audioRef.current?.pause();
+    } else if (modeRef.current === 'tts') window.speechSynthesis?.pause();
     else clearTextTimer();
     stopTalking();
     resetPose(); // robot returns to idle while paused
-    setStatus('paused');
-  }, [stopTalking, resetPose]);
+  }, [changeStatus, stopTalking, resetPose]);
 
   const resume = useCallback(() => {
     if (statusRef.current !== 'paused') return;
-    setStatus('speaking');
+    changeStatus('speaking');
     startTalking();
     if (modeRef.current === 'audio') {
-      const p = audioRef.current?.play();
-      p?.catch?.(() => runSpeechSynthesis());
+      if (audioRef.current) playAudio(audioRef.current, markPlayed);
     } else if (modeRef.current === 'tts') {
       window.speechSynthesis?.resume();
     } else {
       runTextCaptions(Math.max(segmentIdx, 0));
     }
-  }, [startTalking, runSpeechSynthesis, runTextCaptions, segmentIdx]);
+  }, [changeStatus, startTalking, playAudio, runTextCaptions, segmentIdx]);
 
   const toggleMute = useCallback(() => {
-    setMuted((m) => {
-      const next = !m;
-      if (audioRef.current) audioRef.current.muted = next;
-      if (modeRef.current === 'tts' && next && window.speechSynthesis) {
-        // TTS volume can't change mid-utterance: switch to silent captions.
-        window.speechSynthesis.cancel();
-        clearTextTimer();
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setSoundPreference(!next);
+    setMuted(next);
+    if (audioRef.current) audioRef.current.muted = next;
+    if (modeRef.current === 'tts' && next && window.speechSynthesis) {
+      // TTS volume can't change mid-utterance: switch to silent captions.
+      modeRef.current = 'text';
+      window.speechSynthesis.cancel();
+      if (statusRef.current === 'speaking') {
         runTextCaptions(Math.max(segmentIdx, 0));
       }
-      return next;
-    });
-  }, [runTextCaptions, segmentIdx]);
+    }
+    if (!next && autoplayPending.current) start(true);
+  }, [runTextCaptions, segmentIdx, start]);
 
   const stopEverything = useCallback(() => {
+    playbackRef.current += 1;
     clearTextTimer();
     audioRef.current?.pause();
     window.speechSynthesis?.cancel();
@@ -243,19 +287,18 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
 
   const replay = useCallback(() => {
     stopEverything();
-    setStatus('ready');
-    // allow state to settle, then start fresh
-    startLockRef.current = false;
+    changeStatus('ready');
     start();
-  }, [stopEverything, start]);
+  }, [changeStatus, stopEverything, start]);
 
   const close = useCallback(() => {
+    autoplayPending.current = false;
     stopEverything();
     setSegmentIdx(-1);
-    setStatus(readPlayed() ? 'completed' : 'ready');
+    changeStatus(readPlayed() ? 'completed' : 'ready');
+    restoreFocusRef.current = true;
     setOpen(false);
-    setDismissed(true);
-  }, [stopEverything]);
+  }, [changeStatus, stopEverything]);
 
   /* Release the start lock whenever we leave active playback. */
   useEffect(() => {
@@ -276,6 +319,7 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
   /* Unmount cleanup: stop audio/synthesis/timers. */
   useEffect(
     () => () => {
+      playbackRef.current += 1;
       clearTextTimer();
       if (audioRef.current) {
         audioRef.current.pause();
@@ -286,6 +330,19 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
     },
     []
   );
+
+  useEffect(() => {
+    if (muted || !open) return undefined;
+    const attempt = () => start(true);
+    const stopListening = onSoundInteraction(attempt, '.robot-greeting, a[href]');
+    const initialAttempt = setTimeout(attempt, 0);
+    document.addEventListener('visibilitychange', attempt);
+    return () => {
+      clearTimeout(initialAttempt);
+      stopListening();
+      document.removeEventListener('visibilitychange', attempt);
+    };
+  }, [muted, open, start]);
 
   /* ── Caption text ── */
   let caption;
@@ -299,50 +356,35 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
     caption = INVITE_TEXT;
   }
 
-  const speaking = status === 'speaking';
-
   return (
-    <>
-      {/* Subtle audio-reactive glow on the robot panel while speaking */}
-      <div
-        aria-hidden="true"
-        className={`absolute inset-0 rounded-[2rem] pointer-events-none z-30 transition-opacity duration-500 ${
-          speaking && !reducedMotion ? 'opacity-100 robot-speaking-glow' : 'opacity-0'
-        }`}
-      />
-
-      <RobotSpeechBubble
-        open={open}
+    <div className="robot-greeting">
+      {open ? <RobotSpeechBubble
+        actionRef={actionRef}
         status={status}
         muted={muted}
         caption={caption}
         reducedMotion={reducedMotion}
-        onStart={status === 'completed' || status === 'error' ? replay : start}
+        onStart={status === 'completed' || status === 'error' ? replay : () => start()}
         onPause={pause}
         onResume={resume}
         onToggleMute={toggleMute}
-        onReplay={replay}
         onClose={close}
-      />
-
-      {/* Re-open chip after the bubble is dismissed */}
-      {dismissed && !open && (
-        <motion.button
+      /> : (
+        <button
+          ref={reopenRef}
           type="button"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
           onClick={() => {
-            setDismissed(false);
+            restoreFocusRef.current = true;
             setOpen(true);
           }}
           aria-label="Open assistant greeting"
-          className="absolute left-4 bottom-6 z-40 pointer-events-auto inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-950/80 backdrop-blur-xl border border-[var(--color-accent-cyan)]/25 text-xs font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-accent-cyan)] hover:border-[var(--color-accent-cyan)]/50 transition-colors duration-200 shadow-lg"
+          className="robot-greeting__reopen"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          Assistant
-        </motion.button>
+          Open greeting
+        </button>
       )}
 
       {/* Screen-reader status updates */}
@@ -351,6 +393,6 @@ export default function RobotVoiceGreeting({ splineRef, robotLoaded }) {
         {status === 'paused' && 'Greeting paused.'}
         {status === 'completed' && 'Greeting finished.'}
       </span>
-    </>
+    </div>
   );
 }

@@ -1,0 +1,217 @@
+.greeting-page {
+  min-height: 100dvh;
+  color: var(--bone);
+  background: radial-gradient(ellipse at 76% 28%, #12121e 0%, var(--void) 64%);
+  font: 1rem/1.6 var(--body);
+}
+
+.greeting-page .skip-link {
+  z-index: 100;
+  background: var(--panel);
+  color: var(--bone);
+}
+
+.greeting-main {
+  width: min(1280px, calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+  padding-block: clamp(6.25rem, 9vw, 8.75rem) clamp(2.5rem, 7vw, 6rem);
+}
+
+.greeting-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 40px;
+  margin-bottom: clamp(1.2rem, 4vw, 3rem);
+  color: var(--smoke);
+  font: .7rem/1.4 var(--mono);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.greeting-back:hover,
+.greeting-back span {
+  color: var(--cyan);
+}
+
+.greeting-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.3fr);
+  grid-template-areas:
+    "intro stage"
+    "voice stage";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  column-gap: clamp(2rem, 6vw, 6rem);
+  row-gap: clamp(1.2rem, 3vw, 2.25rem);
+}
+
+.greeting-intro {
+  grid-area: intro;
+  padding-top: clamp(.5rem, 3vw, 2rem);
+}
+
+.greeting-intro h1 {
+  margin: 0;
+  color: var(--bone);
+  font: 400 clamp(2.65rem, 5.1vw, 5.4rem)/1.06 var(--display);
+  letter-spacing: .005em;
+  text-transform: uppercase;
+}
+
+.greeting-intro h1 span {
+  display: block;
+}
+
+.greeting-intro p {
+  max-width: 38ch;
+  margin-top: 1.2rem;
+  color: #b9b1c3;
+}
+
+.greeting-voice {
+  grid-area: voice;
+  min-width: 0;
+}
+
+.greeting-stage {
+  grid-area: stage;
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.greeting-stage__viewport {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.24;
+  min-height: 270px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 52% 48%, rgba(79,227,255,.13), transparent 46%),
+    radial-gradient(ellipse at 77% 23%, rgba(255,46,126,.07), transparent 48%),
+    #08070d;
+}
+
+.greeting-stage__viewport::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background-image:
+    linear-gradient(rgba(245,242,234,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,242,234,.045) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at center, transparent 27%, #000 93%);
+}
+
+.greeting-stage__viewport::after {
+  position: absolute;
+  inset: 12px 12px auto;
+  z-index: 2;
+  height: 18px;
+  pointer-events: none;
+  content: "";
+  border-inline: 1px solid var(--line-hot);
+  background: linear-gradient(var(--line-hot), var(--line-hot)) left top / 18px 1px no-repeat,
+    linear-gradient(var(--line-hot), var(--line-hot)) right top / 18px 1px no-repeat;
+}
+
+.greeting-stage__poster {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 64%;
+  height: 80%;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.greeting-stage__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.greeting-stage__viewport[data-scene-status="ready"] .greeting-stage__canvas {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.greeting-stage__viewport[data-scene-status="ready"] .greeting-stage__poster {
+  visibility: hidden;
+}
+
+.greeting-stage__caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .4rem .8rem;
+  min-height: 54px;
+  padding: .35rem 1rem;
+  border-top: 1px solid var(--line);
+  color: #b9b1c3;
+  font: .72rem/1.5 var(--mono);
+}
+
+.greeting-stage__caption button {
+  min-height: 44px;
+  padding: 0 .2rem;
+  color: var(--cyan);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: .24em;
+}
+
+.greeting-stage__touch {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 760px) {
+  .greeting-stage__instruction {
+    display: none;
+  }
+
+  .greeting-stage__touch {
+    display: inline;
+  }
+}
+
+@media (max-width: 760px) {
+  .greeting-main {
+    padding-top: 5.35rem;
+  }
+
+  .greeting-back {
+    margin-bottom: .8rem;
+  }
+
+  .greeting-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "intro" "stage" "voice";
+    grid-template-rows: auto;
+    row-gap: 1rem;
+  }
+
+  .greeting-intro {
+    padding-top: 0;
+  }
+
+  .greeting-intro p {
+    margin-top: .8rem;
+  }
+
+  .greeting-stage__viewport {
+    aspect-ratio: 1.22;
+    min-height: 245px;
+  }
+}

@@ -1,29 +1,15 @@
-/**
- * Shared constants for the robot voice greeting feature.
- *
- * AUDIO FILE — place the final AI-generated voice file at:
- *   public/audio/robot-welcome.mp3
- * It is served from /audio/robot-welcome.mp3. If the file is missing,
- * the feature falls back to browser speech synthesis, then to
- * timed captions only. No key or API call happens in the browser.
- */
-
-/** Tried in order. The MP3 (final AI voice) wins when present; the M4A is a
- *  committed placeholder generated with macOS TTS ("Daniel") so the greeting
- *  is audible until the premium voice is produced. */
+/** The same narration in MP3 and AAC for browser compatibility. */
 export const GREETING_AUDIO_SOURCES = ['/audio/robot-welcome.mp3', '/audio/robot-welcome.m4a'];
 
 export const GREETING_STORAGE_KEY = 'parag-robot-greeting-played';
 
-/** Progressive caption segments. `at` = fraction of total audio duration
- *  at which the segment begins (approximate, intentionally not word-level). */
+/** The start of each caption as a fraction of the prerecorded narration. */
 export const GREETING_SEGMENTS = [
-  { at: 0.0, text: "Hi, I'm Parag's digital assistant." },
-  { at: 0.28, text: 'Parag builds websites, AI solutions, and helps solve everyday technology problems.' },
-  { at: 0.68, text: 'Explore his work, check out his services, or get in touch.' },
+  { at: 0, text: "Hi, I’m Parag’s digital assistant. Thanks for stopping by." },
+  { at: 0.19496, text: 'Parag works on AI products, software automation, and GPU infrastructure.' },
+  { at: 0.43945, text: 'In the Engineering Lab, you can replay an incident with InfraPilot, build a workflow in RelayOps, or compare GPU schedulers in ComputeFlow, all with simulated data.' },
+  { at: 0.91612, text: 'I hope you enjoy exploring.' },
 ];
 
 export const GREETING_FULL_TEXT = GREETING_SEGMENTS.map((s) => s.text).join(' ');
-
-/** Fallback per-segment display time (ms) when no audio duration is available. */
-export const SEGMENT_FALLBACK_MS = 4200;
+export const GREETING_DURATION_MS = 22_169;

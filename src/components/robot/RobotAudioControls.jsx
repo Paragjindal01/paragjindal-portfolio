@@ -1,6 +1,3 @@
-const btnClass =
-  'inline-flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-white/10 border border-[var(--color-accent-cyan)]/30 text-[var(--color-text-primary)] hover:text-[var(--color-accent-cyan)] hover:border-[var(--color-accent-cyan)]/70 hover:bg-[var(--color-accent-cyan)]/10 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed';
-
 const Icon = ({ children }) => (
   <svg
     width="15"
@@ -32,45 +29,33 @@ export const SoundOffIcon = () => (
   </Icon>
 );
 
-/**
- * Compact icon controls for the greeting audio.
- * The sound (mute/unmute) toggle is ALWAYS visible so visitors can see
- * the greeting has audio before starting it. Every button has an
- * aria-label; state comes from the parent.
- */
 export default function RobotAudioControls({
+  actionRef,
   status,
   muted,
+  onStart,
   onPause,
   onResume,
   onToggleMute,
-  onReplay,
   onClose,
 }) {
-  const speaking = status === 'speaking';
-  const paused = status === 'paused';
+  const play = <Icon><path d="m7 4 13 8-13 8z" /></Icon>;
+  const actions = {
+    ready: { label: "Meet Parag's AI", onClick: onStart, icon: play },
+    speaking: { label: 'Pause greeting', onClick: onPause, icon: <Icon><path d="M9 5v14m6-14v14" /></Icon> },
+    paused: { label: 'Resume greeting', onClick: onResume, icon: play },
+    replay: { label: 'Replay Greeting', onClick: onStart, icon: <Icon><path d="M1 4v6h6m-6 0 4-4a8.9 8.9 0 1 1-2 9" /></Icon> },
+  };
+  const action = actions[status] ?? actions.replay;
 
   return (
-    <div className="flex items-center gap-2" role="group" aria-label="Greeting audio controls">
-      {speaking && (
-        <button type="button" className={btnClass} onClick={onPause} aria-label="Pause greeting">
-          <Icon>
-            <line x1="10" y1="5" x2="10" y2="19" />
-            <line x1="15" y1="5" x2="15" y2="19" />
-          </Icon>
-        </button>
-      )}
-      {paused && (
-        <button type="button" className={btnClass} onClick={onResume} aria-label="Resume greeting">
-          <Icon>
-            <polygon points="6 4 20 12 6 20 6 4" />
-          </Icon>
-        </button>
-      )}
-      {/* Sound toggle — always visible */}
+    <div className="robot-greeting__controls" role="group" aria-label="Greeting audio controls">
+      <button ref={actionRef} type="button" className="robot-greeting__action" onClick={action.onClick}>
+        {action.icon}<span>{action.label}</span>
+      </button>
       <button
         type="button"
-        className={`${btnClass} ${muted ? '!text-[var(--color-accent-coral)] !border-[var(--color-accent-coral)]/50' : ''}`}
+        className="robot-greeting__icon-button"
         onClick={onToggleMute}
         aria-label={muted ? 'Unmute greeting' : 'Mute greeting'}
         aria-pressed={muted}
@@ -78,15 +63,7 @@ export default function RobotAudioControls({
       >
         {muted ? <SoundOffIcon /> : <SoundOnIcon />}
       </button>
-      {(status === 'completed' || status === 'error') && (
-        <button type="button" className={btnClass} onClick={onReplay} aria-label="Replay greeting">
-          <Icon>
-            <polyline points="1 4 1 10 7 10" />
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-          </Icon>
-        </button>
-      )}
-      <button type="button" className={btnClass} onClick={onClose} aria-label="Close greeting">
+      <button type="button" className="robot-greeting__icon-button" onClick={onClose} aria-label="Close greeting" title="Close greeting">
         <Icon>
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />

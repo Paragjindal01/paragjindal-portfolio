@@ -232,16 +232,52 @@ test.describe('hero', () => {
   });
 });
 
+test('3D greeting keeps the voice controls and robot poster when the scene is unavailable', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.route('https://prod.spline.design/**', route => route.abort());
+  await page.goto('/greeting');
+
+  await expect(page.getByRole('heading', { name: 'Interactive 3D greeting' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting|Pause greeting/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Retry scene' })).toBeVisible({ timeout: 20_000 });
+  await page.locator('.greeting-stage__poster').evaluate(image => image.decode());
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test('sound defaults on and the visitor can turn it off for the greeting', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const toggle = page.getByRole('button', { name: 'Turn sound off' });
+  await expect(toggle).toBeVisible();
+  await toggle.click();
+  await expect(page.getByRole('button', { name: 'Turn sound on' })).toBeVisible();
+  await page.goto('/greeting');
+  await expect(page.getByRole('button', { name: 'Unmute greeting' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting/ })).toBeVisible();
+});
+
 test.describe('Live Spline greeting controls', () => {
   // The robot depends on an external Spline CDN fetch — allow extra headroom.
   test.slow();
 
   test('invite → play → pause → resume → mute → close → reopen', async ({ page }) => {
+    await page.addInitScript(() => {
+      let interacted = false;
+      window.addEventListener('click', () => { interacted = true; }, { capture: true, once: true });
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        if (!interacted && this instanceof HTMLAudioElement) {
+          return Promise.reject(new DOMException('Autoplay requires a user interaction', 'NotAllowedError'));
+        }
+        return play.call(this);
+      };
+    });
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/');
     await page.getByRole('link', { name: 'Open 3D greeting' }).click();
     await expect(page.getByRole('heading', { name: 'Interactive 3D greeting' })).toBeVisible();
-    // The invitation appears after the scene loads.
+    // The voice invitation is independent of scene loading.
     const meetBtn = page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting/ });
     await expect(meetBtn).toBeVisible({ timeout: 45_000 });
 
@@ -277,7 +313,7 @@ test.describe('Live Spline greeting controls', () => {
   test('speech bubble stays inside the viewport at 320px', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto('/greeting');
-    const meetBtn = page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting/ });
+    const meetBtn = page.getByRole('button', { name: /Meet Parag's AI|Replay Greeting|Pause greeting/ });
     await expect(meetBtn).toBeVisible({ timeout: 45_000 });
     const box = await meetBtn.boundingBox();
     expect(box.x).toBeGreaterThanOrEqual(0);

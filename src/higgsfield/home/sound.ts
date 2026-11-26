@@ -3,9 +3,8 @@
  * browser with the Web Audio API: no audio files, no licences, no network
  * requests, so the same code runs on any host.
  *
- * Default state is muted. Browsers refuse to start audio without a gesture, so
- * the opening sting fires the moment the visitor unmutes, then the rain and hum
- * fade in underneath it.
+ * The opening sting fires once the browser allows playback, followed by
+ * the rain and hum.
  */
 
 type Engine = {
@@ -19,6 +18,7 @@ type Engine = {
 
 let engine: Engine | null = null;
 let enabled = false;
+let requested = false;
 
 const MASTER_VOLUME = 0.5;
 
@@ -156,10 +156,6 @@ function sting(current: Engine) {
   air.stop(now + 1.2);
 }
 
-export function isSoundEnabled(): boolean {
-  return enabled;
-}
-
 export async function enableSound(): Promise<void> {
   if (typeof window === "undefined") return;
   const Ctor =
@@ -167,14 +163,16 @@ export async function enableSound(): Promise<void> {
     (window as unknown as { webkitAudioContext?: typeof AudioContext })
       .webkitAudioContext;
   if (!Ctor) return;
-
-  if (!engine) engine = build(new Ctor());
+  requested = true;
+  if (enabled && engine?.ctx.state === "running") return;
 
   try {
+    if (!engine) engine = build(new Ctor());
     await engine.ctx.resume();
   } catch {
     return;
   }
+  if (!requested || engine.ctx.state !== "running" || enabled) return;
 
   enabled = true;
   const now = engine.ctx.currentTime;
@@ -189,6 +187,7 @@ export async function enableSound(): Promise<void> {
 }
 
 export function disableSound(): void {
+  requested = false;
   enabled = false;
   if (!engine) return;
   const now = engine.ctx.currentTime;

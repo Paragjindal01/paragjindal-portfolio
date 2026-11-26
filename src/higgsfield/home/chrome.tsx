@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import { CONTACT } from "../../data/professional.mjs";
-import { disableSound, enableSound, glitch, isSoundEnabled } from "./sound";
+import { getSoundPreference, onSoundInteraction, setSoundPreference } from "../../data/sound-preference.mjs";
+import { disableSound, enableSound, glitch } from "./sound";
 
 export const { email: EMAIL, github: GITHUB, linkedin: LINKEDIN } = CONTACT;
 
@@ -213,26 +214,31 @@ export function FooterTop() {
 /* ---------- sound toggle ---------- */
 
 export function SoundToggle() {
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(getSoundPreference);
 
   useEffect(() => {
-    setOn(isSoundEnabled());
-    return disableSound;
-  }, []);
+    if (!on) return undefined;
+    const stopListening = onSoundInteraction(() => {
+      if (getSoundPreference()) void enableSound();
+    }, ".sound-toggle");
+    void enableSound();
+    return () => {
+      stopListening();
+      disableSound();
+    };
+  }, [on]);
 
   return (
     <button
       aria-label={on ? "Turn sound off" : "Turn sound on"}
       aria-pressed={on}
       className="sound-toggle"
-      onClick={async () => {
-        if (on) {
-          disableSound();
-          setOn(false);
-          return;
-        }
-        await enableSound();
-        setOn(isSoundEnabled());
+      onClick={() => {
+        const enabled = !on;
+        setSoundPreference(enabled);
+        setOn(enabled);
+        if (enabled) void enableSound();
+        else disableSound();
       }}
       type="button"
     >

@@ -107,10 +107,6 @@
 .site-footer { border-top: 1px solid var(--line); padding: 1.1rem 0; font-size: .82rem; color: var(--muted); }
 .site-footer .site-frame, .site-footer .site-frame > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .8rem 1.2rem; }
 .site-footer a:hover { color: var(--green); text-decoration: underline; }
-.site-greeting { padding-block: 2rem; }
-.site-greeting h1 { margin-bottom: 1.2rem; font-size: clamp(1.9rem, 4vw, 3.4rem); }
-.site-spline { position: relative; overflow: hidden; border-radius: 12px; min-height: min(700px, 76vh); background: #101912; color: white; --color-text-primary: #f5f9f4; --color-text-secondary: #e0eddf; --color-text-muted: #becebd; --color-accent-cyan: #c4e2c0; }
-.site-spline > p { padding: 1rem; }
 .engineering-site #contact { --color-text-primary: #edf3e8; --color-text-secondary: #e2ebdf; --color-text-muted: #c4d2c2; --color-accent-blue: #bcdec0; --color-accent-cyan: #cae7c9; --color-accent-coral: #ffbbaa; --color-bg-ice: #3e664b; background: #203429; color: #edf3e8; border-top: 1px solid #344639; scroll-margin-top: 72px; }
 .engineering-site #contact :is(.glass-card, [class*="bg-slate-900"]) { background: #243c2e; border-color: #57715d; border-radius: 9px; box-shadow: none; backdrop-filter: none; }
 .engineering-site #contact .form-input { background-color: #182c21; border-color: #5f7765; border-radius: 6px; font-size: 1rem; }

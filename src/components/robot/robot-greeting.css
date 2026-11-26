@@ -1,0 +1,141 @@
+.robot-greeting {
+  --voice-surface: var(--panel, #0c0a12);
+  --voice-ink: var(--bone, #f5f2ea);
+  --voice-muted: #c0b8cb;
+  --voice-line: var(--line, rgba(245, 242, 234, .18));
+  --voice-accent: var(--magenta, #ff2e7e);
+  --voice-signal: var(--cyan, #4fe3ff);
+  min-width: 0;
+  width: min(100%, 28rem);
+  color: var(--voice-ink);
+  font-family: var(--body, 'Space Grotesk', system-ui, sans-serif);
+}
+
+.robot-greeting__panel {
+  display: grid;
+  gap: .8rem;
+  padding: clamp(.78rem, 2vw, 1.05rem);
+  border: 1px solid var(--voice-line);
+  background: var(--voice-surface);
+}
+
+.robot-greeting__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  padding-bottom: .65rem;
+  border-bottom: 1px solid var(--voice-line);
+}
+
+.robot-greeting .robot-greeting__heading {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0;
+  color: var(--voice-ink);
+  font: 500 .72rem/1.4 var(--mono, 'JetBrains Mono', monospace);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.robot-greeting__heading::before {
+  content: '';
+  width: .35rem;
+  height: .35rem;
+  flex: none;
+  background: var(--voice-accent);
+}
+
+.robot-greeting .robot-greeting__caption {
+  min-height: 2.9em;
+  margin: 0;
+  color: var(--voice-muted);
+  font-size: .94rem;
+  line-height: 1.55;
+}
+
+.robot-greeting__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem;
+  gap: .45rem;
+}
+
+.robot-greeting button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 1px solid var(--voice-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--voice-ink);
+  font: 600 .74rem/1.3 var(--mono, 'JetBrains Mono', monospace);
+  cursor: pointer;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.robot-greeting button svg { flex: none; }
+.robot-greeting button:focus-visible { outline: 2px solid var(--voice-signal); outline-offset: 3px; }
+
+.robot-greeting button.robot-greeting__action {
+  justify-content: flex-start;
+  padding: .5rem .72rem;
+  border-color: var(--voice-accent);
+  background: var(--voice-accent);
+  color: var(--void, #06050a);
+  text-align: left;
+}
+
+.robot-greeting .robot-greeting__action:hover {
+  border-color: #ff76ab;
+  background: #ff76ab;
+}
+
+.robot-greeting .robot-greeting__icon-button { padding: 0; }
+.robot-greeting .robot-greeting__icon-button[aria-pressed='true'] { color: #ff8cb7; border-color: #ff8cb7; }
+
+.robot-greeting .robot-greeting__icon-button:hover,
+.robot-greeting .robot-greeting__reopen:hover {
+  border-color: var(--voice-signal);
+  color: var(--voice-signal);
+}
+
+.robot-greeting .robot-greeting__reopen {
+  padding: .5rem .75rem;
+  background: var(--voice-surface);
+}
+
+.robot-greeting__wave {
+  display: inline-flex;
+  align-items: center;
+  gap: .16rem;
+  height: .95rem;
+  flex: none;
+  color: var(--voice-signal);
+  opacity: 0;
+}
+
+.robot-greeting__wave[data-speaking='true'] { opacity: 1; }
+.robot-greeting__wave span { width: 2px; height: 50%; background: currentColor; }
+.robot-greeting__wave span:nth-child(2n) { height: 72%; }
+.robot-greeting__wave span:nth-child(3) { height: 100%; }
+.robot-greeting__wave[data-speaking='true']:not([data-static]) span { animation: robot-greeting-wave .8s ease-in-out var(--wave-delay, 0s) infinite alternate; }
+.robot-greeting__wave span:nth-child(2n) { --wave-delay: -.22s; }
+.robot-greeting__wave span:nth-child(3) { --wave-delay: -.41s; }
+
+@keyframes robot-greeting-wave {
+  from { transform: scaleY(.45); }
+  to { transform: scaleY(1); }
+}
+
+@media (max-width: 380px) {
+  .robot-greeting button.robot-greeting__action { padding-inline: .5rem; gap: .35rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot-greeting button { transition: none; }
+  .robot-greeting .robot-greeting__wave span { animation: none; }
+}
