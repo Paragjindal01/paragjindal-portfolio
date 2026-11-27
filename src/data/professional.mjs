@@ -4,6 +4,7 @@ export const CONTACT = {
   website: 'https://paragjindal.com',
   github: 'https://github.com/Paragjindal01',
   linkedin: 'https://www.linkedin.com/in/parag-jindal-604b41320/',
+  instagram: 'https://www.instagram.com/paragjindal23/',
   city: 'Ottawa',
   province: 'Ontario',
   country: 'Canada',

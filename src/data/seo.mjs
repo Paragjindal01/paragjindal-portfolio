@@ -24,7 +24,7 @@ export const STRUCTURED_DATA = {
       hasOccupation: EMPLOYMENT[0].roles.map((role) => ({
         '@type': 'Occupation', name: role.title, description: `${employmentPeriod(role)}. ${workplaceDetails(role)}. ${role.summary}`,
       })),
-      sameAs: [CONTACT.github, CONTACT.linkedin],
+      sameAs: [CONTACT.github, CONTACT.linkedin, CONTACT.instagram],
     },
     {
       '@type': 'ProfessionalService',

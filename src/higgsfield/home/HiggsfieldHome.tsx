@@ -519,6 +519,15 @@ export default function HiggsfieldHome() {
               </a>
               <a
                 className="contact-row"
+                href={CONTACT.instagram}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <span>INSTAGRAM</span>
+                <strong>@paragjindal23</strong>
+              </a>
+              <a
+                className="contact-row"
                 href="/lab"
               >
                 <span>ENGINEERING LAB</span>
